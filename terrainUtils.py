@@ -7,15 +7,14 @@ class Block(object):
 	def __init__(self):
 		self.color = (0,0,0)
 		self.collides = False
-
-	def isLava(self):
-		return False
+		self.transparent = False
 
 
 class Floor(Block):
 	def __init__(self):
 		self.color = (200,200,200)
 		self.collides = False
+		self.transparent = True
 
 	def __str__(self):
 		return "  "
@@ -23,8 +22,19 @@ class Floor(Block):
 
 class Stone(Block):
 	def __init__(self):
-		self.color = (50,50,50)
+		self.color = (60,60,60)
 		self.collides = True
+		self.transparent = False
+
+	def __str__(self):
+		return "@@"
+
+
+class Brick(Block):
+	def __init__(self):
+		self.color = (40,40,40)
+		self.collides = True
+		self.transparent = False
 
 	def __str__(self):
 		return "##"
@@ -34,6 +44,7 @@ class Door(Block):
 	def __init__(self):
 		self.color = (100,100,100)
 		self.collides = False
+		self.transparent = False
 
 	def __str__(self):
 		return "/\\"
@@ -43,27 +54,27 @@ class Lava(Block):
 	def __init__(self):
 		self.color = (255,20,0)
 		self.collides = False
+		self.transparent = True
 
 	def __str__(self):
-		return "()"
-
-	def isLava(self):
-		return True
+		return "LL"
 
 
 class Bedrock(Block):
 	def __init__(self):
 		self.color = (0,0,0)
 		self.collides = True
+		self.transparent = False
 
 	def __str__(self):
-		return "[]"
+		return "BB"
 
 
 class Obsidian(Block):
 	def __init__(self):
 		self.color = (30,0,50)
 		self.collides = True
+		self.transparent = False
 
 	def __str__(self):
 		return "XX"
@@ -73,6 +84,7 @@ class Glass(Block):
 	def __init__(self):
 		self.color = (220,220,220)
 		self.collides = True
+		self.transparent = True
 
 	def __str__(self):
 		return "||"
@@ -81,6 +93,7 @@ class Metal(Block):
 	def __init__(self):
 		self.color = (150,150,150)
 		self.collides = True
+		self.transparent = False
 
 	def __str__(self):
 		return "//"
@@ -89,6 +102,7 @@ class OneWayGlass(Block):
 	def __init__(self, direction):
 		self.color = (220,220,220)
 		self.collides = True
+		self.transparent = True
 		self.direction = direction
 
 	def __str__(self):
