@@ -13,25 +13,29 @@ from terrainUtils import *
 
 
 class Dungeon(object):
-	def __init__(self, method):
+	def __init__(self, w, h, method):
 		if method == "basic":
-			self.grid = self.generateBasic(9,9,4,4,8)
+			self.grid = self.generateBasic(w/8,h/8,w/16,h/16,8)
 		elif method == "panel":
-			self.grid = self.generatePanel(72,72)
+			self.grid = self.generatePanel(w,h)
 		elif method == "round":
-			self.grid = self.generateRound(72,72, 53)
+			self.grid = self.generateRound(w,h, 53)
 		elif method == "halls":
-			self.grid = self.generateHalls(72,72, 16,16, 10)
+			self.grid = self.generateHalls(w,h, 16,16, 10)
 		elif method == "fastH":
-			self.grid = self.generateFastH(72,72, 16,16, 12)
+			self.grid = self.generateFastH(w,h, 16,16, 12)
 		elif method == "piece":
-			self.grid = self.generatePiece(72,72, 500)
+			self.grid = self.generatePiece(w,h, w*h/10)
 		elif method == "mazes":
-			self.grid = self.generateMazes(72,72, 12, 500, 0.5)
+			self.grid = self.generateMazes(w,h, 12, 500, 0.5)
 		elif method == "maze2":
-			self.grid = self.generateMazes(72,72, 12, 100, 0.9)
+			self.grid = self.generateMazes(w,h, 10, 100, 0.9)
 		elif method == "cells":
-			self.grid = self.generateCells(72,72, 3, 4, 0.33, 3)
+			self.grid = self.generateCells(w,h, 3, 4, 0.33, 3)
+		elif method == "Rwalk":
+			self.grid = self.generateRWalk(w,h, 8, 1000)
+		elif method == "Iwalk":
+			self.grid = self.generateIWalk(w,h, 1, 5000)
 		else:
 			self.grid = [[]]
 
@@ -610,6 +614,74 @@ class Dungeon(object):
 			for y in range(1,h):
 				if not grid[y][x].collides and rng.random() < .01:	# and some tiny lava lakes
 					self.splatterLava(x,y,grid)
+		return grid
+
+
+	def generateRWalk(self, w, h, n, t):
+		"""
+		generates a random dungeon using a drunkard's walk algorithm
+		w, h = the dimensions of the dungeon
+		n = the number of drunkards
+		t = the number of steps each drunkard takes
+		"""
+		grid = []
+		for y in range(h+1):
+			row = []
+			for x in range(w+1):
+				row.append(Stone())
+			grid.append(row)
+
+		for i in range(n):
+			x = (w+1)/2
+			y = (w+1)/2
+			for step in range(t):
+				if grid[y][x].collides:
+					grid[y][x] = Floor()
+				adj = [(0,1),(0,-1),(1,0),(-1,0)]
+				for p in adj:
+					if y+p[1] <= 0 or y+p[1] >= h or x+p[0] <= 0 or x+p[0] >= h:
+						adj.remove(p)
+				p = rng.choice(adj)
+				x = x+p[0]
+				y = y+p[1]
+		return grid
+
+
+	def generateIWalk(self, w, h, n, t):
+		"""
+		generates a random dungeon using a modified drunkard's walk algorithm that avoids the edges
+		w, h = the dimensions of the dungeon
+		n = the number of drunkards
+		t = the number of steps each drunkard takes
+		"""
+		grid = []
+		for y in range(h+1):
+			row = []
+			for x in range(w+1):
+				row.append(Stone())
+			grid.append(row)
+
+		for i in range(n):
+			x = (w+1)/2
+			y = (w+1)/2
+			for step in range(t):
+				if grid[y][x].collides:
+					grid[y][x] = Floor()
+				adj = [(0,-1),(0,1),(-1,0),(1,0)]
+				probs = []
+				for p in adj:	# for each adjacent tile
+					try:
+						probs.append(1.0 / (1.0/(x+p[0]) + 1.0/(y+p[1]) + 1.0/(w-x-p[0]) + 1.0/(h-y-p[1])))
+					except ZeroDivisionError:
+						probs.append(0)
+				r = rng.random()
+				for i in range(len(probs)):
+					if r < probs[i]/sum(probs):
+						x = x+adj[i][0]
+						y = y+adj[i][1]
+						break
+					else:
+						r = r-probs[i]/sum(probs)
 		return grid
 
 
