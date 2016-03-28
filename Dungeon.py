@@ -1,5 +1,6 @@
 import math
 import random as rng
+from copy import deepcopy
 import numpy as np
 from scipy.spatial import Delaunay
 from scipy.sparse import csr_matrix
@@ -24,7 +25,13 @@ class Dungeon(object):
 		elif method == "fastH":
 			self.grid = self.generateFastH(72,72, 16,16, 12)
 		elif method == "piece":
-			self.grid = self.generatePiece(72,72, 400)
+			self.grid = self.generatePiece(72,72, 500)
+		elif method == "mazes":
+			self.grid = self.generateMazes(72,72, 12, 500, 0.5)
+		elif method == "maze2":
+			self.grid = self.generateMazes(72,72, 12, 100, 0.9)
+		elif method == "cells":
+			self.grid = self.generateCells(72,72, 3, 4, 0.33, 3)
 		else:
 			self.grid = [[]]
 
@@ -175,8 +182,8 @@ class Dungeon(object):
 						if rng.random() < (0.01+z)*(6.01-z)/200.0:
 							grid[y][x] = Obsidian()
 
-		for i in range(2):
-			self.flowLava(w/2, h/2, grid, 2*(w+h))	# creates lava rivers
+		for d in [-1, 1]:
+			self.flowLava(w/2, h/2, grid, 2*(w+h), d)	# creates lava rivers
 
 		for x in range(1,w):
 			for y in range(1,h):
@@ -318,7 +325,7 @@ class Dungeon(object):
 		n = the number of main hub rooms
 		"""
 		rooms = []
-		for i in range(0, 30*(w/rw + h/rh)):
+		for i in range(0, 20*(w/rw + h/rh)):
 			newRoom = RectRoom(rng.randint(1,rw),rng.randint(1,rh),rng.randint(1,rw),rng.randint(1,rh))
 			if newRoom.w <= 2 or newRoom.h <= 2:	# discard tiny rooms
 				continue
@@ -422,16 +429,25 @@ class Dungeon(object):
 			for x in range(w/2-3, w/2+3):
 				grid[y][x] = Floor()
 
+		corridoring = False	# whether we just made a corridor. If not, we are free to put rooms wherever we want
 		for i in range(n):
-			drc = None
-			while drc == None:
-				wall = (rng.randint(1,w-1), rng.randint(1,h-1))	# pick a random wall
-				drc = self.findWall(wall,grid)
-			r = rng.random()
-			if r < 0.45:
-				success = self.makeCorridor(*wall+(drc, rng.randint(3,9), grid))	# and try to put something on it
-			elif r < 0.5:
-				success = self.makeSquigglyCorridor(*wall+(drc, rng.choice([-1,1]), rng.randint(3,7), grid))
+			if not corridoring:
+				drc = None
+				while drc == None:
+					wall = (rng.randint(1,w-1), rng.randint(1,h-1))	# pick a random wall
+					drc = self.findWall(wall,grid)
+				r = rng.random()
+			else:
+				wall = (wall[0]+(l)*drc[0], wall[1]+(l)*drc[1])
+				while wall[0] > 0 and wall[0] < w and wall[1] > 0 and wall[1] < h and not grid[wall[1]][wall[0]].collides:
+					wall = (wall[0]+drc[0], wall[1]+drc[1])
+				r = (rng.random()+1)/2
+			if r < 0.3:
+				l = rng.randint(3,9)
+				success = self.makeCorridor(*wall+(drc, l, grid))	# and try to put something on it
+			elif r < 0.4:
+				l = rng.randint(3,8)
+				success = self.makeSquigglyCorridor(*wall+(drc, rng.choice([-1,1]), l, grid))
 			elif r < 0.8:
 				success = self.makeRoom(*wall+(drc, rng.randint(4,10), rng.randint(4,10), grid))
 			elif r < 0.85:
@@ -440,6 +456,7 @@ class Dungeon(object):
 				success = self.makeColumnRoom(*wall+(drc, 1+2*rng.randint(1,4), 1+2*rng.randint(1,4), grid))
 			else:
 				success = self.makeCircleRoom(*wall+(drc, rng.uniform(2,5), grid))
+			corridoring = success and r < 0.4
 			if success:
 				grid[wall[1]][wall[0]] = Door()
 
@@ -450,7 +467,161 @@ class Dungeon(object):
 					if (adjWall[0] and adjWall[1] and not adjWall[2] and not adjWall[3]) or (not adjWall[0] and not adjWall[1] and adjWall[2] and adjWall[3]):
 						if rng.random() < 0.1:
 							grid[y][x] = Door()
+
+		x = 1
+		while x < w:	# fill in all dead ends
+			y = 1
+			while y < h:
+				if not grid[y][x].collides:
+					adjWalls = 0
+					for p in [(0,1),(0,-1),(1,0),(-1,0)]:
+						if grid[y+p[1]][x+p[0]].collides:
+							adjWalls = adjWalls+1
+					if adjWalls >= 3:			# if this is a dead end
+						grid[y][x] = Stone()	# fill it in
+						x = 0					# start over
+						y = 0
+				y = y+1
+			x = x+1
 		return grid
+
+
+	def generateMazes(self, w, h, s, n, c):
+		"""
+		generates a dungeon comprised of rooms and mazes
+		w, h = the dimensions of the dungeon
+		s = the maximum room size
+		n = the approximate number of rooms (actual number will be somewhat less)
+		c = a number that makes more unnecessary doors
+		"""
+		sr = (s-1)/2	# gets the odd "root" of s
+		wr = w/2
+		hr = h/2
+
+		grid = []
+		for y in range(h+1):
+			row = []
+			for x in range(w+1):
+				row.append(Stone())
+			grid.append(row)
+
+		regionN = 0	# helps keep track of which tiles are connected to others
+		for i in range(n):
+			rw = 1+2*rng.randint(1,sr)
+			rh = 1+2*rng.randint(1,sr)
+			x0 = 1+2*rng.randint(0,wr-(rw-1)/2)
+			y0 = 1+2*rng.randint(0,hr-(rh-1)/2)
+			if self.isClear(x0, y0, x0+rw-1, y0+rh-1, grid):
+				room = []
+				for x in range(x0,x0+rw):
+					for y in range(y0,y0+rh):
+						grid[y][x] = Floor()
+						grid[y][x].region = regionN
+				regionN = regionN+1
+
+		for x in rng.sample(range(1,w,2),w/2):
+			for y in rng.sample(range(1,h,2),h/2):
+				if grid[y][x].collides:
+					self.randomFlood(x,y,grid, regionN)
+					regionN = regionN+1
+
+		regions = range(regionN)	# keeps track of which regions have united (the goal is all of them)
+		while regions != [regions[0]]*regionN:	# while there are separate regions
+			importantWalls = []
+			for x in range(1,w):
+				for y in range(1,h):
+					if x%2 == 1 or y%2 == 1:
+						if grid[y][x].collides:
+							if not grid[y+1][x].collides and not grid[y-1][x].collides and (regions[grid[y+1][x].region]!=regions[grid[y-1][x].region]):
+								importantWalls.append((x, y, regions[grid[y+1][x].region], regions[grid[y-1][x].region]))
+							if not grid[y][x+1].collides and not grid[y][x-1].collides and (regions[grid[y][x+1].region]!=regions[grid[y][x-1].region]):
+								importantWalls.append((x, y, regions[grid[y][x+1].region], regions[grid[y][x-1].region]))
+			if rng.random() < c:	# there is a chance to knock out more doors than necessary
+				doors = 2
+			else:
+				doors = 1
+			for iterationVariable in range(doors):
+				if len(importantWalls) > 0:
+					x,y,r1,r2 = rng.choice(importantWalls)
+					grid[y][x] = Door()
+					for i in range(regionN):	# knock out a door and unite the two regions
+						if regions[i] == r1:
+							regions[i] = r2
+
+		x = 1
+		while x < w:	# fill in all dead ends
+			y = 1
+			while y < h:
+				if not grid[y][x].collides:
+					adjWalls = 0
+					for p in [(0,1),(0,-1),(1,0),(-1,0)]:
+						if grid[y+p[1]][x+p[0]].collides:
+							adjWalls = adjWalls+1
+					if adjWalls >= 3:			# if this is a dead end
+						grid[y][x] = Stone()	# fill it in
+						x = 0					# start over
+						y = 0
+				y = y+1
+			x = x+1
+		return grid
+
+
+	def generateCells(self, w, h, deathLim, birthLim, prob, n):
+		"""
+		generates a round map based on cellular automata
+		w, h = the dimensions of the dungeon
+		deathLim, birthLim = the limits that command the cellular automation process
+		prob = the initial probability of stone
+		n = the number of steps
+		"""
+		grid = []
+		for y in range(0,h+1):
+			row = [Obsidian()]
+			for x in range(1,w):
+				if rng.random() < prob:
+					row.append(Obsidian())
+				else:
+					row.append(Floor())
+			row.append(Obsidian())
+			grid.append(row)
+		for x in range(0,w+1):
+			grid[0][x] = Obsidian()
+			grid[w][x] = Obsidian()
+
+		for i in range(n):
+			newGrid = deepcopy(grid)
+			for x in range(1,w):
+				for y in range(1,h):
+					adj = 0
+					for dx in [-1,0,1]:
+						for dy in [-1,0,1]:
+							if grid[y+dy][x+dx].collides:
+								adj = adj+1
+					if adj > birthLim:
+						newGrid[y][x] = Obsidian()
+					if adj < deathLim:
+						newGrid[y][x] = Floor()
+			grid = newGrid
+
+		for d in [-1,1]:
+			self.flowLava(w/2, h/2, grid, 2*(w+h), d)	# creates lava rivers
+
+		for x in range(1,w):
+			for y in range(1,h):
+				if not grid[y][x].collides and rng.random() < .01:	# and some tiny lava lakes
+					self.splatterLava(x,y,grid)
+		return grid
+
+
+	def randomFlood(self, x, y, grid, region=0):	# random recursive flood algorithm that creates mazes
+		grid[y][x] = Floor()
+		grid[y][x].region = region
+		for p in rng.sample([(0,1),(0,-1),(1,0),(-1,0)], 4):
+			if y+2*p[1] >= 0 and y+2*p[1] < len(grid) and x+2*p[0] >= 0 and x+2*p[0] < len(grid[y]):
+				if grid[y+2*p[1]][x+2*p[0]].collides:	# each segment is at least two long to give it that "a maze"-ing look
+					grid[y+p[1]][x+p[0]] = Floor()
+					grid[y+p[1]][x+p[0]].region = region
+					self.randomFlood(x+2*p[0], y+2*p[1], grid, region)
 
 
 	def findWall(self, coords, grid):	# find out if there is a wall here and return the direction as a tuple
@@ -604,6 +775,10 @@ class Dungeon(object):
 		return True
 
 
+	def makeTreasure(self, x0,y0,grid):
+		grid[y0][x0] = Loot()
+
+
 	def makeLHall(self, room1, room2, grid, minX, minY):
 		x1 = room1.x+room1.w/2-minX
 		y1 = room1.y+room1.h/2-minY
@@ -634,7 +809,7 @@ class Dungeon(object):
 			self.clearHall(p.parent, grid)
 
 
-	def flowLava(self, x, y, grid, n):
+	def flowLava(self, x, y, grid, n, d):	# make a lava river!
 		if n <= 0:
 			return
 		if x < 0 or y < 0 or y >= len(grid) or x >= len(grid[y]):
@@ -647,21 +822,23 @@ class Dungeon(object):
 		adj = []
 		totZ = 0
 		for p in [(0,-1),(0,1),(-1,0),(1,0)]:	# for each adjacent tile
-			z = 0.0	# count how much lava is near it
-			for i in range(len(dys)):	# for each tile adjacent to the adjacent one
+			z = 0.0								# count how much lava is near it
+			for i in range(len(dys)):
 				for j in range(len(dxs)):
 					try:
 						if grid[y+p[1]+dys[i]][x+p[0]+dxs[j]].isLava():
 							z = z+costs[i][j]
 					except IndexError:
 						pass
-			z = math.exp(-6*z)
+			z = math.exp(-4*z)
+			if p[0] == d or p[1] == d:
+				z = 2*z
 			adj.append((p,z))
 			totZ = totZ+z
 		r = rng.random()
 		for p,z in adj:
 			if r < z/totZ:
-				self.flowLava(x+p[0], y+p[1], grid, n-1)
+				self.flowLava(x+p[0], y+p[1], grid, n-1, d)
 				return
 			else:
 				r = r-z/totZ

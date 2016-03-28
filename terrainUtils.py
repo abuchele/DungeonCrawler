@@ -101,6 +101,15 @@ class OneWayGlass(Block):
 		else:
 			return "vv"
 
+class Loot(Block):
+	def __init__(self):
+		self.color = (255,250,0)
+		self.collides = True
+
+	def __str__(self):
+		return "[]"
+
+
 class Node(object):	# used for my A* search in the "halls" algorithm
 	def __init__(self, x,y,xf,yf,parent,cost):
 		self.x = x
