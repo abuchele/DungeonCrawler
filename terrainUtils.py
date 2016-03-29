@@ -5,7 +5,7 @@ import math
 
 class Block(object):
 	def __init__(self):
-		self.color = (0,0,0)
+		self.color = (0,0,0, 255)
 		self.collides = False
 		self.transparent = False
 		self.raised = True
@@ -17,7 +17,7 @@ class Block(object):
 
 class Floor(Block):
 	def __init__(self):
-		self.color = (200,200,200)
+		self.color = (200,200,200, 255)
 		self.collides = False
 		self.transparent = True
 		self.raised = False
@@ -28,7 +28,7 @@ class Floor(Block):
 
 class Stone(Block):
 	def __init__(self):
-		self.color = (60,60,60)
+		self.color = (60,60,60, 255)
 		self.collides = True
 		self.transparent = False
 		self.raised = True
@@ -39,7 +39,7 @@ class Stone(Block):
 
 class Brick(Block):
 	def __init__(self):
-		self.color = (40,40,40)
+		self.color = (40,40,40, 255)
 		self.collides = True
 		self.transparent = False
 		self.raised = True
@@ -50,7 +50,7 @@ class Brick(Block):
 
 class Door(Block):
 	def __init__(self):
-		self.color = (100,100,100)
+		self.color = (100,100,100, 255)
 		self.collides = False
 		self.transparent = False
 		self.raised = True
@@ -61,7 +61,7 @@ class Door(Block):
 
 class Lava(Block):
 	def __init__(self):
-		self.color = (255,20,0)
+		self.color = (255,20,0, 255)
 		self.collides = False
 		self.transparent = True
 		self.raised = False
@@ -72,7 +72,7 @@ class Lava(Block):
 
 class Bedrock(Block):
 	def __init__(self):
-		self.color = (0,0,0)
+		self.color = (0,0,0, 255)
 		self.collides = True
 		self.transparent = False
 		self.raised = True
@@ -83,7 +83,7 @@ class Bedrock(Block):
 
 class Obsidian(Block):
 	def __init__(self):
-		self.color = (30,0,50)
+		self.color = (40,0,50, 255)
 		self.collides = True
 		self.transparent = False
 		self.raised = True
@@ -94,7 +94,7 @@ class Obsidian(Block):
 
 class Glass(Block):
 	def __init__(self):
-		self.color = (220,220,220)
+		self.color = (225,225,225, 100)
 		self.collides = True
 		self.transparent = True
 		self.raised = True
@@ -104,7 +104,7 @@ class Glass(Block):
 
 class Metal(Block):
 	def __init__(self):
-		self.color = (150,150,150)
+		self.color = (150,150,150, 255)
 		self.collides = True
 		self.transparent = False
 		self.raised = True
@@ -114,7 +114,7 @@ class Metal(Block):
 
 class OneWayGlass(Block):
 	def __init__(self, direction):
-		self.color = (220,220,220)
+		self.color = (220,220,220, 255)
 		self.collides = True
 		self.transparent = True
 		self.raised = True
@@ -132,7 +132,7 @@ class OneWayGlass(Block):
 
 class Loot(Block):
 	def __init__(self, value):
-		self.color = (255,250,0)
+		self.color = (255,250,0, 255)
 		self.collides = True
 		self.transparent = True
 		self.raised = True

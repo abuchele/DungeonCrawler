@@ -726,7 +726,7 @@ def randomQueueFlood(x0, y0, grid, region=0):	# random recursive flood algorithm
 	while len(queue) > 0:
 		x,y,xp,yp = rng.choice(queue)
 		queue.remove((x,y,xp,yp))
-		if grid[y][x].collides:	# someone beat us to it
+		if not grid[y][x].collides:	# someone beat us to it
 			continue
 
 		grid[yp][xp] = Floor()	# draw the path
