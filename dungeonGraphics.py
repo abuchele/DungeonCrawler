@@ -64,7 +64,7 @@ if __name__ == '__main__':
     size = (screenX, screenY)
     blockSize = 50
     screen = pygame.display.set_mode(size)
-    model = Dungeon(72,72,"cells")
+    model = Dungeon(72,72,"rooms")
     
     view = DungeonModelView(model, screen, size, blockSize)
     #pygame.key.set_repeat(350,35)
