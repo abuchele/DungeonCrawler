@@ -306,21 +306,22 @@ def generateFastH(w, h, rw, rh, n):
 				continue
 		rooms.append(newRoom)
 
-	thereAreIntersections = True	# spaces out the rooms
-	while thereAreIntersections:
-		thereAreIntersections = False
-		for i in range(0,len(rooms)):
-			for j in range(0,i):
-				room1 = rooms[i]
-				room2 = rooms[j]
-				if room1.intersect(room2) != None:
-					thereAreIntersections = True
-					room1.push(room2)	# rooms that intersect will move away from each other
-					room2.push(room1)
+	for i in range(10):	# this iteration might make rooms more evenly spaced; I don't actually know if it does anything.
+		thereAreIntersections = True	# spaces out the rooms
+		while thereAreIntersections:
+			thereAreIntersections = False
+			for i in range(0,len(rooms)):
+				for j in range(0,i):
+					room1 = rooms[i]
+					room2 = rooms[j]
+					if room1.intersect(room2) != None:
+						thereAreIntersections = True
+						room1.push(room2)	# rooms that intersect will move away from each other
+						room2.push(room1)
+			for room in rooms:
+				room.move()
 		for room in rooms:
-			room.move()
-	for room in rooms:
-		room.round()
+			room.round()
 	
 	hubs = []	# discards all but the biggest rooms
 	for i in range(n):
@@ -458,13 +459,14 @@ def generatePiece(w, h, n):
 	return grid
 
 
-def generateMazes(w, h, s, n, c):
+def generateMazes(w, h, s, n, c, mazeAlg):
 	"""
 	generates a dungeon comprised of rooms and mazes
 	w, h = the dimensions of the dungeon
 	s = the maximum room size
 	n = the approximate number of rooms (actual number will be somewhat less)
 	c = a number that makes more unnecessary doors
+	mazeAlg = True for random breadth-first-search, False for random depth-first-search
 	"""
 	sr = (s-1)/2	# gets the odd "root" of s
 	wr = w/2
@@ -494,7 +496,10 @@ def generateMazes(w, h, s, n, c):
 	for x in rng.sample(range(1,w,2),w/2):
 		for y in rng.sample(range(1,h,2),h/2):
 			if grid[y][x].collides:
-				randomFlood(x,y,grid, regionN)
+				if mazeAlg:
+					randomQueueFlood(x,y,grid, regionN)
+				else:
+					randomStackFlood(x,y,grid, regionN)
 				regionN = regionN+1
 
 	regions = range(regionN)	# keeps track of which regions have united (the goal is all of them)
@@ -653,6 +658,62 @@ def generateIWalk(w, h, n, t):
 	return grid
 
 
+def generateRooms(w, h, n, p):
+	"""
+	generates a dungeon composed entirely of rectangular rooms connected by doorways
+	w, h = the dimensions of the dungeon
+	n = the approximate number of walls to draw
+	p = a number from 0-1 that makes rooms more interconnected
+	"""
+	grid = []
+	for y in range(0,h+1):
+		row = []
+		for x in range(0,w+1):
+			block = Floor()
+			block.region = 0
+			row.append(block)
+		grid.append(row)
+	for x in range(0,w+1):
+		grid[0][x] = Brick()
+		grid[h][x] = Brick()
+		#grid[h/2][x] = Brick()
+	for y in range(0,h+1):
+		grid[y][0] = Brick()
+		grid[y][w] = Brick()
+		#grid[y][w/2] = Brick()
+
+	regionN = 1
+	for i in range(n):
+		x0 = rng.randint(2,w-2)
+		y0 = rng.randint(2,h-2)
+		okay = True
+		"""for adj in [grid[y0+dy][x0+dx] for dy in [-2,-1,0,1,2] for dx in [-2,-1,0,1,2]]:
+			if adj.collides:	# walls may not form too close to other walls
+				okay = False
+				break
+		if not okay:
+			continue"""
+		x1 = x0
+		while not grid[y0][x1].collides:	# checks the horizontal room we have to work with
+			x1 = x1+1
+		x2 = x0-1
+		while not grid[y0][x2].collides:
+			x2 = x2-1
+		y1 = y0
+		while not grid[y1][x0].collides:	# checks the vertical room we have to work with
+			y1 = y1+1
+		y2 = y0-1
+		while not grid[y2][x0].collides:
+			y2 = y2-1
+		if x1-x2 < y1-y2 or (x1-x2 == y1-y2 and rng.random() < 0.5):	# draws the shorter wall here
+			for x in range(x2,x1):
+				grid[y0][x] = Brick()
+		else:
+			for y in range(y2,y1):
+				grid[y][x0] = Brick()
+	return grid
+
+
 def harmonicSum(lst):
 	sum = 0
 	for x in lst:
@@ -660,7 +721,26 @@ def harmonicSum(lst):
 	return 1.0/sum
 
 
-def randomFlood(x, y, grid, region=0):	# random recursive flood algorithm that creates mazes
+def randomQueueFlood(x0, y0, grid, region=0):	# random recursive flood algorithm that creates mazes
+	queue = [(x0,y0,x0,y0)]	# the list of nodes that need to be filled as well as where they will be filled from
+	while len(queue) > 0:
+		x,y,xp,yp = rng.choice(queue)
+		queue.remove((x,y,xp,yp))
+		if grid[y][x].collides:	# someone beat us to it
+			continue
+
+		grid[yp][xp] = Floor()	# draw the path
+		grid[yp][xp].region = region
+		grid[y][x] = Floor()
+		grid[y][x].region = region
+
+		for p in [(0,1),(0,-1),(1,0),(-1,0)]:
+			if y+2*p[1] >= 0 and y+2*p[1] < len(grid) and x+2*p[0] >= 0 and x+2*p[0] < len(grid[y]):
+				if grid[y+2*p[1]][x+2*p[0]].collides:
+					queue.append((x+2*p[0], y+2*p[1], x+p[0], y+p[1]))
+
+
+def randomStackFlood(x, y, grid, region=0):	# random recursive flood algorithm that creates mazes
 	grid[y][x] = Floor()
 	grid[y][x].region = region
 	for p in rng.sample([(0,1),(0,-1),(1,0),(-1,0)], 4):
@@ -668,7 +748,7 @@ def randomFlood(x, y, grid, region=0):	# random recursive flood algorithm that c
 			if grid[y+2*p[1]][x+2*p[0]].collides:	# each segment is at least two long to give it that "a maze"-ing look (get it?)
 				grid[y+p[1]][x+p[0]] = Floor()
 				grid[y+p[1]][x+p[0]].region = region
-				randomFlood(x+2*p[0], y+2*p[1], grid, region)
+				randomStackFlood(x+2*p[0], y+2*p[1], grid, region)
 
 
 def findWall(coords, grid):	# find out if there is a wall here and return the direction as a tuple
@@ -963,13 +1043,16 @@ def placeTreasure(dens, grid):	# scatters treasure blocks across the map
 			neighbors = [grid[y+p[1]][x+p[0]] for p in [(1,1),(1,0),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1),(0,1)]]
 			wallCount = 1
 
-			hitAWall = False
+			wallsHit = 0
 			for i in range(len(neighbors)):
 				if neighbors[i].collides:
 					wallCount = wallCount + 1
 				if not neighbors[i].collides and neighbors[(i+1)%len(neighbors)].collides:	# this may only be triggered once
-					if hitAWall:															# multiple triggerings means this chest may block off a room
+					if wallsHit >= 1:
+						wallsHit = 2														# multiple triggerings means this chest may block off a room
 						break
-					hitAWall = True
-			if rng.random() < dens*(wallCount):
-				grid[y][x] = Loot()
+					else:
+						wallsHit = 1
+
+			if wallsHit < 2 and rng.random() < dens*(wallCount):
+				grid[y][x] = Loot(5)

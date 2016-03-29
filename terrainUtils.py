@@ -8,6 +8,11 @@ class Block(object):
 		self.color = (0,0,0)
 		self.collides = False
 		self.transparent = False
+		self.raised = True
+		self.explored = False
+
+	def __str__(self):
+		return "nl"
 
 
 class Floor(Block):
@@ -15,6 +20,7 @@ class Floor(Block):
 		self.color = (200,200,200)
 		self.collides = False
 		self.transparent = True
+		self.raised = False
 
 	def __str__(self):
 		return "  "
@@ -25,6 +31,7 @@ class Stone(Block):
 		self.color = (60,60,60)
 		self.collides = True
 		self.transparent = False
+		self.raised = True
 
 	def __str__(self):
 		return "@@"
@@ -35,6 +42,7 @@ class Brick(Block):
 		self.color = (40,40,40)
 		self.collides = True
 		self.transparent = False
+		self.raised = True
 
 	def __str__(self):
 		return "##"
@@ -45,6 +53,7 @@ class Door(Block):
 		self.color = (100,100,100)
 		self.collides = False
 		self.transparent = False
+		self.raised = True
 
 	def __str__(self):
 		return "/\\"
@@ -55,9 +64,10 @@ class Lava(Block):
 		self.color = (255,20,0)
 		self.collides = False
 		self.transparent = True
+		self.raised = False
 
 	def __str__(self):
-		return "LL"
+		return "::"
 
 
 class Bedrock(Block):
@@ -65,6 +75,7 @@ class Bedrock(Block):
 		self.color = (0,0,0)
 		self.collides = True
 		self.transparent = False
+		self.raised = True
 
 	def __str__(self):
 		return "BB"
@@ -75,6 +86,7 @@ class Obsidian(Block):
 		self.color = (30,0,50)
 		self.collides = True
 		self.transparent = False
+		self.raised = True
 
 	def __str__(self):
 		return "XX"
@@ -85,6 +97,7 @@ class Glass(Block):
 		self.color = (220,220,220)
 		self.collides = True
 		self.transparent = True
+		self.raised = True
 
 	def __str__(self):
 		return "||"
@@ -94,6 +107,7 @@ class Metal(Block):
 		self.color = (150,150,150)
 		self.collides = True
 		self.transparent = False
+		self.raised = True
 
 	def __str__(self):
 		return "//"
@@ -103,6 +117,7 @@ class OneWayGlass(Block):
 		self.color = (220,220,220)
 		self.collides = True
 		self.transparent = True
+		self.raised = True
 		self.direction = direction
 
 	def __str__(self):
@@ -116,9 +131,12 @@ class OneWayGlass(Block):
 			return "vv"
 
 class Loot(Block):
-	def __init__(self):
+	def __init__(self, value):
 		self.color = (255,250,0)
 		self.collides = True
+		self.transparent = True
+		self.raised = True
+		self.value = value
 
 	def __str__(self):
 		return "[]"

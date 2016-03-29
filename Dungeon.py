@@ -1,4 +1,5 @@
 import dungeonGenerationAlgorithms as dga
+from terrainUtils import Block
 
 
 
@@ -19,19 +20,24 @@ class Dungeon(object):
 		elif method == "piece":
 			self.grid = dga.generatePiece(w,h, w*h/10)
 		elif method == "maze1":
-			self.grid = dga.generateMazes(w,h, 12, 500, 0.5)
+			self.grid = dga.generateMazes(w,h, 12, 500, 0.5, False)
 		elif method == "maze2":
-			self.grid = dga.generateMazes(w,h, 10, 100, 0.9)
+			self.grid = dga.generateMazes(w,h, 12, 50, 0.9, True)
 		elif method == "cells":
 			self.grid = dga.generateCells(w,h, 3, 4, 0.33, 3)
 		elif method == "Rwalk":
 			self.grid = dga.generateRWalk(w,h, 8, 1000)
 		elif method == "Iwalk":
 			self.grid = dga.generateIWalk(w,h, 4, 1000)
+		elif method == "rooms":
+			self.grid = dga.generateRooms(w,h, 100, 0.1)
 		else:
 			self.grid = [[]]
 
-		dga.placeTreasure(0.001, self.grid)
+		dga.placeTreasure(0.006, self.grid)
+
+		self.nullBlock = Block()
+
 
 	def __str__(self):
 		output = ""
@@ -40,6 +46,13 @@ class Dungeon(object):
 				output = output+str(blk)
 			output = output+"\n"
 		return output
+
+
+	def getBlock(self,x,y):
+		if y >= 0 and y < len(self.grid) and x >= 0 and x < len(self.grid[y]):
+			return self.grid[y][x]
+		else:
+			return self.nullBlock
 
 
 
