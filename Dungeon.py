@@ -38,6 +38,8 @@ class Dungeon(object):
 
 		self.nullBlock = Block()
 
+		self.last_action = "You wake up near an underground river."
+
 
 	def __str__(self):
 		output = ""
@@ -53,6 +55,17 @@ class Dungeon(object):
 			return self.grid[y][x]
 		else:
 			return self.nullBlock
+
+
+	def getLog(self):
+		return self.last_action
+
+
+	def getWidth(self):
+		return len(self.grid[0])
+
+	def getHeight(self):
+		return len(self.grid)
 
 
 
