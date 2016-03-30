@@ -14,9 +14,9 @@ class DungeonModelView(object):
         self.screen = screen
         self.size = size
         self.dispSize = (size[1],size[1])
-        tht = 0.2
+        tht = 0.3
         self.blockSize = (bs,int(bs*math.cos(tht)),int(bs*math.sin(tht)))
-        self.playerPos = (60,65)
+        self.playerPos = (36,36)
         self.screenBounds = (-int(size[1]/bs/2), int(size[1]/bs/2)+1, -int(size[1]/bs/math.sqrt(2)), int(size[1]/bs/math.sqrt(2)))
         self.bigmap = pygame.Surface((size[0], size[0]))
 

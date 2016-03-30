@@ -49,14 +49,22 @@ class Brick(Block):
 
 
 class Door(Block):
-	def __init__(self):
-		self.color = (100,100,100, 255)
-		self.collides = False
+	def __init__(self, open=False):
+		if open:
+			self.color = (160,160,160, 255)
+			self.collides = False
+		else:
+			self.color = (100,100,100, 255)
+			self.collides = True
 		self.transparent = False
 		self.raised = True
 
 	def __str__(self):
 		return "/\\"
+
+	def open(self):
+		self.color = (160,160,160, 255)
+		self.collides = False
 
 
 class Lava(Block):
@@ -94,7 +102,7 @@ class Obsidian(Block):
 
 class Glass(Block):
 	def __init__(self):
-		self.color = (225,225,225, 100)
+		self.color = (220,220,220, 100)
 		self.collides = True
 		self.transparent = True
 		self.raised = True
@@ -104,7 +112,7 @@ class Glass(Block):
 
 class Metal(Block):
 	def __init__(self):
-		self.color = (150,150,150, 255)
+		self.color = (140,140,140, 255)
 		self.collides = True
 		self.transparent = False
 		self.raised = True
@@ -139,7 +147,7 @@ class Loot(Block):
 		self.contents = contents #contents can be a list of stuff
 
 	def __str__(self):
-		return "{}".format(contents)
+		return "[]"
 
 
 class Node(object):	# used for my A* search in the "halls" algorithm

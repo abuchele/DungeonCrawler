@@ -45,7 +45,7 @@ def generateBasic(w,h,x0,y0,s):
 						fineGrid[s*ry+dy][s*rx+dx] = Floor()
 
 			if bigGrid[ry][rx].left == "door":	# finish the walls
-				fineGrid[s*ry+rng.randint(1,s-1)][s*rx] = Door()
+				fineGrid[s*ry+rng.randint(1,s-1)][s*rx] = Door(False)
 			elif bigGrid[ry][rx].left == "open":
 				for dy in range(1,s):
 					fineGrid[s*ry+dy][s*rx] = Floor()
@@ -53,7 +53,7 @@ def generateBasic(w,h,x0,y0,s):
 				for dy in range(1,s):
 					fineGrid[s*ry+dy][s*rx] = Glass()
 			if bigGrid[ry][rx].top == "door":
-				fineGrid[s*ry][s*rx+rng.randint(1,s-1)] = Door()
+				fineGrid[s*ry][s*rx+rng.randint(1,s-1)] = Door(False)
 			elif bigGrid[ry][rx].top == "open":
 				for dx in range(1,s):
 					fineGrid[s*ry][s*rx+dx] = Floor()
@@ -435,11 +435,13 @@ def generatePiece(w, h, n):
 
 	for x in range(1,w):
 		for y in range(1,h):
+			if type(grid[y][x]).__name__ == "Door":
+				grid[y][x].open()
 			if grid[y][x].collides:
 				adjWall = [grid[y+p[1]][x+p[0]].collides for p in [(0,1),(0,-1),(1,0),(-1,0)]]
 				if (adjWall[0] and adjWall[1] and not adjWall[2] and not adjWall[3]) or (not adjWall[0] and not adjWall[1] and adjWall[2] and adjWall[3]):
 					if rng.random() < 0.1:
-						grid[y][x] = Door()
+						grid[y][x] = Door(True)
 
 	x = 1
 	while x < w:	# fill in all dead ends
@@ -459,13 +461,13 @@ def generatePiece(w, h, n):
 	return grid
 
 
-def generateMazes(w, h, s, n, c, mazeAlg):
+def generateMazes(w, h, s, n, doors, mazeAlg):
 	"""
 	generates a dungeon comprised of rooms and mazes
 	w, h = the dimensions of the dungeon
 	s = the maximum room size
 	n = the approximate number of rooms (actual number will be somewhat less)
-	c = a number that makes more unnecessary doors
+	doors = a number that makes more unnecessary doors
 	mazeAlg = True for random breadth-first-search, False for random depth-first-search
 	"""
 	sr = (s-1)/2	# gets the odd "root" of s
@@ -513,14 +515,10 @@ def generateMazes(w, h, s, n, c, mazeAlg):
 							importantWalls.append((x, y, regions[grid[y+1][x].region], regions[grid[y-1][x].region]))
 						if not grid[y][x+1].collides and not grid[y][x-1].collides and (regions[grid[y][x+1].region]!=regions[grid[y][x-1].region]):
 							importantWalls.append((x, y, regions[grid[y][x+1].region], regions[grid[y][x-1].region]))
-		if rng.random() < c:	# there is a chance to knock out more doors than necessary
-			doors = 2
-		else:
-			doors = 1
 		for iterationVariable in range(doors):
 			if len(importantWalls) > 0:
 				x,y,r1,r2 = rng.choice(importantWalls)
-				grid[y][x] = Door()
+				grid[y][x] = Door(True)
 				for i in range(regionN):	# knock out a door and unite the two regions
 					if regions[i] == r1:
 						regions[i] = r2
@@ -658,12 +656,12 @@ def generateIWalk(w, h, n, t):
 	return grid
 
 
-def generateRooms(w, h, n, p):
+def generateRooms(w, h, n, c):
 	"""
 	generates a dungeon composed entirely of rectangular rooms connected by doorways
 	w, h = the dimensions of the dungeon
 	n = the approximate number of walls to draw
-	p = a number from 0-1 that makes rooms more interconnected
+	c = a number from 0-1 that makes rooms more interconnected
 	"""
 	grid = []
 	for y in range(0,h+1):
@@ -687,12 +685,6 @@ def generateRooms(w, h, n, p):
 		x0 = rng.randint(2,w-2)
 		y0 = rng.randint(2,h-2)
 		okay = True
-		"""for adj in [grid[y0+dy][x0+dx] for dy in [-2,-1,0,1,2] for dx in [-2,-1,0,1,2]]:
-			if adj.collides:	# walls may not form too close to other walls
-				okay = False
-				break
-		if not okay:
-			continue"""
 		x1 = x0
 		while not grid[y0][x1].collides:	# checks the horizontal room we have to work with
 			x1 = x1+1
@@ -707,10 +699,39 @@ def generateRooms(w, h, n, p):
 			y2 = y2-1
 		if x1-x2 < y1-y2 or (x1-x2 == y1-y2 and rng.random() < 0.5):	# draws the shorter wall here
 			for x in range(x2,x1):
-				grid[y0][x] = Brick()
+				grid[y0][x] = Brick()			# draw a horizontal line
+				for y in range(y0,y1):			# and update regions accordingly
+					grid[y][x].region = regionN
 		else:
 			for y in range(y2,y1):
-				grid[y][x0] = Brick()
+				grid[y][x0] = Brick()			# draw a vertical line
+				for x in range(x0,x1):			# and update regions accordingly
+					grid[y][x].region = regionN
+		regionN += 1
+
+	regions = range(regionN)	# keeps track of which regions have united (the goal is all of them)
+	importantWalls = [0]
+	while len(importantWalls) > 0:	# while there are rooms that need to be connected
+		importantWalls = []
+		for x in range(1,w):
+			for y in range(1,h):
+				if grid[y][x].collides:
+					if not grid[y+1][x].collides and not grid[y-1][x].collides and (regions[grid[y+1][x].region]!=regions[grid[y-1][x].region]):
+						importantWalls.append((x, y, regions[grid[y+1][x].region], regions[grid[y-1][x].region]))
+					if not grid[y][x+1].collides and not grid[y][x-1].collides and (regions[grid[y][x+1].region]!=regions[grid[y][x-1].region]):
+						importantWalls.append((x, y, regions[grid[y][x+1].region], regions[grid[y][x-1].region]))
+		if rng.random() < c:	# there is a chance to knock out more doors than necessary
+			doors = 2
+		else:
+			doors = 1
+		for iterationVariable in range(doors):
+			if len(importantWalls) > 0:
+				x,y,r1,r2 = rng.choice(importantWalls)
+				grid[y][x] = Door()
+				grid[y][x].region = r2
+				for i in range(regionN):	# knock out a door and unite the two regions
+					if regions[i] == r1:
+						regions[i] = r2
 	return grid
 
 
