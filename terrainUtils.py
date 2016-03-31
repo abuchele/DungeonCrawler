@@ -1,5 +1,6 @@
 import random as rng
 import math
+from pygame import image
 
 
 
@@ -8,8 +9,8 @@ class Block(object):
 		self.color = (0,0,0, 255)
 		self.collides = False
 		self.transparent = False
-		self.raised = True
 		self.explored = False
+		self.sprite = image.load("sprites/Null.png")
 
 	def __str__(self):
 		return "nl"
@@ -20,7 +21,7 @@ class Floor(Block):
 		self.color = (200,200,200, 255)
 		self.collides = False
 		self.transparent = True
-		self.raised = False
+		self.sprite = image.load("sprites/Floor.png")
 
 	def __str__(self):
 		return "  "
@@ -31,7 +32,7 @@ class Stone(Block):
 		self.color = (60,60,60, 255)
 		self.collides = True
 		self.transparent = False
-		self.raised = True
+		self.sprite = image.load("sprites/Stone.png")
 
 	def __str__(self):
 		return "@@"
@@ -42,7 +43,7 @@ class Brick(Block):
 		self.color = (40,40,40, 255)
 		self.collides = True
 		self.transparent = False
-		self.raised = True
+		self.sprite = image.load("sprites/Brick.png")
 
 	def __str__(self):
 		return "##"
@@ -53,11 +54,12 @@ class Door(Block):
 		if open:
 			self.color = (160,160,160, 255)
 			self.collides = False
+			self.sprite = image.load("sprites/DoorOpen.png")
 		else:
 			self.color = (100,100,100, 255)
 			self.collides = True
+			self.sprite = image.load("sprites/DoorClosed.png")
 		self.transparent = False
-		self.raised = True
 
 	def __str__(self):
 		return "/\\"
@@ -65,6 +67,7 @@ class Door(Block):
 	def open(self):
 		self.color = (160,160,160, 255)
 		self.collides = False
+		self.sprite = image.load("sprites/DoorOpen.png")
 
 
 class Lava(Block):
@@ -72,7 +75,7 @@ class Lava(Block):
 		self.color = (255,20,0, 255)
 		self.collides = False
 		self.transparent = True
-		self.raised = False
+		self.sprite = image.load("sprites/Lava.png")
 
 	def __str__(self):
 		return "::"
@@ -83,7 +86,7 @@ class Bedrock(Block):
 		self.color = (0,0,0, 255)
 		self.collides = True
 		self.transparent = False
-		self.raised = True
+		self.sprite = image.load("sprites/Bedrock.png")
 
 	def __str__(self):
 		return "BB"
@@ -94,7 +97,7 @@ class Obsidian(Block):
 		self.color = (40,0,50, 255)
 		self.collides = True
 		self.transparent = False
-		self.raised = True
+		self.sprite = image.load("sprites/Obsidian.png")
 
 	def __str__(self):
 		return "XX"
@@ -105,7 +108,7 @@ class Glass(Block):
 		self.color = (220,220,220, 100)
 		self.collides = True
 		self.transparent = True
-		self.raised = True
+		self.sprite = image.load("sprites/Glass.png")
 
 	def __str__(self):
 		return "||"
@@ -115,7 +118,7 @@ class Metal(Block):
 		self.color = (140,140,140, 255)
 		self.collides = True
 		self.transparent = False
-		self.raised = True
+		self.sprite = image.load("sprites/Metal.png")
 
 	def __str__(self):
 		return "//"
@@ -125,8 +128,8 @@ class OneWayGlass(Block):
 		self.color = (220,220,220, 255)
 		self.collides = True
 		self.transparent = True
-		self.raised = True
 		self.direction = direction
+		self.sprite = image.load("sprites/Metal.png")
 
 	def __str__(self):
 		if self.direction == 0:
@@ -144,6 +147,7 @@ class Loot(Block):
 		self.collides = True
 		self.transparent = True
 		self.raised = True
+		self.sprite = image.load("sprites/Loot.png")
 		self.contents = contents #contents can be a list of stuff
 
 	def __str__(self):

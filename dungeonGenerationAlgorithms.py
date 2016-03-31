@@ -1,6 +1,5 @@
 import math
 import random as rng
-from copy import deepcopy
 import numpy as np
 from scipy.spatial import Delaunay
 from scipy.sparse import csr_matrix
@@ -396,7 +395,7 @@ def generatePiece(w, h, n):
 	for y in range(h+1):
 		row = []
 		for x in range(w+1):
-			row.append(Stone())
+			row.append(Brick())
 		grid.append(row)
 	for y in range(h/2-3, h/2+3):
 		for x in range(w/2-3, w/2+3):
@@ -453,7 +452,7 @@ def generatePiece(w, h, n):
 					if grid[y+p[1]][x+p[0]].collides:
 						adjWalls = adjWalls+1
 				if adjWalls >= 3:			# if this is a dead end
-					grid[y][x] = Stone()	# fill it in
+					grid[y][x] = Brick()	# fill it in
 					x = 0					# start over
 					y = 0
 			y = y+1
@@ -564,7 +563,12 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 		grid[w][x] = Obsidian()
 
 	for i in range(n):
-		newGrid = deepcopy(grid)
+		newGrid = []
+		for y in range(0,h+1):		# manually deep-copying because copy.deepcopy creates a nested list that will break pygame.Surface later on.
+			row = []
+			for x in range(0,w+1):
+				row.append(grid[y][x])
+			newGrid.append(row)
 		for x in range(1,w):
 			for y in range(1,h):
 				adj = 0
