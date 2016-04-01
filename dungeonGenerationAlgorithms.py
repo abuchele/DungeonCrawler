@@ -432,24 +432,23 @@ def generatePiece(w, h, n):
 		if success:
 			grid[wall[1]][wall[0]] = Door()
 
-	for x in range(1,w):
-		for y in range(1,h):
-			if type(grid[y][x]).__name__ == "Door":
-				grid[y][x].open()
+	for x in rng.sample(range(1,w), w-1):
+		for y in rng.sample(range(1,h), h-1):	# places doors where appropriate
 			if grid[y][x].collides:
-				adjWall = [grid[y+p[1]][x+p[0]].collides for p in [(0,1),(0,-1),(1,0),(-1,0)]]
-				if (adjWall[0] and adjWall[1] and not adjWall[2] and not adjWall[3]) or (not adjWall[0] and not adjWall[1] and adjWall[2] and adjWall[3]):
-					if rng.random() < 0.1:
-						grid[y][x] = Door(True)
+				adjWall = [(grid[y+p[1]][x+p[0]].collides, x+p[0], y+p[1]) for p in [(0,1),(0,-1),(1,0),(-1,0)]]
+				if adjWall[0][0] and adjWall[1][0] and not adjWall[2][0] and not adjWall[3][0] and dist(adjWall[2][1:3],adjWall[3][1:3],grid) >= 50:
+					grid[y][x] = Door()
+				if adjWall[2][0] and adjWall[3][0] and not adjWall[0][0] and not adjWall[1][0] and dist(adjWall[0][1:3],adjWall[1][1:3],grid) >= 50:
+					grid[y][x] = Door()
 
 	x = 1
 	while x < w:	# fill in all dead ends
 		y = 1
 		while y < h:
-			if not grid[y][x].collides:
+			if grid[y][x].passable():
 				adjWalls = 0
 				for p in [(0,1),(0,-1),(1,0),(-1,0)]:
-					if grid[y+p[1]][x+p[0]].collides:
+					if not grid[y+p[1]][x+p[0]].passable():
 						adjWalls = adjWalls+1
 				if adjWalls >= 3:			# if this is a dead end
 					grid[y][x] = Brick()	# fill it in
@@ -529,7 +528,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 			if not grid[y][x].collides:
 				adjWalls = 0
 				for p in [(0,1),(0,-1),(1,0),(-1,0)]:
-					if grid[y+p[1]][x+p[0]].collides:
+					if not grid[y+p[1]][x+p[0]].passable():
 						adjWalls = adjWalls+1
 				if adjWalls >= 3:			# if this is a dead end
 					grid[y][x] = Stone()	# fill it in
@@ -737,6 +736,41 @@ def generateRooms(w, h, n, c):
 					if regions[i] == r1:
 						regions[i] = r2
 	return grid
+
+
+def dist(dest, strt, grid):	# A* search
+	openQ = [Node(strt[0], strt[1], dest[0], dest[1], None, 0)]
+	closQ = []
+	while len(openQ) > 0:
+		p = openQ.pop()	# take the point with the lowest f (openQ is already sorted)
+		adj = []
+		if p.x-1 > 0 and grid[p.y][p.x-1].passable():
+			adj.append(Node(p.x-1, p.y, dest[0], dest[1], p, 1))
+		if p.y-1 > 0 and grid[p.y-1][p.x].passable():
+			adj.append(Node(p.x, p.y-1, dest[0], dest[1], p, 1))
+		if p.x+1 < len(grid[p.y])-1 and grid[p.y][p.x+1].passable():
+			adj.append(Node(p.x+1, p.y, dest[0], dest[1], p, 1))
+		if p.y+1 < len(grid)-1 and grid[p.y+1][p.x].passable():
+			adj.append(Node(p.x, p.y+1, dest[0], dest[1], p, 1))
+		for nxt in adj:
+			if nxt.h == 0:	# if we have reached our destination
+				return nxt.g
+			promising = True	# whether it should be added to the queue
+			for p2 in openQ:
+				if nxt < p2:
+					promising = False	# skip it if there is another node that is objectively better already on either queue
+					break
+			for p2 in closQ:
+				if nxt < p2:
+					promising = False
+					break
+			if promising:
+				k = len(openQ)-1
+				while k >= 0 and openQ[k].f < nxt.f:	# add it to the queue, sorted from longest to shortest f
+					k = k-1
+				openQ.insert(k+1, nxt)
+		closQ.append(p)
+	return -1	# return -1 if there is no path
 
 
 def harmonicSum(lst):
@@ -1072,7 +1106,7 @@ def placeTreasure(dens, grid):	# scatters treasure blocks across the map
 			for i in range(len(neighbors)):
 				if neighbors[i].collides:
 					wallCount = wallCount + 1
-				if not neighbors[i].collides and neighbors[(i+1)%len(neighbors)].collides:	# this may only be triggered once
+				if neighbors[i].passable() and neighbors[(i+1)%len(neighbors)].collides:	# this may only be triggered once
 					if wallsHit >= 1:
 						wallsHit = 2														# multiple triggerings means this chest may block off a room
 						break

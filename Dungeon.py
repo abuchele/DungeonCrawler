@@ -27,13 +27,13 @@ class Dungeon(object):
 			dga.placeTreasure(0.007, self.grid)
 		elif method == "maze1":
 			self.grid = dga.generateMazes(w,h, 12, 300, 2, False)
-			dga.placeTreasure(0.003, self.grid)
+			dga.placeTreasure(0.005, self.grid)
 		elif method == "maze2":
 			self.grid = dga.generateMazes(w,h, 12, 80, 3, True)
 			dga.placeTreasure(0.005, self.grid)
 		elif method == "cells":
 			self.grid = dga.generateCells(w,h, 3, 4, 0.33, 3)
-			dga.placeTreasure(0.003, self.grid)
+			dga.placeTreasure(0.004, self.grid)
 		elif method == "Rwalk":
 			self.grid = dga.generateRWalk(w,h, 8, 1000)
 			dga.placeTreasure(0.007, self.grid)

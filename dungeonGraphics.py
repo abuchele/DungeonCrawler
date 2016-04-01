@@ -16,7 +16,7 @@ class DungeonModelView(object):
         self.dispSize = (size[1],size[1])
         tht = 0.3
         self.blockSize = (50,48,15)
-        self.playerPos = (36,36)
+        self.playerPos = (10,10)
         self.screenBounds = (-size[1]/self.blockSize[0]/2, size[1]/self.blockSize[0]/2, -size[1]/self.blockSize[1]/2, size[1]/self.blockSize[1]/2)
         self.bigmap = pygame.Surface((size[0], size[0]))
 
@@ -33,10 +33,7 @@ class DungeonModelView(object):
         for dy in range(self.screenBounds[2], self.screenBounds[3]+1):    # draw all the blocks
             for dx in range(self.screenBounds[0], self.screenBounds[1]+1):
                 block = self.model.getBlock(self.playerPos[0]+dx, self.playerPos[1]+dy)
-                #try:
-                self.bigmap.blit(block.sprite, ((dx-0.5)*self.blockSize[0]+self.dispSize[0]/2, (dy-0.5)*self.blockSize[1]+self.dispSize[1]/2))
-                #except:
-                #    print block
+                self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
         self.screen.blit(self.bigmap, (0,0))
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], 0, self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
@@ -60,7 +57,7 @@ if __name__ == '__main__':
     screenY = 720
     size = (screenX, screenY)
     screen = pygame.display.set_mode(size)
-    model = Dungeon(72,72,"piece")
+    model = Dungeon(72,72,"panel")
     
     view = DungeonModelView(model, screen, size)
     #pygame.key.set_repeat(350,35)

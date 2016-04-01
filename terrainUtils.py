@@ -15,6 +15,9 @@ class Block(object):
 	def __str__(self):
 		return "nl"
 
+	def passable(self):
+		return not self.collides
+
 
 class Floor(Block):
 	def __init__(self):
@@ -63,6 +66,9 @@ class Door(Block):
 
 	def __str__(self):
 		return "/\\"
+
+	def passable(self):
+		return True
 
 	def open(self):
 		self.color = (160,160,160, 255)
