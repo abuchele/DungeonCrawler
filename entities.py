@@ -23,7 +23,7 @@ grid = 0
 
 
 class Entity(object):
-    def __init__(self, grid, health=30, maxhealth=30, speed=1, accuracy=2, flatDamage = 2, damageRange=2, damageMod=2, vision=3, armor=10, phasing = False, effect = dict()):
+    def __init__(self, grid, health=30, maxhealth=30, speed=1, accuracy=2, flatDamage = 2, damageRange=2, damageMod=2, vision=3, armor=10, phasing = False, name = None, effect = dict()):
         # self.xpos = xpos
         # self.ypos = ypos
         self.grid = grid        
@@ -46,7 +46,9 @@ class Entity(object):
         if this.attackRoll() >= that.armor:
             damage = this.damage()
             that.health -= damage
-            return "{} hits {} for {} damage!".format(str(this),str(that),damage)
+            if this.name!="You":
+                return "{} hits {} for {} damage!".format(str(this),str(that),damage)
+            return "{} hit {} for {} damage!".format(str(this),str(that),damage)
         return "{} misses {}!".format(str(this),str(that))
     def effected(self,effect_specific):
     	self.effect[effect_specific] = True
@@ -62,7 +64,7 @@ class Entity(object):
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self,x,y, direction="U", health = 100, maxhealth = 100, inventory = dict(), name = "Mustafa the Magnificient"):
+    def __init__(self,x,y, direction="U", health = 100, maxhealth = 100, inventory = dict(), name = "You"):
         Entity.__init__(self,grid)
         self.x = x
         self.y = y
@@ -90,7 +92,7 @@ class Monster(Entity):
         Entity.__init__(self,grid)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
-
+        self.name = None
     def passiveMove(self):
         # if self.seen = True:
         direction = [(1,0),(0,1),(-1,0),(0,-1)]
