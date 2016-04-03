@@ -1,5 +1,5 @@
 import dungeonGenerationAlgorithms as dga
-from terrainUtils import Block
+from terrainUtils import Null
 
 
 
@@ -46,7 +46,7 @@ class Dungeon(object):
 		else:
 			self.grid = [[]]
 
-		self.nullBlock = Block()
+		self.nullBlock = Null()
 
 		self.last_action = "You wake up near an underground river."
 

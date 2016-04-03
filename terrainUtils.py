@@ -6,21 +6,27 @@ from pygame import image
 
 class Block(object):
 	def __init__(self):
-		self.color = (0,0,0, 255)
-		self.collides = False
-		self.transparent = False
 		self.explored = False
-		self.sprite = image.load("sprites/Null.png")
-
-	def __str__(self):
-		return "nl"
 
 	def passable(self):
 		return not self.collides
 
 
+class Null(Block):
+	def __init__(self):
+		self.explored = False
+		self.color = (0,0,0, 255)
+		self.collides = False
+		self.transparent = False
+		self.sprite = image.load("sprites/Null.png")
+
+	def __str__(self):
+		return "nl"
+
+
 class Floor(Block):
 	def __init__(self):
+		self.explored = False
 		self.color = (200,200,200, 255)
 		self.collides = False
 		self.transparent = True
@@ -32,6 +38,7 @@ class Floor(Block):
 
 class Stone(Block):
 	def __init__(self):
+		self.explored = False
 		self.color = (60,60,60, 255)
 		self.collides = True
 		self.transparent = False
@@ -43,6 +50,7 @@ class Stone(Block):
 
 class Brick(Block):
 	def __init__(self):
+		self.explored = False
 		self.color = (40,40,40, 255)
 		self.collides = True
 		self.transparent = False
@@ -54,6 +62,7 @@ class Brick(Block):
 
 class Door(Block):
 	def __init__(self, open=False):
+		self.explored = False
 		if open:
 			self.color = (160,160,160, 255)
 			self.collides = False
@@ -78,6 +87,7 @@ class Door(Block):
 
 class Lava(Block):
 	def __init__(self):
+		self.explored = False
 		self.color = (255,20,0, 255)
 		self.collides = False
 		self.transparent = True
@@ -89,6 +99,7 @@ class Lava(Block):
 
 class Bedrock(Block):
 	def __init__(self):
+		self.explored = False
 		self.color = (0,0,0, 255)
 		self.collides = True
 		self.transparent = False
@@ -100,6 +111,7 @@ class Bedrock(Block):
 
 class Obsidian(Block):
 	def __init__(self):
+		self.explored = False
 		self.color = (40,0,50, 255)
 		self.collides = True
 		self.transparent = False
@@ -111,6 +123,7 @@ class Obsidian(Block):
 
 class Glass(Block):
 	def __init__(self):
+		self.explored = False
 		self.color = (220,220,220, 100)
 		self.collides = True
 		self.transparent = True
@@ -121,6 +134,7 @@ class Glass(Block):
 
 class Metal(Block):
 	def __init__(self):
+		self.explored = False
 		self.color = (140,140,140, 255)
 		self.collides = True
 		self.transparent = False
@@ -131,6 +145,7 @@ class Metal(Block):
 
 class OneWayGlass(Block):
 	def __init__(self, direction):
+		self.explored = False
 		self.color = (220,220,220, 255)
 		self.collides = True
 		self.transparent = True
@@ -149,6 +164,7 @@ class OneWayGlass(Block):
 
 class Loot(Block):
 	def __init__(self, value, contents = None):
+		self.explored = False
 		self.color = (255,250,0, 255)
 		self.collides = True
 		self.transparent = True
