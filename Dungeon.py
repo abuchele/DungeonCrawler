@@ -1,12 +1,14 @@
 import dungeonGenerationAlgorithms as dga
 from terrainUtils import Null
-
+import entities
 
 
 
 
 class Dungeon(object):
-	def __init__(self, w, h, method):
+	def __init__(self, w, h, method, Player = entities.Player(0,0)):
+		self.w = w
+		self.h = h
 		if method == "basic":
 			self.grid = dga.generateBasic(w/8,h/8,w/16,h/16,8)
 			dga.placeTreasure(0.003, self.grid)
@@ -47,6 +49,7 @@ class Dungeon(object):
 			self.grid = [[]]
 
 		self.nullBlock = Null()
+		self.Player = entities.Player(self.w/2,self.h/2)
 
 		self.last_action = "You wake up near an underground river."
 
