@@ -18,10 +18,11 @@ class DungeonModelView(object):
         self.blockSize = (50,48,15)
         self.playerPos = (36,36)
         self.screenBounds = (-size[1]/self.blockSize[0]/2, size[1]/self.blockSize[0]/2+1, -size[1]/self.blockSize[1]/2, size[1]/self.blockSize[1]/2+1)
-        self.bigmap = pygame.Surface((size[0], size[0]))
-        self.minimap = pygame.Surface((len(dungeon.grid[0]), len(dungeon.grid)))
+        self.bigmap = pygame.Surface((size[0], size[0]))    # the actual display window
+        self.minimap = pygame.Surface((len(dungeon.grid[0]), len(dungeon.grid)))    # the 1 pixel/block map
         self.font = pygame.font.SysFont("Times New Roman", 30, bold=True)
-        self.shadowSprite = pygame.image.load("sprites/Shadow.png")
+        self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
+        self.playerSprite = pygame.image.load("sprites/Player.png") # the player sprite
 
         self.losLst = []    # the list that will determine line of sight
         for r in range(1,max(self.screenBounds[1],self.screenBounds[3])+1):
@@ -52,6 +53,8 @@ class DungeonModelView(object):
                 elif block.explored:
                     self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                     self.bigmap.blit(self.shadowSprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
+
+        self.bigmap.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))
 
         self.screen.blit(self.bigmap, (0,0))
 
