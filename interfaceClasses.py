@@ -21,17 +21,21 @@ class PyGameKeyboardController(object):
                 block_to_interact_with = self.model.grid[self.model.player.y+blockcoords[1]][self.model.player.x+blockcoords[0]] #grid is nested lists, (x,y) is grid[y][x]
                 block_to_interact_with.interact()
 
-            if event.key == pygame.K_LEFT and not self.model.grid[self.model.player.y][self.model.player.x-1].collides:
-                self.model.player.x -= 1
+            if event.key == pygame.K_LEFT:
+                if not self.model.grid[self.model.player.y][self.model.player.x-1].collides:
+                    self.model.player.x -= 1
                 self.model.player.direction = "L"
-            elif event.key == pygame.K_RIGHT and not self.model.grid[self.model.player.y][self.model.player.x+1].collides:
-                self.model.player.x += 1
+            elif event.key == pygame.K_RIGHT:
+                if not self.model.grid[self.model.player.y][self.model.player.x+1].collides:
+                    self.model.player.x += 1
                 self.model.player.direction = "R"
-            elif event.key == pygame.K_UP and not self.model.grid[self.model.player.y-1][self.model.player.x].collides:
-                self.model.player.y -=1
+            elif event.key == pygame.K_UP:
+                if not self.model.grid[self.model.player.y-1][self.model.player.x].collides:
+                    self.model.player.y -=1
                 self.model.player.direction = "U"
-            elif event.key == pygame.K_DOWN and not self.model.grid[self.model.player.y+1][self.model.player.x].collides:
-                self.model.player.y +=1
+            elif event.key == pygame.K_DOWN:
+                if not self.model.grid[self.model.player.y+1][self.model.player.x].collides:
+                    self.model.player.y +=1
                 self.model.player.direction = "D"
 
             return True

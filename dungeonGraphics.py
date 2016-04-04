@@ -49,6 +49,7 @@ class DungeonModelView(object):
                 if self.visible[(dx,dy)]:
                     self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                     self.minimap.set_at((self.model.player.x+dx, self.model.player.y+dy), block.color)
+                    block.explored = True
                 elif block.explored:
                     self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                     self.bigmap.blit(self.shadowSprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
