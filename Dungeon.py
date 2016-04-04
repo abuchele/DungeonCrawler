@@ -6,7 +6,7 @@ import entities
 
 
 class Dungeon(object):
-	def __init__(self, w, h, method, Player = entities.Player(0,0)):
+	def __init__(self, w, h, method, player = entities.Player(0,0)):
 		self.w = w
 		self.h = h
 		if method == "basic":
@@ -37,7 +37,7 @@ class Dungeon(object):
 			self.grid = dga.generateWhole(w*2,h*2, w*h/10, 3,4,0.33,3, 12,300,2,False)
 
 		self.nullBlock = Null()
-		self.Player = entities.Player(self.w/2,self.h/2)
+		self.player = entities.Player(self.w/2,self.h/2)
 
 		self.last_action = "You wake up near an underground river."
 

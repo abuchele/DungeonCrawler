@@ -16,22 +16,14 @@ if __name__ == '__main__':
     model = Dungeon(72,72,"piece")
     
     view = DungeonModelView(model, screen, size)
-    #pygame.key.set_repeat(350,35)
-    # controller = PyGameMouseController(model)
     controller = PyGameKeyboardController(model) 
     running = True
     view.display()
     while running:
         time.sleep(.25)
+
         events = pygame.event.get()
-        if len(events) == 0:
-            pass
-        # if event.type == QUIT:
-        #         running == False
-        #         pygame.quit()
-        
-        else:
-            controller.handle_event(events[len(events)-1])
-            
-        #     controller.handle_event(event)
+        if len(events) > 0:
+            running = controller.handle_event(events[-1])
+
         view.display()

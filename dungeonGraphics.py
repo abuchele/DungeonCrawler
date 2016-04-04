@@ -41,14 +41,14 @@ class DungeonModelView(object):
 
     def display(self):
         for x1,y1,x2,y2 in self.losLst:
-            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.Player.x+x2, self.model.Player.y+y2).transparent
+            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.player.x+x2, self.model.player.y+y2).transparent
 
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
-                block = self.model.getBlock(self.model.Player.x+dx, self.model.Player.y+dy)
+                block = self.model.getBlock(self.model.player.x+dx, self.model.player.y+dy)
                 if self.visible[(dx,dy)]:
                     self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-                    self.minimap.set_at((self.model.Player.x+dx, self.model.Player.y+dy), block.color)
+                    self.minimap.set_at((self.model.player.x+dx, self.model.player.y+dy), block.color)
                 elif block.explored:
                     self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                     self.bigmap.blit(self.shadowSprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
