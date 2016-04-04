@@ -7,9 +7,13 @@ from pygame import image
 class Block(object):
 	def __init__(self):
 		self.explored = False
+		self.interaction = None
 
 	def passable(self):
 		return not self.collides
+
+	def interact(self):
+		print self.interaction
 
 
 class Null(Block):
@@ -72,6 +76,7 @@ class Door(Block):
 			self.collides = True
 			self.sprite = image.load("sprites/DoorClosed.png")
 		self.transparent = False
+		self.interaction = "The door is locked."
 
 	def __str__(self):
 		return "/\\"
