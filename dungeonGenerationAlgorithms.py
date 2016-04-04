@@ -778,6 +778,7 @@ def generateWhole(w, h, n1, deathLim, birthLim, prob, t, s, n2, doors, mazeAlg):
 	sector2 = generatePanel(w,h)
 	sector3 = generateCells(w,h,deathLim,birthLim,prob,t)
 	sector4 = generateMazes(s,n2,doors,mazeAlg)
+	
 
 
 def dist(dest, strt, grid):	# A* search

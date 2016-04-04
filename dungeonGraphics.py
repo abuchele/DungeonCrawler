@@ -1,7 +1,6 @@
 import pygame
 import time
 import math
-from pygame.locals import QUIT, KEYDOWN, MOUSEMOTION
 
 from Dungeon import Dungeon
 from terrainUtils import *
@@ -62,91 +61,19 @@ class DungeonModelView(object):
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], 0, self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
 
-        self.screen.blit(pygame.transform.scale(self.minimap, (size[0]-size[1],size[0]-size[1])), (self.size[1],0))    # draw the minimap
+        self.screen.blit(pygame.transform.scale(self.minimap, (self.size[0]-self.size[1],self.size[0]-self.size[1])), (self.size[1],0))    # draw the minimap
         
         actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
         self.screen.blit(actionLog, (0, self.size[1]-34))
 
         hp = 3*100
-        pygame.draw.rect(self.screen, pygame.Color("red"), (size[0]-90, size[1]-30-hp, 60, hp)) # draw the hp bar
+        pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
 
         pygame.display.update()
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)
     return (x, y, int(math.floor(0.5+x-x/math.hypot(x,y))), int(math.floor(0.5+y-y/math.hypot(x,y))))
-
-
-class PyGameKeyboardController(object):
-    def __init__(self, model):
-        self.model = model
-
-    def handle_event(self, event):
-        # self.model.Player.history = (self.model.Player.xpos,self.model.Player.ypos, self.model.Player.history[0], self.model.Player.history[1])
-        if event.type != KEYDOWN:
-            return
-   #    while running:
-   #        keys = pygame.key.get_pressed()
-   #        if keys[pygame.K_LEFT] and self.model.Player.xpos > 1:
-   #            self.model.Player.xpos -= 1
-            # if keys[pygame.K_RIGHT] and self.model.Player.xpos < self.model.x - 1:
-            #   self.model.Player.xpos += 1
-            # if keys[pygame.K_UP] and self.model.Player.ypos > 1:
-            #   self.model.Player.ypos -=1
-            # if keys[pygame.K_DOWN] and self.model.Player.ypos < self.model.y - 1:
-            #   self.model.Player.ypos +=1
-
-        if event.key == pygame.K_LEFT and not self.model.grid[self.model.Player.y][self.model.Player.x-1].collides:
-            # if self.model.Player.direction == "L":
-            self.model.Player.x -= 1
-            self.model.Player.direction = "L"
-        elif event.key == pygame.K_RIGHT and not self.model.grid[self.model.Player.y][self.model.Player.x+1].collides:
-            # if self.model.Player.direction == "R":
-            self.model.Player.x += 1
-            self.model.Player.direction = "R"
-        elif event.key == pygame.K_UP and not self.model.grid[self.model.Player.y-1][self.model.Player.x].collides:
-            # if self.model.Player.direction == "U":            
-            self.model.Player.y -=1
-            self.model.Player.direction = "U"
-        elif event.key == pygame.K_DOWN and not self.model.grid[self.model.Player.y+1][self.model.Player.x].collides:
-            # if self.model.Player.direction == "D":
-            self.model.Player.y +=1
-            self.model.Player.direction = "D"
-
-
-
-        
-        # if event.key == pygame.K_LEFT and not self.model.grid[self.model.Player.x-1,self.model.Player.y].collides:
-        #     # if self.model.Player.direction == "L":
-        #     self.model.Player.x -= 1
-        #     self.model.Player.direction = "L"
-        # elif event.key == pygame.K_RIGHT and not self.model.grid[self.model.Player.x+1,self.model.Player.y].collides:
-        #     # if self.model.Player.direction == "R":
-        #     self.model.Player.x += 1
-        #     self.model.Player.direction = "R"
-        # elif event.key == pygame.K_UP and not self.model.grid[self.model.Player.x,self.model.Player.y-1].collides:
-        #     # if self.model.Player.direction == "U":            
-        #     self.model.Player.y -=1
-        #     self.model.Player.direction = "U"
-        # elif event.key == pygame.K_DOWN and not self.model.grid[self.model.Player.x,self.model.Player.y+1].collides:
-        #     # if self.model.Player.direction == "D":
-        #     self.model.Player.y +=1
-        #     self.model.Player.direction = "D"
-
-
-        # if self.model.Player.xpos == self.model.KeyX and self.model.Player.ypos == self.model.KeyY:
-        #     self.model.Player.hasKey = True
-        # if self.model.Player.hasKey == True:
-        #     self.model.Grid[self.model.ChestX,self.model.ChestY] = 0
-        # if (self.model.Player.xpos,self.model.Player.ypos)==(self.model.ChestX,self.model.ChestY):
-        #     self.model.won = True
-        # self.model.MonsterPack.move(self.model.MonsterPack.grid)
-        # for coord in self.model.MonsterPack.coordinates:
-        #     # print coord
-        #     if coord == (self.model.Player.xpos,self.model.Player.ypos):
-        #         self.model.eaten = True
-
-
 
 
 
@@ -159,22 +86,9 @@ if __name__ == '__main__':
     model = Dungeon(72,72,"piece")
     
     view = DungeonModelView(model, screen, size)
-    #pygame.key.set_repeat(350,35)
-    # controller = PyGameMouseController(model)
-    controller = PyGameKeyboardController(model) 
-    running = True
     view.display()
-    while running:
-        time.sleep(.25)
-        events = pygame.event.get()
-        if len(events) == 0:
-            pass
-        # if event.type == QUIT:
-        #         running == False
-        #         pygame.quit()
-        
-        else:
-            controller.handle_event(events[len(events)-1])
-            
-        #     controller.handle_event(event)
-        view.display()
+    while True:
+        for e in pygame.event.get():
+            if e.type == QUIT:
+                pygame.quit()
+                break

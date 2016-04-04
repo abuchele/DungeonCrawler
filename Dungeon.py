@@ -78,6 +78,7 @@ class Dungeon(object):
 		return len(self.grid)
 
 
+
 if __name__ == "__main__":
 	import doctest
 	doctest.testmod()
