@@ -53,6 +53,8 @@ class DungeonModelView(object):
                 elif block.explored:
                     self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                     self.bigmap.blit(self.shadowSprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
+                else:
+                    self.bigmap.blit(self.model.nullBlock.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
 
         self.bigmap.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))
 

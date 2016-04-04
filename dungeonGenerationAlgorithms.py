@@ -64,6 +64,8 @@ def generateBasic(w,h,x0,y0,s):
 		for y in range(1,s*h):
 			if not fineGrid[y][x].collides and rng.random() < .004:	# and some tiny lava lakes
 				splatterLava(x,y,fineGrid)
+
+	placeTreasure(0.003, fineGrid)
 	return fineGrid
 
 
@@ -160,6 +162,8 @@ def generateRound(w, h, p):
 		for y in range(1,h):
 			if not grid[y][x].collides and rng.random() < .01:	# and some tiny lava lakes
 				splatterLava(x,y,grid)
+
+	placeTreasure(0.007, grid)
 	return grid
 
 
@@ -284,6 +288,8 @@ def generateHalls(w, h, rw, rh, n):
 			for dx in range(1, room.w):
 				for dy in range(1, room.h):
 					grid[room.y-minY+dy][room.x-minX+dx] = Floor()
+
+	placeTreasure(0.004, grid)
 	return grid
 
 
@@ -382,6 +388,8 @@ def generateFastH(w, h, rw, rh, n):
 			for dx in range(1, room.w):
 				for dy in range(1, room.h):
 					grid[room.y+dy-minY][room.x+dx-minX] = Floor()
+
+	placeTreasure(0.007, grid)
 	return grid
 
 
@@ -456,6 +464,8 @@ def generatePiece(w, h, n):
 					y = 0
 			y = y+1
 		x = x+1
+
+	placeTreasure(0.007, grid)
 	return grid
 
 
@@ -536,6 +546,8 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 					y = 0
 			y = y+1
 		x = x+1
+
+	placeTreasure(0.005, grid)
 	return grid
 
 
@@ -588,6 +600,8 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 		for y in range(1,h):
 			if not grid[y][x].collides and rng.random() < .01:	# and some tiny lava lakes
 				splatterLava(x,y,grid)
+
+	placeTreasure(0.004, grid)
 	return grid
 
 
@@ -618,6 +632,8 @@ def generateRWalk(w, h, n, t):
 			p = rng.choice(adj)
 			x = x+p[0]
 			y = y+p[1]
+
+	placeTreasure(0.007, grid)
 	return grid
 
 
@@ -656,6 +672,8 @@ def generateIWalk(w, h, n, t):
 					break
 				else:
 					r = r-probs[i]/sum(probs)
+
+	placeTreasure(0.007, grid)
 	return grid
 
 
@@ -735,7 +753,31 @@ def generateRooms(w, h, n, c):
 				for i in range(regionN):	# knock out a door and unite the two regions
 					if regions[i] == r1:
 						regions[i] = r2
+
+	placeTreasure(0.002, grid)
 	return grid
+
+
+def generateWhole(w, h, n1, deathLim, birthLim, prob, t, s, n2, doors, mazeAlg):
+	"""
+	Generates a huge dungeon incorporating the piece, panel, cellular, and maze algorithms
+	w, h = the dimensions of each section
+
+	n1 = the number of rooms to place
+
+	deathLim, birthLim = the bounds that control the cellular automata process
+	prob = the inital probability of placing obsidian
+	t = the number of iterations for the cells algorithm
+
+	s = the maximum room size
+	n2 = the approximate number of rooms
+	doors = a number that makes Hades's palace more interconnected
+	mazeAlg = True for BFS and False for DFS
+	"""
+	sector1 = generatePiece(w,h,n1)
+	sector2 = generatePanel(w,h)
+	sector3 = generateCells(w,h,deathLim,birthLim,prob,t)
+	sector4 = generateMazes(s,n2,doors,mazeAlg)
 
 
 def dist(dest, strt, grid):	# A* search
