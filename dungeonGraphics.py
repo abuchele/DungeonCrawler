@@ -97,5 +97,5 @@ if __name__ == '__main__':
                 running == False
                 pygame.quit()
             #controller.handle_event(event)
-        view.display()
-        time.sleep(.01)
+    while True:
+        pass

@@ -86,9 +86,9 @@ class Dungeon(object):
 	def getHeight(self):
 		return len(self.grid)
 
-a = Dungeon(50,50,"fastH")
-print a.grid
 
 if __name__ == "__main__":
 	import doctest
 	doctest.testmod()
+	a = Dungeon(50,50,"fastH")
+	print a.grid
