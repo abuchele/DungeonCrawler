@@ -92,6 +92,9 @@ class Door(Block):
 		self.collides = False
 		self.sprite = image.load("sprites/DoorOpen.png")
 
+	def interact(self):
+		self.open()
+
 
 class Lava(Block):
 	def __init__(self):

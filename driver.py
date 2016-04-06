@@ -13,7 +13,7 @@ if __name__ == '__main__':
     screenY = 720
     size = (screenX, screenY)
     screen = pygame.display.set_mode(size)
-    model = Dungeon(72,72,"cells")
+    model = Dungeon(72,72,"whole")
     
     view = DungeonModelView(model, screen, size)
     controller = PyGameKeyboardController(model) 
