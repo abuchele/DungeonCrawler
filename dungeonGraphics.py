@@ -59,10 +59,8 @@ class DungeonModelView(object):
                     self.screen.blit(self.shadows[block.sprite], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                 else:
                     self.screen.blit(self.sprites[0], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-
-        self.screen.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))
-
-        #self.screen.blit(self.bigmap, (0,0))
+            if dy == 0:
+                self.screen.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], 0, self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
