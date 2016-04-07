@@ -16,7 +16,7 @@ if __name__ == '__main__':
     model = Dungeon(72,72,"piece")
     
     view = DungeonModelView(model, screen, size)
-    #pygame.key.set_repeat(350,35)
+    pygame.key.set_repeat(150,35)
     # controller = PyGameMouseController(model)
     controller = PyGameKeyboardController(model) 
     running = True
