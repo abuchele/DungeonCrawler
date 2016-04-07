@@ -13,7 +13,7 @@ if __name__ == '__main__':
     screenY = 720
     size = (screenX, screenY)
     screen = pygame.display.set_mode(size)
-    model = Dungeon(72,72,"piece")
+    model = Dungeon(2*72,2*72,"whole")
     
     view = DungeonModelView(model, screen, size)
     pygame.key.set_repeat(150,35)
@@ -23,15 +23,9 @@ if __name__ == '__main__':
     view.display()
     while running:
         time.sleep(.25)
+
         events = pygame.event.get()
-        if len(events) == 0:
-            pass
-        # if event.type == QUIT:
-        #         running == False
-        #         pygame.quit()
-        
-        else:
-            controller.handle_event(events[len(events)-1])
-            
-        #     controller.handle_event(event)
+        if len(events) > 0:
+            running = controller.handle_event(events[-1])
+
         view.display()

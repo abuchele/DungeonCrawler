@@ -13,9 +13,9 @@ class DungeonModelView(object):
         self.screen = screen
         self.size = size
         self.dispSize = (size[1],size[1])
-        tht = 0.3
+        self.mimpSz = (size[0]-size[1], size[0]-size[1])            # minimap size
+        self.rempSz = (len(dungeon.grid[0])/2, len(dungeon.grid)/2) # real map size (half the size of the whole dungeon)
         self.blockSize = (50,48,15)
-        # self.playerPos = [36,36]
         self.screenBounds = (-size[1]/self.blockSize[0]/2, size[1]/self.blockSize[0]/2+1, -size[1]/self.blockSize[1]/2, size[1]/self.blockSize[1]/2+1)
         self.bigmap = pygame.Surface((size[0], size[0]))    # the actual display window
         self.minimap = pygame.Surface((len(dungeon.grid[0]), len(dungeon.grid)))    # the 1 pixel/block map
@@ -24,7 +24,7 @@ class DungeonModelView(object):
         self.playerSprite = pygame.image.load("sprites/Player.png") # the player sprite
 
         self.losLst = []    # the list that will determine line of sight
-        for r in range(1,max(self.screenBounds[1],self.screenBounds[3])+1):
+        for r in range(2,max(self.screenBounds[1],self.screenBounds[3])+1):
             for t in range(-r,r):
                 if r < self.screenBounds[1] and t >= self.screenBounds[2] and t < self.screenBounds[3]:
                     self.losLst.append(drawLOS(r,t))   # each element is a tuple with x,y of the point in question, and x,y of the point it is pointing to
@@ -36,19 +36,22 @@ class DungeonModelView(object):
                     self.losLst.append(drawLOS(t,-r))
 
         self.visible = dict()
-        self.visible[(0,0)] = True  # keeps track fo which blocks are visible
+        for x in [-1,0,1]:
+            for y in [-1,0,1]:
+                self.visible[(x,y)] = True  # keeps track fo which blocks are visible
         
 
     def display(self):
         for x1,y1,x2,y2 in self.losLst:
-            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.Player.x+x2, self.model.Player.y+y2).transparent
+            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.player.x+x2, self.model.player.y+y2).transparent
 
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
-                block = self.model.getBlock(self.model.Player.x+dx, self.model.Player.y+dy)
+                block = self.model.getBlock(self.model.player.x+dx, self.model.player.y+dy)
                 if self.visible[(dx,dy)]:
                     self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-                    self.minimap.set_at((self.model.Player.x+dx, self.model.Player.y+dy), block.color)
+                    self.minimap.set_at((self.model.player.x+dx, self.model.player.y+dy), block.color)
+                    block.explored = True
                 elif block.explored:
                     self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                     self.bigmap.blit(self.shadowSprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
@@ -60,8 +63,8 @@ class DungeonModelView(object):
         self.screen.blit(self.bigmap, (0,0))
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], 0, self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
-
-        self.screen.blit(pygame.transform.scale(self.minimap, (self.size[0]-self.size[1],self.size[0]-self.size[1])), (self.size[1],0))    # draw the minimap
+        self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
+            area = ((self.model.player.x/self.rempSz[0]*self.mimpSz[0], self.model.player.y/self.rempSz[1]*self.mimpSz[1]), self.mimpSz))    # draw the minimap
         
         actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
         self.screen.blit(actionLog, (0, self.size[1]-34))
