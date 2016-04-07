@@ -1,9 +1,11 @@
 import time
 import pygame
+import pickle
 
 from dungeonGraphics import DungeonModelView
 from interfaceClasses import PyGameKeyboardController
 from Dungeon import Dungeon
+import pickle
 
 
 
@@ -13,7 +15,8 @@ if __name__ == '__main__':
     screenY = 720
     size = (screenX, screenY)
     screen = pygame.display.set_mode(size)
-    model = Dungeon(2*72,2*72,"whole")
+    #model = Dungeon(2*72,2*72, method="whole")
+    model = pickle.load(open("saves/pregeneratedDungeon.txt",'r'))
     
     view = DungeonModelView(model, screen, size)
     controller = PyGameKeyboardController(model) 

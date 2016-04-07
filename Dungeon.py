@@ -6,11 +6,15 @@ import entities
 
 
 class Dungeon(object):
-	def __init__(self, w, h, method = "whole", player = entities.Player(0,0)):
+	def __init__(self, w, h, method = "whole", player = entities.Player(0,0), filename = None):
 		self.w = w
 		self.h = h
 
-		thing = dga.generate(w,h,method)
+		if filename != None:
+			thing = dga.read(filename)
+		else:
+			thing = dga.generate(w,h,method)
+
 		self.grid = thing[0]
 
 		self.nullBlock = Null()
@@ -20,7 +24,7 @@ class Dungeon(object):
 
 
 	def __str__(self):
-		output = ""
+		output = "{:03d} {:03d}\n".format(self.player.x,self.player.y)
 		for row in self.grid:
 			for blk in row:
 				output = output+str(blk)
