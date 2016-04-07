@@ -30,7 +30,7 @@ def generate(w,h,method):
 	elif method == "piece":
 		return generatePiece(w,h, w*h/10)
 	elif method == "maze1":
-		return generateMazes(w,h, 12, 300, 2, False)
+		return generateMazes(w,h, 12, 300, 3, False)
 	elif method == "maze2":
 		return generateMazes(w,h, 12, 80, 3, True)
 	elif method == "cells":
@@ -524,15 +524,18 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 		for x in range(w+1):
 			row.append(Stone())
 		grid.append(row)
+	for y in range(h/2-3, h/2+4):
+		for x in range(w/2-3, w/2+4):
+			grid[y][x] = Floor()
+			grid[y][x].region = 0
 
-	regionN = 0	# helps keep track of which tiles are connected to others
+	regionN = 1	# helps keep track of which tiles are connected to others
 	for i in range(n):
 		rw = 1+2*rng.randint(1,sr)
-		rh = 1+2*rng.randint(1,sr)
+		rh = 1+2*rng.randint(1,sr)	# generate a bunch of random rooms
 		x0 = 1+2*rng.randint(0,wr-(rw-1)/2)
 		y0 = 1+2*rng.randint(0,hr-(rh-1)/2)
 		if isClear(x0, y0, x0+rw-1, y0+rh-1, grid):
-			room = []
 			for x in range(x0,x0+rw):
 				for y in range(y0,y0+rh):
 					grid[y][x] = Floor()
@@ -562,7 +565,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 		for iterationVariable in range(doors):
 			if len(importantWalls) > 0:
 				x,y,r1,r2 = rng.choice(importantWalls)
-				grid[y][x] = Door(True)
+				grid[y][x] = Door()
 				for i in range(regionN):	# knock out a door and unite the two regions
 					if regions[i] == r1:
 						regions[i] = r2
@@ -629,15 +632,31 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 					newGrid[y][x] = Floor()
 		grid = newGrid
 
+	regions = []
+	maxRSize = 0
+	maxRIndx = -1
+	for x in range(1,w):
+		for y in range(1,h):
+			if not grid[y][x].collides and not hasattr(grid[y][x], 'region'):	# if this in an unmarked floor
+				region = findRegion(x,y,grid)									# get all blocks connected to it
+				if len(region) > maxRSize:
+					maxRSize = len(region)
+					maxRIndx = len(regions)
+				regions.append(region)											# and save them as a region
+	for i in range(0,len(regions)):
+		if i != maxRIndx:
+			for x,y in regions[i]:
+				grid[y][x] = Obsidian()		# fill in all but the biggest region
+
 	for d in [-1,1]:
 		flowLava(w/2, h/2, grid, 2*(w+h), d)	# creates lava rivers
 
 	for x in range(1,w):
 		for y in range(1,h):
-			if not grid[y][x].collides and rng.random() < .01:	# and some tiny lava lakes
+			if not grid[y][x].collides and rng.random() < .015:	# and some tiny lava lakes
 				splatterLava(x,y,grid)
 
-	placeTreasure(0.004, grid)
+	placeTreasure(0.005, grid)
 	return [grid, (w/2,h/2)]
 
 
@@ -930,6 +949,20 @@ def harmonicSum(lst):
 	return 1.0/sum
 
 
+def findRegion(xs, ys, grid):	# gets all the open blocks connected to this one
+	region = []
+	queue = [(xs,ys)]
+	while len(queue) > 0:
+		x0, y0 = queue.pop()
+		grid[y0][x0].region = True
+		region.append((x0,y0))
+
+		for x,y in [(x0+p[0], y0+p[1]) for p in [(0,1),(0,-1),(1,0),(-1,0)]]:
+			if not grid[y][x].collides and not hasattr(grid[y][x],"region"):
+				queue.append((x,y))
+	return region
+
+
 def randomQueueFlood(x0, y0, grid, region=0):	# random recursive flood algorithm that creates mazes
 	queue = [(x0,y0,x0,y0)]	# the list of nodes that need to be filled as well as where they will be filled from
 	while len(queue) > 0:
@@ -1112,7 +1145,7 @@ def makeCircleRoom(x0,y0,d,r,grid):
 
 
 def makeTreasure(x0,y0,grid):
-	grid[y0][x0] = Loot()
+	grid[y0][x0] = Loot(5)
 
 
 def makeLHall(room1, room2, grid, minX, minY):
@@ -1187,22 +1220,26 @@ def erectPanel(x,y,grid):
 		for dx in [-1, 0, 1]:
 			if r < 0.5:
 				grid[y][x+dx] = Metal()
-			elif r < 0.75:
+			elif r < 0.7:
 				grid[y][x+dx] = Glass()
-			elif r < 0.85:
-				grid[y][x+dx] = OneWayGlass(1)
-			elif r < 0.95:
-				grid[y][x+dx] = OneWayGlass(3)	# there is a small chance there will be nothing there
+			elif r < 0.8:
+				grid[y][x+dx] = OneWayGlass(0)
+			elif r < 0.9:
+				grid[y][x+dx] = OneWayGlass(2)	# there is a small chance there will be nothing there
+			elif r < 0.95 and dx == 0:
+				grid[y][x+dx] = Loot(5)
 	else:	# vertical
 		for dy in [-1, 0, 1]:
 			if r < 0.5:
 				grid[y+dy][x] = Metal()
-			elif r < 0.75:
+			elif r < 0.7:
 				grid[y+dy][x] = Glass()
-			elif r < 0.85:
-				grid[y+dy][x] = OneWayGlass(0)
-			elif r < 0.95:
-				grid[y+dy][x] = OneWayGlass(2)
+			elif r < 0.8:
+				grid[y+dy][x] = OneWayGlass(1)
+			elif r < 0.9:
+				grid[y+dy][x] = OneWayGlass(3)
+			elif r < 0.95 and dy == 0:
+				grid[y+dy][x] = Loot(5)
 
 
 def dig(x,y, grid, d=7, bearing=-1):	# starts a tunnel here

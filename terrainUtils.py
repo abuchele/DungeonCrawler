@@ -18,7 +18,7 @@ class Block(object):
 class Null(Block):
 	def __init__(self):
 		Block.__init__(self)
-		self.color = (0,0,0, 255)
+		self.color = (0,0,0)
 		self.collides = False
 		self.transparent = False
 		self.descriptions = ["There's nothing there."]
@@ -31,7 +31,7 @@ class Null(Block):
 class Floor(Block):
 	def __init__(self):
 		Block.__init__(self)
-		self.color = (200,200,200, 255)
+		self.color = (200,200,200)
 		self.collides = False
 		self.transparent = True
 		self.descriptions = ["An empty space.","Nothing to interact with here.","I wonder why there's tile down here."]
@@ -44,7 +44,7 @@ class Floor(Block):
 class Stone(Block):
 	def __init__(self):
 		Block.__init__(self)
-		self.color = (60,60,60, 255)
+		self.color = (80,80,80)
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["It looks like some kind of sandstone... or maybe ignimbrite?","You lick the rock. It tastes dirty.","The walls here are surprisingly smooth."]
@@ -57,7 +57,7 @@ class Stone(Block):
 class Brick(Block):
 	def __init__(self):
 		Block.__init__(self)
-		self.color = (40,40,40, 255)
+		self.color = (70,70,70)
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["These stone bricks are huge!","Clearly man-made; who built this, and why?","The bricks are cold."]
@@ -71,11 +71,11 @@ class Door(Block):
 	def __init__(self, open=False):
 		Block.__init__(self)
 		if open:
-			self.color = (160,160,160, 255)
+			self.color = (160,160,160)
 			self.collides = False
 			self.sprite = image.load("sprites/DoorOpen.png")
 		else:
-			self.color = (100,100,100, 255)
+			self.color = (120,120,120)
 			self.collides = True
 			self.sprite = image.load("sprites/DoorClosed.png")
 		self.transparent = False
@@ -88,7 +88,7 @@ class Door(Block):
 		return True
 
 	def open(self):
-		self.color = (160,160,160, 255)
+		self.color = (160,160,160)
 		self.collides = False
 		self.sprite = image.load("sprites/DoorOpen.png")
 
@@ -99,7 +99,7 @@ class Door(Block):
 class Lava(Block):
 	def __init__(self):
 		Block.__init__(self)
-		self.color = (255,20,0, 255)
+		self.color = (255,20,0)
 		self.collides = False
 		self.transparent = True
 		self.descriptions = ["You can feel the heat from here.","I'd better not fall into that.","Magma... I must be deep!"]
@@ -112,7 +112,7 @@ class Lava(Block):
 class Bedrock(Block):
 	def __init__(self):
 		Block.__init__(self)
-		self.color = (0,0,0, 255)
+		self.color = (0,0,0)
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["This rock is corse and tough.","You bite the rock. Mm, crunchy!","If you look closely, you can see minerals sparkling in the stone wall."]
@@ -125,7 +125,7 @@ class Bedrock(Block):
 class Obsidian(Block):
 	def __init__(self):
 		Block.__init__(self)
-		self.color = (80,10,100, 255)
+		self.color = (80,10,100)
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["The lava rock here is shiny and purple.","The walls are pourus and sharp.","This rooms seems to be a drained lava chamber."]
@@ -138,7 +138,7 @@ class Obsidian(Block):
 class Glass(Block):
 	def __init__(self):
 		Block.__init__(self)
-		self.color = (220,220,220, 100)
+		self.color = (240,240,240)
 		self.collides = True
 		self.transparent = True
 		self.descriptions = ["I wonder how they got glass down here.","The glass is surprisingly clean.","You breathe on the glass and draw a smiley face."]
@@ -150,7 +150,7 @@ class Glass(Block):
 class Metal(Block):
 	def __init__(self):
 		Block.__init__(self)
-		self.color = (140,140,140, 255)
+		self.color = (140,140,140)
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["The walls here are metal and hollow.","You knock on the wall, and hear a resounding clang.","There are no bolts here; the metal is fused together."]
@@ -162,7 +162,7 @@ class Metal(Block):
 class OneWayGlass(Block):
 	def __init__(self, direction):
 		Block.__init__(self)
-		self.color = (220,220,220, 255)
+		self.color = (240,240,240)
 		self.collides = True
 		self.transparent = True
 		self.direction = direction
@@ -182,7 +182,7 @@ class OneWayGlass(Block):
 class Loot(Block):
 	def __init__(self, value, contents = None):
 		Block.__init__(self)
-		self.color = (255,250,0, 255)
+		self.color = (255,250,0)
 		self.collides = True
 		self.transparent = True
 		self.raised = True
