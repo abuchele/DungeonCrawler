@@ -49,18 +49,18 @@ class DungeonModelView(object):
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 block = self.model.getBlock(self.model.player.x+dx, self.model.player.y+dy)
                 if self.visible[(dx,dy)]:
-                    self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
+                    self.screen.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                     self.minimap.set_at((self.model.player.x+dx, self.model.player.y+dy), block.color)
                     block.explored = True
                 elif block.explored:
-                    self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-                    self.bigmap.blit(self.shadowSprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
+                    self.screen.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
+                    self.screen.blit(self.shadowSprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                 else:
-                    self.bigmap.blit(self.model.nullBlock.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
+                    self.screen.blit(self.model.nullBlock.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
 
-        self.bigmap.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))
+        self.screen.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))
 
-        self.screen.blit(self.bigmap, (0,0))
+        #self.screen.blit(self.bigmap, (0,0))
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], 0, self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
