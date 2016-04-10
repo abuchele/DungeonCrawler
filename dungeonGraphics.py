@@ -23,6 +23,9 @@ class DungeonModelView(object):
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
         self.playerSprite = pygame.image.load("sprites/Player.png") # the player sprite
 
+        self.sprites = loadSprites()
+        self.shadows = loadShadowSprites()
+
         self.losLst = []    # the list that will determine line of sight
         for r in range(2,max(self.screenBounds[1],self.screenBounds[3])+1):
             for t in range(-r,r):
@@ -49,18 +52,15 @@ class DungeonModelView(object):
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 block = self.model.getBlock(self.model.player.x+dx, self.model.player.y+dy)
                 if self.visible[(dx,dy)]:
-                    self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
+                    self.screen.blit(self.sprites[block.sprite], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                     self.minimap.set_at((self.model.player.x+dx, self.model.player.y+dy), block.color)
                     block.explored = True
                 elif block.explored:
-                    self.bigmap.blit(block.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-                    self.bigmap.blit(self.shadowSprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
+                    self.screen.blit(self.shadows[block.sprite], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
                 else:
-                    self.bigmap.blit(self.model.nullBlock.sprite, (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-
-        self.bigmap.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))
-
-        self.screen.blit(self.bigmap, (0,0))
+                    self.screen.blit(self.sprites[0], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
+            if dy == 0:
+                self.screen.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], 0, self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
@@ -73,6 +73,14 @@ class DungeonModelView(object):
         pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
 
         pygame.display.update()
+
+
+def loadSprites():
+    return [pygame.image.load("sprites/{}.png".format(name)) for name in ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot"]]
+
+
+def loadShadowSprites():
+    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot"]]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)

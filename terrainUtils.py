@@ -1,6 +1,5 @@
 import random as rng
 import math
-from pygame import image
 
 
 
@@ -22,7 +21,7 @@ class Null(Block):
 		self.collides = False
 		self.transparent = False
 		self.descriptions = ["There's nothing there."]
-		self.sprite = image.load("sprites/Null.png")
+		self.sprite = 0
 
 	def __str__(self):
 		return "nl"
@@ -41,7 +40,7 @@ class Floor(Block):
 		self.collides = False
 		self.transparent = True
 		self.descriptions = ["An empty space.","Nothing to interact with here.","I wonder why there's tile down here."]
-		self.sprite = image.load("sprites/Floor.png")
+		self.sprite = 1
 
 	def __str__(self):
 		return "  "
@@ -54,7 +53,7 @@ class Stone(Block):
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["It looks like some kind of sandstone... or maybe ignimbrite?","You lick the rock. It tastes dirty.","The walls here are surprisingly smooth."]
-		self.sprite = image.load("sprites/Stone.png")
+		self.sprite = 2
 
 	def __str__(self):
 		return "@@"
@@ -67,7 +66,7 @@ class Brick(Block):
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["These stone bricks are huge!","Clearly man-made; who built this, and why?","The bricks are cold."]
-		self.sprite = image.load("sprites/Brick.png")
+		self.sprite = 3
 
 	def __str__(self):
 		return "##"
@@ -79,11 +78,11 @@ class Door(Block):
 		if open:
 			self.color = (160,160,160)
 			self.collides = False
-			self.sprite = image.load("sprites/DoorOpen.png")
+			self.sprite = 4
 		else:
 			self.color = (120,120,120)
 			self.collides = True
-			self.sprite = image.load("sprites/DoorClosed.png")
+			self.sprite = 5
 		self.transparent = False
 		self.descriptions = ["The door is locked.","It appears to slide down into the ground when unlocked.","This is some high-quality mahogany"]
 
@@ -96,7 +95,7 @@ class Door(Block):
 	def open(self):
 		self.color = (160,160,160)
 		self.collides = False
-		self.sprite = image.load("sprites/DoorOpen.png")
+		self.sprite = 4
 
 	def interact(self, player):
 		self.open()
@@ -109,7 +108,7 @@ class Lava(Block):
 		self.collides = False
 		self.transparent = True
 		self.descriptions = ["You can feel the heat from here.","I'd better not fall into that.","Magma... I must be deep!"]
-		self.sprite = image.load("sprites/Lava.png")
+		self.sprite = 6
 
 	def __str__(self):
 		return "::"
@@ -122,7 +121,7 @@ class Bedrock(Block):
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["This rock is corse and tough.","You bite the rock. Mm, crunchy!","If you look closely, you can see minerals sparkling in the stone wall."]
-		self.sprite = image.load("sprites/Bedrock.png")
+		self.sprite = 7
 
 	def __str__(self):
 		return "BB"
@@ -135,7 +134,7 @@ class Obsidian(Block):
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["The lava rock here is shiny and purple.","The walls are pourus and sharp.","This rooms seems to be a drained lava chamber."]
-		self.sprite = image.load("sprites/Obsidian.png")
+		self.sprite = 8
 
 	def __str__(self):
 		return "XX"
@@ -148,7 +147,7 @@ class Glass(Block):
 		self.collides = True
 		self.transparent = True
 		self.descriptions = ["I wonder how they got glass down here.","The glass is surprisingly clean.","You breathe on the glass and draw a smiley face."]
-		self.sprite = image.load("sprites/Glass.png")
+		self.sprite = 9
 
 	def __str__(self):
 		return "||"
@@ -160,7 +159,7 @@ class Metal(Block):
 		self.collides = True
 		self.transparent = False
 		self.descriptions = ["The walls here are metal and hollow.","You knock on the wall, and hear a resounding clang.","There are no bolts here; the metal is fused together."]
-		self.sprite = image.load("sprites/Metal.png")
+		self.sprite = 10
 
 	def __str__(self):
 		return "//"
@@ -173,7 +172,7 @@ class OneWayGlass(Block):
 		self.transparent = True
 		self.direction = direction
 		self.descriptions = ["This wall seems opaque, but you can just barely make something out on the other side."]
-		self.sprite = image.load("sprites/Metal.png")
+		self.sprite = 11
 
 	def __str__(self):
 		if self.direction == 0:
@@ -193,7 +192,7 @@ class Loot(Block):
 		self.transparent = True
 		self.raised = True
 		self.descriptions = ["This chest is locked."]
-		self.sprite = image.load("sprites/Loot.png")
+		self.sprite = 12
 		self.contents = contents #contents can be a list of stuff
 
 	def __str__(self):
