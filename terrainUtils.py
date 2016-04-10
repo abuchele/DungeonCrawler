@@ -1,6 +1,5 @@
 import random as rng
 import math
-from pygame import image
 
 
 
@@ -11,14 +10,18 @@ class Block(object):
 	def passable(self):
 		return not self.collides
 
+	def interact(self):
+		print rng.choice(self.descriptions)
+
 
 class Null(Block):
 	def __init__(self):
-		self.explored = False
-		self.color = (0,0,0, 255)
+		Block.__init__(self)
+		self.color = (0,0,0)
 		self.collides = False
 		self.transparent = False
-		self.sprite = image.load("sprites/Null.png")
+		self.descriptions = ["There's nothing there."]
+		self.sprite = 0
 
 	def __str__(self):
 		return "nl"
@@ -26,11 +29,12 @@ class Null(Block):
 
 class Floor(Block):
 	def __init__(self):
-		self.explored = False
-		self.color = (200,200,200, 255)
+		Block.__init__(self)
+		self.color = (200,200,200)
 		self.collides = False
 		self.transparent = True
-		self.sprite = image.load("sprites/Floor.png")
+		self.descriptions = ["An empty space.","Nothing to interact with here.","I wonder why there's tile down here."]
+		self.sprite = 1
 
 	def __str__(self):
 		return "  "
@@ -38,11 +42,12 @@ class Floor(Block):
 
 class Stone(Block):
 	def __init__(self):
-		self.explored = False
-		self.color = (60,60,60, 255)
+		Block.__init__(self)
+		self.color = (80,80,80)
 		self.collides = True
 		self.transparent = False
-		self.sprite = image.load("sprites/Stone.png")
+		self.descriptions = ["It looks like some kind of sandstone... or maybe ignimbrite?","You lick the rock. It tastes dirty.","The walls here are surprisingly smooth."]
+		self.sprite = 2
 
 	def __str__(self):
 		return "@@"
@@ -50,11 +55,12 @@ class Stone(Block):
 
 class Brick(Block):
 	def __init__(self):
-		self.explored = False
-		self.color = (40,40,40, 255)
+		Block.__init__(self)
+		self.color = (70,70,70)
 		self.collides = True
 		self.transparent = False
-		self.sprite = image.load("sprites/Brick.png")
+		self.descriptions = ["These stone bricks are huge!","Clearly man-made; who built this, and why?","The bricks are cold."]
+		self.sprite = 3
 
 	def __str__(self):
 		return "##"
@@ -62,16 +68,17 @@ class Brick(Block):
 
 class Door(Block):
 	def __init__(self, open=False):
-		self.explored = False
+		Block.__init__(self)
 		if open:
-			self.color = (160,160,160, 255)
+			self.color = (160,160,160)
 			self.collides = False
-			self.sprite = image.load("sprites/DoorOpen.png")
+			self.sprite = 4
 		else:
-			self.color = (100,100,100, 255)
+			self.color = (120,120,120)
 			self.collides = True
-			self.sprite = image.load("sprites/DoorClosed.png")
+			self.sprite = 5
 		self.transparent = False
+		self.descriptions = ["The door is locked.","It appears to slide down into the ground when unlocked.","This is some high-quality mahogany"]
 
 	def __str__(self):
 		return "/\\"
@@ -80,18 +87,22 @@ class Door(Block):
 		return True
 
 	def open(self):
-		self.color = (160,160,160, 255)
+		self.color = (160,160,160)
 		self.collides = False
-		self.sprite = image.load("sprites/DoorOpen.png")
+		self.sprite = 4
+
+	def interact(self):
+		self.open()
 
 
 class Lava(Block):
 	def __init__(self):
-		self.explored = False
-		self.color = (255,20,0, 255)
+		Block.__init__(self)
+		self.color = (255,20,0)
 		self.collides = False
 		self.transparent = True
-		self.sprite = image.load("sprites/Lava.png")
+		self.descriptions = ["You can feel the heat from here.","I'd better not fall into that.","Magma... I must be deep!"]
+		self.sprite = 6
 
 	def __str__(self):
 		return "::"
@@ -99,11 +110,12 @@ class Lava(Block):
 
 class Bedrock(Block):
 	def __init__(self):
-		self.explored = False
-		self.color = (0,0,0, 255)
+		Block.__init__(self)
+		self.color = (0,0,0)
 		self.collides = True
 		self.transparent = False
-		self.sprite = image.load("sprites/Bedrock.png")
+		self.descriptions = ["This rock is corse and tough.","You bite the rock. Mm, crunchy!","If you look closely, you can see minerals sparkling in the stone wall."]
+		self.sprite = 7
 
 	def __str__(self):
 		return "BB"
@@ -111,11 +123,12 @@ class Bedrock(Block):
 
 class Obsidian(Block):
 	def __init__(self):
-		self.explored = False
-		self.color = (40,0,50, 255)
+		Block.__init__(self)
+		self.color = (80,10,100)
 		self.collides = True
 		self.transparent = False
-		self.sprite = image.load("sprites/Obsidian.png")
+		self.descriptions = ["The lava rock here is shiny and purple.","The walls are pourus and sharp.","This rooms seems to be a drained lava chamber."]
+		self.sprite = 8
 
 	def __str__(self):
 		return "XX"
@@ -123,34 +136,37 @@ class Obsidian(Block):
 
 class Glass(Block):
 	def __init__(self):
-		self.explored = False
-		self.color = (220,220,220, 100)
+		Block.__init__(self)
+		self.color = (240,240,240)
 		self.collides = True
 		self.transparent = True
-		self.sprite = image.load("sprites/Glass.png")
+		self.descriptions = ["I wonder how they got glass down here.","The glass is surprisingly clean.","You breathe on the glass and draw a smiley face."]
+		self.sprite = 9
 
 	def __str__(self):
 		return "||"
 
 class Metal(Block):
 	def __init__(self):
-		self.explored = False
-		self.color = (140,140,140, 255)
+		Block.__init__(self)
+		self.color = (140,140,140)
 		self.collides = True
 		self.transparent = False
-		self.sprite = image.load("sprites/Metal.png")
+		self.descriptions = ["The walls here are metal and hollow.","You knock on the wall, and hear a resounding clang.","There are no bolts here; the metal is fused together."]
+		self.sprite = 10
 
 	def __str__(self):
 		return "//"
 
 class OneWayGlass(Block):
 	def __init__(self, direction):
-		self.explored = False
-		self.color = (220,220,220, 255)
+		Block.__init__(self)
+		self.color = (240,240,240)
 		self.collides = True
 		self.transparent = True
 		self.direction = direction
-		self.sprite = image.load("sprites/Metal.png")
+		self.descriptions = ["This wall seems opaque, but you can just barely make something out on the other side."]
+		self.sprite = 11
 
 	def __str__(self):
 		if self.direction == 0:
@@ -164,12 +180,13 @@ class OneWayGlass(Block):
 
 class Loot(Block):
 	def __init__(self, value, contents = None):
-		self.explored = False
-		self.color = (255,250,0, 255)
+		Block.__init__(self)
+		self.color = (255,250,0)
 		self.collides = True
 		self.transparent = True
 		self.raised = True
-		self.sprite = image.load("sprites/Loot.png")
+		self.descriptions = ["This chest is locked."]
+		self.sprite = 12
 		self.contents = contents #contents can be a list of stuff
 
 	def __str__(self):
