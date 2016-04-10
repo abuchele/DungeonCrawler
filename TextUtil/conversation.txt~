@@ -1,0 +1,8 @@
+Conversation File
+
+id=0000
+Console: This is the text test conversation.$$
+Player: What does it mean?$$
+Console: This shouldn't be used for anything but testing.$$
+end_0000
+
