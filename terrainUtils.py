@@ -11,7 +11,7 @@ class Block(object):
 	def passable(self):
 		return not self.collides
 
-	def interact(self):
+	def interact(self, player):
 		print rng.choice(self.descriptions)
 
 
@@ -27,6 +27,12 @@ class Null(Block):
 	def __str__(self):
 		return "nl"
 
+class NPC(Block): #all we need is an opaque impassable block that can move and talk to you. Take passive move from entities
+	def __init__(self):
+		Block.__init__(self)
+		self.collides = True
+		self.transparent = False
+		pass
 
 class Floor(Block):
 	def __init__(self):
@@ -92,7 +98,7 @@ class Door(Block):
 		self.collides = False
 		self.sprite = image.load("sprites/DoorOpen.png")
 
-	def interact(self):
+	def interact(self, player):
 		self.open()
 
 
@@ -192,6 +198,13 @@ class Loot(Block):
 
 	def __str__(self):
 		return "[]"
+
+	def interact(self, player):
+		if self.contents == None:
+			print "The chest is empty."
+		else:
+			for item in self.contents:
+				player.inventory[item]=player.inventory.get(item, 0)+1
 
 
 class Node(object):	# used for my A* search in the "halls" algorithm

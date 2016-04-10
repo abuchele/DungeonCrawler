@@ -22,7 +22,7 @@ if __name__ == '__main__':
     running = True
     view.display()
     while running:
-        time.sleep(.25)
+        time.sleep(.1)
 
         events = pygame.event.get()
         if len(events) > 0:

@@ -19,8 +19,13 @@ class PyGameKeyboardController(object):
             if event.key == pygame.K_e:
                 blockcoords = controllerDirections[self.model.player.direction]
                 block_to_interact_with = self.model.grid[self.model.player.y+blockcoords[1]][self.model.player.x+blockcoords[0]] #grid is nested lists, (x,y) is grid[y][x]
-                block_to_interact_with.interact()
-
+                block_to_interact_with.interact(self.model.player)
+            if event.key == pygame.K_r:
+                targetcoords = controllerDirections[self.model.player.direction]
+                target_to_attack = self.model.grid[self.model.player.y+blockcoords[1]][self.model.player.x+blockcoords[0]]
+                if type(target_to_attack).__name__ != Entity:
+                    return
+                self.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
             if event.key == pygame.K_LEFT:
                 if not self.model.grid[self.model.player.y][self.model.player.x-1].collides:
                     self.model.player.x -= 1
