@@ -10,17 +10,17 @@ class Dungeon(object):
 		self.w = w
 		self.h = h
 
-		if filename != None:
-			thing = dga.read(filename)
-		else:
-			thing = dga.generate(w,h,method)
+		thing = dga.generate(w,h,method)
 
 		self.grid = thing[0]
 
 		self.nullBlock = Null()
-		self.player = entities.Player(*thing[1])
+		self.player = entities.Player(*thing[1][0])
 
 		self.last_action = "You wake up near an underground river."
+
+		self.last_save = 0
+		self.savePoints = thing[1] + [(None,None)]
 
 
 	def __str__(self):
@@ -30,6 +30,12 @@ class Dungeon(object):
 				output = output+str(blk)
 			output = output+"\n"
 		return output
+
+
+	def update(self):
+		if self.player.x == self.savePoints[self.last_save][0] and self.player.y == self.savePoints[self.last_save][1]:
+			print "Saving... (jk not rely)"
+			self.last_save += 1
 
 
 	def getBlock(self,x,y):

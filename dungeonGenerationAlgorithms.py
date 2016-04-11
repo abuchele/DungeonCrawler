@@ -12,10 +12,10 @@ from terrainUtils import *
 def generate(w,h,method):
 	"""
 	generates a dungeon (nested list of blocks) using the given method
-	returns the dungeon in a list with a tuple of ints, representing the player position
+	returns the dungeon as a nested list and a list of tuples representing the save points
 	w, h = the dimensions of the desired dungeon
 	method = a string representing the method I should use
-	returns [nested list, int tuple]
+	returns [nested list, int tuple list]
 	"""
 	if method == "basic":
 		return generateBasic(w/8,h/8,w/16,h/16,8)
@@ -102,7 +102,7 @@ def generateBasic(w,h,x0,y0,s):
 				splatterLava(x,y,fineGrid)
 
 	placeTreasure(0.003, fineGrid)
-	return [fineGrid, (w/2,h/2)]
+	return [fineGrid, [(w/2,h/2)]]
 
 
 def generatePanel(w,h):
@@ -146,7 +146,7 @@ def generatePanel(w,h):
 		grid[y][0] = Metal()
 		grid[y][h] = Metal()
 
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generateRound(w, h, p):
@@ -200,7 +200,7 @@ def generateRound(w, h, p):
 				splatterLava(x,y,grid)
 
 	placeTreasure(0.007, grid)
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generateHalls(w, h, rw, rh, n):
@@ -326,7 +326,7 @@ def generateHalls(w, h, rw, rh, n):
 					grid[room.y-minY+dy][room.x-minX+dx] = Floor()
 
 	placeTreasure(0.004, grid)
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generateFastH(w, h, rw, rh, n):
@@ -426,7 +426,7 @@ def generateFastH(w, h, rw, rh, n):
 					grid[room.y+dy-minY][room.x+dx-minX] = Floor()
 
 	placeTreasure(0.007, grid)
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generatePiece(w, h, n):
@@ -502,7 +502,7 @@ def generatePiece(w, h, n):
 		x = x+1
 
 	placeTreasure(0.007, grid)
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generateMazes(w, h, s, n, doors, mazeAlg):
@@ -587,7 +587,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 		x = x+1
 
 	placeTreasure(0.005, grid)
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generateCells(w, h, deathLim, birthLim, prob, n):
@@ -657,7 +657,7 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 				splatterLava(x,y,grid)
 
 	placeTreasure(0.005, grid)
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generateRWalk(w, h, n, t):
@@ -689,7 +689,7 @@ def generateRWalk(w, h, n, t):
 			y = y+p[1]
 
 	placeTreasure(0.007, grid)
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generateIWalk(w, h, n, t):
@@ -729,7 +729,7 @@ def generateIWalk(w, h, n, t):
 					r = r-probs[i]/sum(probs)
 
 	placeTreasure(0.007, grid)
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generateRooms(w, h, n, c):
@@ -810,7 +810,7 @@ def generateRooms(w, h, n, c):
 						regions[i] = r2
 
 	placeTreasure(0.002, grid)
-	return [grid, (w/2,h/2)]
+	return [grid, [(w/2,h/2)]]
 
 
 def generateWhole(w, h):
@@ -826,6 +826,8 @@ def generateWhole(w, h):
 	for y in range(h+1):
 		grid.append(sectors[2][y] + sectors[3][y])
 
+	savePoints = [(3*w/2+1,h/2)]
+
 	for d in range(1,min(w,h)):			# does a dijkstra-type-thing to find the nearest open block in piece
 		done = False
 		for t in range(0,d+1):
@@ -840,6 +842,7 @@ def generateWhole(w, h):
 				break
 		if done:
 			break
+	savePoints.append((w,1))
 
 	for d in range(1,min(w,h)):			# same deal as before but for quadrant 3
 		done = False
@@ -855,6 +858,7 @@ def generateWhole(w, h):
 				break
 		if done:
 			break
+	savePoints.append((1,h))
 
 	for d in range(1,min(w,h)):			# now do it for the last two sectors!
 		done = False
@@ -884,16 +888,17 @@ def generateWhole(w, h):
 				break
 		if done:
 			break
-
-	px = 3*w/2+1			# randomizes some things
-	py = h/2
+	savePoints.append((w,2*h))
+	# randomizes some things
 	if rng.random() < 0.5:	# flip about the x-axis
 		grid.reverse()
-		py = 2*h+1-py
+		for i, tp in enumerate(savePoints):
+			savePoints[i] = (tp[0], 2*h+1-tp[1])
 	if rng.random() < 0.5:	# flip about the y-axis
 		for row in grid:
 			row.reverse()
-		px = 2*w+1-px
+		for i, tp in enumerate(savePoints):
+			savePoints[i] = (2*w+1-tp[0], tp[1])
 	if rng.random() < 0.5:	# flip about the line y=x
 		newGrid = []
 		for y in range(0, 2*h+2):
@@ -902,9 +907,10 @@ def generateWhole(w, h):
 				newRow.append(grid[x][y])
 			newGrid.append(newRow)
 		grid = newGrid
-		py,px = (px,py)
+		for i, tp in enumerate(savePoints):
+			savePoints[i] = (tp[1], tp[0])
 
-	return [grid, (px,py)]
+	return [grid, savePoints]
 	
 
 def dist(dest, strt, grid):	# A* search
@@ -1218,19 +1224,19 @@ def erectPanel(x,y,grid):
 	r = rng.random()	# r determines the material
 	if rng.random() < 0.5:	# horizontal
 		for dx in [-1, 0, 1]:
-			if r < 0.7:
+			if r < 0.65:
 				grid[y][x+dx] = Metal()
 			elif r < 0.85:
 				grid[y][x+dx] = Glass()	# there is a small chance there will be nothing there
-			elif r < 0.95 and dx == 0:
+			elif r < 0.9 and dx == 0:
 				grid[y][x+dx] = Loot(5)
 	else:	# vertical
 		for dy in [-1, 0, 1]:
-			if r < 0.7:
+			if r < 0.65:
 				grid[y+dy][x] = Metal()
 			elif r < 0.85:
 				grid[y+dy][x] = Glass()
-			elif r < 0.95 and dy == 0:
+			elif r < 0.9 and dy == 0:
 				grid[y+dy][x] = Loot(5)
 
 
