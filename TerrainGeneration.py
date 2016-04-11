@@ -4,7 +4,7 @@ import pickle
 
 
 method = "whole"
-test = Dungeon(2*72, 2*72, method)
+test = Dungeon(120, 120, method)
 print test
 f = open("saves/pregeneratedDungeon.txt", 'w')
 pickle.dump(test, f)

@@ -1218,26 +1218,18 @@ def erectPanel(x,y,grid):
 	r = rng.random()	# r determines the material
 	if rng.random() < 0.5:	# horizontal
 		for dx in [-1, 0, 1]:
-			if r < 0.5:
+			if r < 0.7:
 				grid[y][x+dx] = Metal()
-			elif r < 0.7:
-				grid[y][x+dx] = Glass()
-			elif r < 0.8:
-				grid[y][x+dx] = OneWayGlass(0)
-			elif r < 0.9:
-				grid[y][x+dx] = OneWayGlass(2)	# there is a small chance there will be nothing there
+			elif r < 0.85:
+				grid[y][x+dx] = Glass()	# there is a small chance there will be nothing there
 			elif r < 0.95 and dx == 0:
 				grid[y][x+dx] = Loot(5)
 	else:	# vertical
 		for dy in [-1, 0, 1]:
-			if r < 0.5:
+			if r < 0.7:
 				grid[y+dy][x] = Metal()
-			elif r < 0.7:
+			elif r < 0.85:
 				grid[y+dy][x] = Glass()
-			elif r < 0.8:
-				grid[y+dy][x] = OneWayGlass(1)
-			elif r < 0.9:
-				grid[y+dy][x] = OneWayGlass(3)
 			elif r < 0.95 and dy == 0:
 				grid[y+dy][x] = Loot(5)
 
