@@ -28,13 +28,12 @@ if __name__ == '__main__':
     controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1}
     while running:
         time.sleep(.1)
-
         events = pygame.event.get()
         # print events
         if len(events) > 0:
             for event in reversed(events):
                 if event.type == KEYDOWN and event.key in controls:
                     print event
-                    running = controller.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
+                    running = controller.handle_event(event)
                     break
         view.display()
