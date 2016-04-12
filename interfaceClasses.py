@@ -6,7 +6,20 @@ from pygame.locals import QUIT, KEYDOWN, MOUSEMOTION
 class PyGameKeyboardController(object):
     def __init__(self, model):
         self.model = model
-        pygame.key.set_repeat(350,35)
+        self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
+            pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1}
+        pygame.key.set_repeat(1,35)
+
+
+    def handle_all_events(self, events):
+        if len(events) > 0:
+            for event in reversed(events):
+                if event.type == KEYDOWN and event.key in self.controls:
+                    running = self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
+                    return True
+                if event.type == QUIT:
+                    return False
+        return True
 
 
     def handle_event(self, event):
@@ -26,19 +39,19 @@ class PyGameKeyboardController(object):
                 if type(target_to_attack).__name__ != Entity:
                     return
                 self.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 if not self.model.grid[self.model.player.y][self.model.player.x-1].collides:
                     self.model.player.x -= 1
                 self.model.player.direction = "L"
-            elif event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                 if not self.model.grid[self.model.player.y][self.model.player.x+1].collides:
                     self.model.player.x += 1
                 self.model.player.direction = "R"
-            elif event.key == pygame.K_UP:
+            elif event.key == pygame.K_UP or event.key == pygame.K_w:
                 if not self.model.grid[self.model.player.y-1][self.model.player.x].collides:
                     self.model.player.y -=1
                 self.model.player.direction = "U"
-            elif event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 if not self.model.grid[self.model.player.y+1][self.model.player.x].collides:
                     self.model.player.y +=1
                 self.model.player.direction = "D"

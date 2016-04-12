@@ -185,25 +185,41 @@ class OneWayGlass(Block):
 			return "vv"
 
 class Loot(Block):
-	def __init__(self, value, contents = None):
+	def __init__(self, value, contents = None, islocked = False, isopen = False):
 		Block.__init__(self)
 		self.color = (255,250,0)
 		self.collides = True
 		self.transparent = True
 		self.raised = True
-		self.descriptions = ["This chest is locked."]
-		self.sprite = 12
-		self.contents = contents #contents can be a list of stuff
+		self.islocked = islocked
+		self.isopen = isopen
+		if self.islocked == True:
+			self.descriptions = ["This chest is locked."]
+		if self.isopen == True:
+			self.sprite = 13
+			self.contents = None
+		else:
+			self.sprite = 12
+			self.contents = contents #contents can be a list of stuff
 
 	def __str__(self):
 		return "[]"
 
 	def interact(self, player):
-		if self.contents == None:
-			print "The chest is empty."
+		if self.isopen == True:
+			print "This chest has been emptied."
+			#Have way to unlock
+		elif self.islocked == True:
+			print "This chest is locked."
 		else:
-			for item in self.contents:
-				player.inventory[item]=player.inventory.get(item, 0)+1
+			if self.contents == None:
+				print "The chest is empty."
+			else:
+				for item in self.contents:
+					player.inventory[item]=player.inventory.get(item, 0)+1
+				self.isopen = True
+				self.contents = None
+
 
 
 class Node(object):	# used for my A* search in the "halls" algorithm
