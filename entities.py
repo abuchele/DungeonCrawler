@@ -313,4 +313,3 @@ if __name__ == "__main__":
     # print a.active_effects()
     # print heal.use(a)
     # print a.active_effects()
->>>>>>> f43033bb47e5197c5a7c7b2160603f1b2eb325d0
