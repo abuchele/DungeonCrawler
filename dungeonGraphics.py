@@ -2,7 +2,7 @@ import pygame
 import time
 import math
 
-from Dungeon import Dungeon
+import coreMechanics
 from terrainUtils import *
 
 
@@ -112,7 +112,7 @@ if __name__ == '__main__':
     screenY = 720
     size = (screenX, screenY)
     screen = pygame.display.set_mode(size)
-    model = Dungeon(72,72,"piece")
+    model = coreMechanics.Dungeon(72,72,method="piece")
     
     view = DungeonModelView(model, screen, size)
     view.display()

@@ -5,7 +5,7 @@ from pygame.locals import QUIT, KEYDOWN, MOUSEMOTION
 
 from dungeonGraphics import DungeonModelView
 from interfaceClasses import PyGameKeyboardController
-import Dungeon
+import coreMechanics
 import pickle
 
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     size = (screenX, screenY)
     
     if raw_input("Would you like to start where you left off? [y/n]") == "y":
-        model = Dungeon.load("saves/last_save.dun")
+        model = coreMechanics.load("saves/last_save.dun")
     else:
         model = pickle.load(open("saves/pregeneratedDungeon.txt",'r'))
 

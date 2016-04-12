@@ -9,6 +9,7 @@ class PyGameKeyboardController(object):
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
             pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1}
         pygame.key.set_repeat(1,35)
+        self.controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
 
 
     def handle_all_events(self, events):
@@ -27,11 +28,9 @@ class PyGameKeyboardController(object):
         takes a pygame event and executes on it. Returns True if the program should continue running
         """
         if event.type == KEYDOWN:
-
-            controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
             if event.key == pygame.K_e:
-                blockcoords = controllerDirections[self.model.player.direction]
-                block_to_interact_with = self.model.grid[self.model.player.y+blockcoords[1]][self.model.player.x+blockcoords[0]] #grid is nested lists, (x,y) is grid[y][x]
+                blockcoords = self.model.player.facingCoordinates()
+                block_to_interact_with = self.model.getBlock(*blockcoords) #grid is nested lists, (x,y) is grid[y][x]
                 block_to_interact_with.interact(self.model.player)
             if event.key == pygame.K_r:
                 targetcoords = controllerDirections[self.model.player.direction]
@@ -55,7 +54,6 @@ class PyGameKeyboardController(object):
                 if not self.model.grid[self.model.player.y+1][self.model.player.x].collides:
                     self.model.player.y +=1
                 self.model.player.direction = "D"
-
             return True
 
         if event.type == QUIT:

@@ -64,7 +64,7 @@ class textutil(object):
 #separate person.  I guess this is just a rearranging.  
 		final_chat_list = []
 		
-		for i in range(len(chat_list))
+		for i in range(len(chat_list)):
 			queue = [] #cutting down from back, needs to be reversed. 
 			temp_list = chat_list[i]
 			x = len(temp_list)
