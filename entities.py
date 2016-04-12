@@ -115,8 +115,6 @@ class Monster(Entity):
         if abs(self.x-self.player.x)<=self.aggrorange or abs(self.y-self.player.y)<=self.aggrorange:
             self.aggro = True
 
-
-
     def passiveMove(self):
         # if self.seen = True:
         direction = [(1,0),(0,1),(-1,0),(0,-1)]
@@ -128,11 +126,28 @@ class Monster(Entity):
             direction.remove((-1,0))
         if self.grid[self.x,self.y-1].collides():
             direction.remove((0,-1))
-        move = direction[randint(0,3)]
+        move = direction[randint(0,len(direction)-1)]
         self.x+=move[0]
         self.y+=move[1]
-    def aggressiveMove(self,that):
-        pass
+
+    def aggressiveMove(self): #moves monster by match x -> match y method. Doesn't try to move into player space (do we want it to?) 
+        if self.x>self.player.x+1:
+            self.x-=1
+        elif self.x<self.player.x-1:
+            self.x+=1
+        elif self.y>self.player.y+1:
+            self.y-=1
+        elif self.y<self.player.y-1:
+            self.y+=1
+
+    def decide(self): #monster checks its own status, then takes either a move or an attack action. We assume monster is melee.
+        self.checkstatus()
+        if self.aggro == True:
+            if abs(self.x-self.player.x) == 0 and abs(self.y-self.player.y) == 1 or abs(self.x-self.player.x) == 1 and abs(self.y-self.player.y) == 0:
+              self.attack(player)
+            self.aggressiveMove
+        elif self.seen == True:
+            self.passiveMove
 
 
 
