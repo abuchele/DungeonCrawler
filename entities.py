@@ -249,24 +249,24 @@ class Potion(Item):
 
 
 
-
-a = Player(0,0)
-b = Zombie(1,1)
-c = Ghost(2,2)
-print b.attack(a)
-print a.attack(b)
-print c.attack(a)
-print a.inventory
-jar = Item('Jar','an empty glass jar.')
-print jar.pickup(a)
-print a.inventory
-frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
-print frog.pickup(a)
-print a.inventory
-print frog.use(a)
-heal = Potion('cure',1,'poisoned')
-print heal.pickup(a)
-print a.effected('poisoned')
-print a.active_effects()
-print heal.use(a)
-print a.active_effects()
+if __name__ == "__main__":
+    a = Player(0,0)
+    b = Zombie(1,1)
+    c = Ghost(2,2)
+    print b.attack(a)
+    print a.attack(b)
+    print c.attack(a)
+    print a.inventory
+    jar = Item('Jar','an empty glass jar.')
+    print jar.pickup(a)
+    print a.inventory
+    frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
+    print frog.pickup(a)
+    print a.inventory
+    print frog.use(a)
+    heal = Potion('cure',1,'poisoned')
+    print heal.pickup(a)
+    print a.effected('poisoned')
+    print a.active_effects()
+    print heal.use(a)
+    print a.active_effects()

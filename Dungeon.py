@@ -1,6 +1,7 @@
 import dungeonGenerationAlgorithms as dga
 from terrainUtils import Null
 import entities
+import pickle
 
 
 
@@ -34,7 +35,7 @@ class Dungeon(object):
 
 	def update(self):
 		if self.player.x == self.savePoints[self.last_save][0] and self.player.y == self.savePoints[self.last_save][1]:
-			print "Saving... (jk not rely)"
+			self.save("saves/last_save.dun")
 			self.last_save += 1
 
 
@@ -54,6 +55,12 @@ class Dungeon(object):
 		return count
 
 
+	def save(self, filename):
+		file = open(filename, 'w')	# just pickles this dungeon to a file
+		pickle.dump(self, file)
+		file.close()
+
+
 	def getLog(self):
 		return self.last_action
 
@@ -64,6 +71,12 @@ class Dungeon(object):
 	def getHeight(self):
 		return len(self.grid)
 
+
+def load(filename):
+	file = open(filename, 'r')
+	output = pickle.load(file)
+	file.close()
+	return output
 
 
 if __name__ == "__main__":

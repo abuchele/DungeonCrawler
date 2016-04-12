@@ -858,7 +858,7 @@ def generateWhole(w, h):
 				break
 		if done:
 			break
-	savePoints.append((1,h))
+	savePoints.append((1,h+1))
 
 	for d in range(1,min(w,h)):			# now do it for the last two sectors!
 		done = False
@@ -874,7 +874,7 @@ def generateWhole(w, h):
 				break
 		if done:
 			break
-	for d in range(1,min(w,h)):
+	for d in range(1,min(w+1,h)):
 		done = False
 		for t in range(0,d+1):
 			x0 = w+1+(t)
