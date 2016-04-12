@@ -13,8 +13,6 @@ class Dungeon(object):
 		thing = dga.generate(w,h,method)
 
 		self.grid = thing[0]
-		# startcoords = *thing[1][0] #doesnt work
-		print thing[1][0]
 		self.nullBlock = Null()
 		self.player = entities.Player(self.grid, *thing[1][0])
 

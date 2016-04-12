@@ -55,7 +55,7 @@ class PyGameKeyboardController(object):
                 if not self.model.grid[self.model.player.y+1][self.model.player.x].collides:
                     self.model.player.y +=1
                 self.model.player.direction = "D"
-            print (self.model.player.x,self.model.player.y)
+            # print (self.model.player.x,self.model.player.y)
             return True
 
         if event.type == QUIT:
