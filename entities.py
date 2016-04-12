@@ -71,7 +71,7 @@ class Entity(object):
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self,x,y, grid, direction="U", health = 100, maxhealth = 100, inventory = dict(), name = "You"):
+    def __init__(self, grid, x, y,  direction="U", health = 100, maxhealth = 100, inventory = dict(), name = "You"):
         Entity.__init__(self,grid) #grid is a global variable which needs to be defined before initializing any entities.
         self.x = x
         self.y = y
@@ -282,18 +282,18 @@ class Potion(Item):
 
 
 
-player = Player(0,0, "grid")
-d = []
-for i in range (5):
-    zombie = Zombie(randint(1,20),randint(1,20), player, "grid")
-    d.append(zombie)
-for monster in d:
-    monster.checkstatus()
-    print (monster.x,monster.y),monster.seen,monster.aggro
+# player = Player("grid", 0,0)
+# d = []
+# for i in range (5):
+#     zombie = Zombie(randint(1,20),randint(1,20), player, "grid")
+#     d.append(zombie)
+# for monster in d:
+#     monster.checkstatus()
+#     print (monster.x,monster.y),monster.seen,monster.aggro
 
 
 
-c = Ghost(2,2, player, "grid")
+# c = Ghost(2,2, player, "grid")
 # print b.attack(a)
 # print player.attack(c)
 # print c.attack(player)

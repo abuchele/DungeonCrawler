@@ -6,16 +6,17 @@ import entities
 
 
 class Dungeon(object):
-	def __init__(self, w, h, method = "whole", player = entities.Player(0,0), filename = None):
+	def __init__(self, w, h, method = "whole", player = entities.Player("grid", 0,0), filename = None):
 		self.w = w
 		self.h = h
 
 		thing = dga.generate(w,h,method)
 
 		self.grid = thing[0]
-
+		# startcoords = *thing[1][0] #doesnt work
+		print thing[1][0]
 		self.nullBlock = Null()
-		self.player = entities.Player(*thing[1][0])
+		self.player = entities.Player(self.grid, *thing[1][0])
 
 		self.last_action = "You wake up near an underground river."
 
@@ -69,5 +70,5 @@ class Dungeon(object):
 if __name__ == "__main__":
 	import doctest
 	doctest.testmod()
-	a = Dungeon(50,50,"fastH")
+	a = Dungeon(50, 50, "fastH")
 	print a.grid
