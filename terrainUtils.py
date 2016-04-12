@@ -1,6 +1,8 @@
 import random as rng
 import math
 
+import entities
+
 
 
 class Block(object):
@@ -185,7 +187,7 @@ class OneWayGlass(Block):
 			return "vv"
 
 class Loot(Block):
-	def __init__(self, value, contents = None, islocked = False, isopen = False):
+	def __init__(self, value, islocked = False, isopen = False):
 		Block.__init__(self)
 		self.color = (255,250,0)
 		self.collides = True
@@ -200,7 +202,10 @@ class Loot(Block):
 			self.contents = None
 		else:
 			self.sprite = 12
-			self.contents = contents #contents can be a list of stuff
+			if rng.random() < 0.5:
+				self.contents = [entities.Item('Frog',"a frog. It isn't moving. Is it dead?",)] #contents can be a list of stuff
+			else:
+				self.contents = None
 
 	def __str__(self):
 		return "[]"
@@ -215,10 +220,13 @@ class Loot(Block):
 			if self.contents == None:
 				print "The chest is empty."
 			else:
+				print "You loot the chest:"
 				for item in self.contents:
+					print item
 					player.inventory[item]=player.inventory.get(item, 0)+1
 				self.isopen = True
 				self.contents = None
+			self.color = (229,225,50)
 
 
 

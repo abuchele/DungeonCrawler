@@ -2,7 +2,7 @@ import pygame
 import time
 import math
 
-from Dungeon import Dungeon
+import coreMechanics
 from terrainUtils import *
 
 
@@ -18,7 +18,7 @@ class DungeonModelView(object):
         self.blockSize = (50,48,15)
         self.screenBounds = (-size[1]/self.blockSize[0]/2, size[1]/self.blockSize[0]/2+1, -size[1]/self.blockSize[1]/2, size[1]/self.blockSize[1]/2+1)
         self.bigmap = pygame.Surface((size[0], size[0]))    # the actual display window
-        self.minimap = pygame.Surface((len(dungeon.grid[0]), len(dungeon.grid)))    # the 1 pixel/block map
+        self.minimap = loadMinimap(dungeon.grid)    # the 1 pixel/block map
         self.font = pygame.font.SysFont("Times New Roman", 30, bold=True)
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
         self.playerSprite = pygame.image.load("sprites/Player.png") # the player sprite
@@ -46,6 +46,10 @@ class DungeonModelView(object):
         
 
     def display(self):
+        """
+        Draws all entities, blocks, minimaps, etc. to the screen and displays
+        to be called once per tick
+        """
         for x1,y1,x2,y2 in self.losLst:
             self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.player.x+x2, self.model.player.y+y2).transparent
 
@@ -80,6 +84,15 @@ class DungeonModelView(object):
         pygame.display.update()
 
 
+def loadMinimap(grid):  # creates a minimap for the given block list-list
+    output = pygame.Surface((len(grid[0]), len(grid)))
+    for x in range(0, len(grid[0])):    # draw all the blocks
+        for y in range(0, len(grid)):
+            if grid[y][x].explored:
+                output.set_at((x, y), grid[y][x].color)
+    return output
+
+
 def loadSprites():
     return [pygame.image.load("sprites/{}.png".format(name)) for name in ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot"]]
 
@@ -99,7 +112,7 @@ if __name__ == '__main__':
     screenY = 720
     size = (screenX, screenY)
     screen = pygame.display.set_mode(size)
-    model = Dungeon(72,72,"piece")
+    model = coreMechanics.Dungeon(72,72,method="piece")
     
     view = DungeonModelView(model, screen, size)
     view.display()

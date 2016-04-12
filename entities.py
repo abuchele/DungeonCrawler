@@ -30,10 +30,11 @@ from random import randint
 
 
 class Entity(object):
-    def __init__(self, grid, health=30, maxhealth=30, speed=1, accuracy=2, flatDamage = 2, damageRange=2, damageMod=2, vision=3, armor=10, phasing = False, name = None, effect = dict()):
+    def __init__(self, grid, direction="U", health=30, maxhealth=30, speed=1, accuracy=2, flatDamage = 2, damageRange=2, damageMod=2, vision=3, armor=10, phasing = False, name = None, effect = dict()):
         # self.xpos = xpos
         # self.ypos = ypos
-        self.grid = grid        
+        self.grid = grid       
+        self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
         self.health = health
         self.maxhealth = maxhealth
@@ -45,6 +46,8 @@ class Entity(object):
         self.vision = vision #sight radius
         self.armor = armor
         self.phasing = phasing
+        self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
+        print self.directionCoordinates
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
     def damage(self):
@@ -67,23 +70,25 @@ class Entity(object):
     		if self.effect[x] is True:
     			effect_list.append(x)
     	return effect_list
+    def facingCoordinates(self):    # the coordinates of the block you are facing
+        return (self.x+self.directionCoordinates[self.direction][0], self.y+self.directionCoordinates[self.direction][1])
 
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self, grid, x, y,  direction="U", health = 100, maxhealth = 100, inventory = dict(), name = "You"):
-        Entity.__init__(self,grid) #grid is a global variable which needs to be defined before initializing any entities.
+    def __init__(self,grid,x,y, direction="U", health = 100, maxhealth = 100, inventory = dict(), name = "You"):
+        Entity.__init__(self,grid,direction=direction) #grid is a global variable which needs to be defined before initializing any entities.
+        print self.directionCoordinates
         self.x = x
         self.y = y
-        # self.history = (xpos,ypos, xpos, ypos)
-        self.direction = direction #direction can be U for up, D for down, L for left, R for right
-        # self.speed = speed
         self.health = health
         self.maxhealth = maxhealth
         self.inventory = inventory
         self.name = name
+        
     def __str__(self):
         return self.name
+
     def editinventory(self,Item,add=True): #add is whether the item is being added or removed. if True, the item is being added, if False, the item is being removed.
     	quantity = self.inventory.get(Item,0)
     	if add == True:
@@ -280,34 +285,32 @@ class Potion(Item):
 		self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
 		self = Item(self,self.name,self.description,self.use_description,self.effect)
 
+if __name__ == "__main__":
+    player = Player(0,0, "grid")
+    d = []
+    for i in range (5):
+        zombie = Zombie(randint(1,20),randint(1,20), player, "grid")
+        d.append(zombie)
+    for monster in d:
+        monster.checkstatus()
+        print (monster.x,monster.y),monster.seen,monster.aggro
 
-
-# player = Player("grid", 0,0)
-# d = []
-# for i in range (5):
-#     zombie = Zombie(randint(1,20),randint(1,20), player, "grid")
-#     d.append(zombie)
-# for monster in d:
-#     monster.checkstatus()
-#     print (monster.x,monster.y),monster.seen,monster.aggro
-
-
-
-# c = Ghost(2,2, player, "grid")
-# print b.attack(a)
-# print player.attack(c)
-# print c.attack(player)
-# print a.inventory
-# jar = Item('Jar','an empty glass jar.')
-# print jar.pickup(a)
-# print a.inventory
-# frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
-# print frog.pickup(a)
-# print a.inventory
-# print frog.use(a)
-# heal = Potion('cure',1,'poisoned')
-# print heal.pickup(a)
-# print a.effected('poisoned')
-# print a.active_effects()
-# print heal.use(a)
-# print a.active_effects()
+    c = Ghost(2,2, player, "grid")
+    # print b.attack(a)
+    # print player.attack(c)
+    # print c.attack(player)
+    # print a.inventory
+    # jar = Item('Jar','an empty glass jar.')
+    # print jar.pickup(a)
+    # print a.inventory
+    # frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
+    # print frog.pickup(a)
+    # print a.inventory
+    # print frog.use(a)
+    # heal = Potion('cure',1,'poisoned')
+    # print heal.pickup(a)
+    # print a.effected('poisoned')
+    # print a.active_effects()
+    # print heal.use(a)
+    # print a.active_effects()
+>>>>>>> f43033bb47e5197c5a7c7b2160603f1b2eb325d0
