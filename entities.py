@@ -2,11 +2,18 @@
 To-do:
 
 Sprites for different entities
+
+
+Notes:
+
+Removed need for global variables. Now initializing player requires x, y, and grid, and each monster needs x, y, player and grid.
+It's a bit more of a pain to initialize (more variables required) but we can change stuff and feed it in, instead of them grabbing the global 
+    value for 'player' and 'grid'.
 """
 
 from random import randint
 
-grid = 0
+
 
 """Changes:"""
 
@@ -64,8 +71,8 @@ class Entity(object):
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self,x,y, direction="U", health = 100, maxhealth = 100, inventory = dict(), name = "You"):
-        Entity.__init__(self,grid)
+    def __init__(self,x,y, grid, direction="U", health = 100, maxhealth = 100, inventory = dict(), name = "You"):
+        Entity.__init__(self,grid) #grid is a global variable which needs to be defined before initializing any entities.
         self.x = x
         self.y = y
         # self.history = (xpos,ypos, xpos, ypos)
@@ -87,12 +94,29 @@ class Player(Entity):
     	if quantity == 0:
     		del self.inventory[Item]
 
+
+
+
+
 class Monster(Entity):
-    def __init__(self): #speed =1,  flatDamage=0, armor=0):
+    def __init__(self, player, grid): #speed =1,  flatDamage=0, armor=0):
         Entity.__init__(self,grid)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
         self.name = None
+        self.seenrange = 8
+        self.aggrorange = 5
+        self.player = player
+        # self.grid = grid #we shouldn't need this, since Entity takes grid
+
+    def checkstatus(self):
+        if abs(self.x-self.player.x)<=self.seenrange or abs(self.y-self.player.y)<=self.seenrange:
+            self.seen = True
+        if abs(self.x-self.player.x)<=self.aggrorange or abs(self.y-self.player.y)<=self.aggrorange:
+            self.aggro = True
+
+
+
     def passiveMove(self):
         # if self.seen = True:
         direction = [(1,0),(0,1),(-1,0),(0,-1)]
@@ -113,8 +137,8 @@ class Monster(Entity):
 
 
 class Zombie(Monster):
-    def __init__(self,x,y):
-        Monster.__init__(self)
+    def __init__(self,x,y, player, grid):
+        Monster.__init__(self, player, grid)
         self.x = x
         self.y = y
         self.health = 30
@@ -127,8 +151,8 @@ class Zombie(Monster):
         return "Zombie"
 
 class Ghost(Monster):
-    def __init__(self,x,y):
-        Monster.__init__(self)
+    def __init__(self,x,y, player, grid):
+        Monster.__init__(self, player, grid)
         self.x = x
         self.y = y
         self.health = 20
@@ -243,30 +267,32 @@ class Potion(Item):
 
 
 
+player = Player(0,0, "grid")
+d = []
+for i in range (5):
+    zombie = Zombie(randint(1,20),randint(1,20), player, "grid")
+    d.append(zombie)
+for monster in d:
+    monster.checkstatus()
+    print (monster.x,monster.y),monster.seen,monster.aggro
 
 
 
-
-
-
-
-a = Player(0,0)
-b = Zombie(1,1)
-c = Ghost(2,2)
-print b.attack(a)
-print a.attack(b)
-print c.attack(a)
-print a.inventory
-jar = Item('Jar','an empty glass jar.')
-print jar.pickup(a)
-print a.inventory
-frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
-print frog.pickup(a)
-print a.inventory
-print frog.use(a)
-heal = Potion('cure',1,'poisoned')
-print heal.pickup(a)
-print a.effected('poisoned')
-print a.active_effects()
-print heal.use(a)
-print a.active_effects()
+c = Ghost(2,2, player, "grid")
+# print b.attack(a)
+# print player.attack(c)
+# print c.attack(player)
+# print a.inventory
+# jar = Item('Jar','an empty glass jar.')
+# print jar.pickup(a)
+# print a.inventory
+# frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
+# print frog.pickup(a)
+# print a.inventory
+# print frog.use(a)
+# heal = Potion('cure',1,'poisoned')
+# print heal.pickup(a)
+# print a.effected('poisoned')
+# print a.active_effects()
+# print heal.use(a)
+# print a.active_effects()

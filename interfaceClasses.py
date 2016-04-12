@@ -27,7 +27,7 @@ class PyGameKeyboardController(object):
         takes a pygame event and executes on it. Returns True if the program should continue running
         """
         if event.type == KEYDOWN:
-
+            
             controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
             if event.key == pygame.K_e:
                 blockcoords = controllerDirections[self.model.player.direction]
@@ -55,7 +55,7 @@ class PyGameKeyboardController(object):
                 if not self.model.grid[self.model.player.y+1][self.model.player.x].collides:
                     self.model.player.y +=1
                 self.model.player.direction = "D"
-
+            print (self.model.player.x,self.model.player.y)
             return True
 
         if event.type == QUIT:
