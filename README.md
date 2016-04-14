@@ -1,28 +1,22 @@
 DungeonCrawler
 =======  
-You wake up in a dark stone room. A turbid river runs through the center of it. You can't remember who you are or where you came from. All you know is that you're here to save a friend. You turn on your flashlight, but it flickers out immediately. Soaked. You stand and examine the dimly-lit room. It looks like a dungeon. And the doors are pretty low. Looks like you'll have to become a Dungeon Crawler [TODO: Think of a better name]!
-
+You wake up in a dark stone room. A turbid river runs through the center of it. You can't remember who you are or where you came from. All you know is that you're here to save a friend. You turn on your flashlight, but it flickers out immediately. Soaked. You stand and examine the dimly-lit room. It looks like a dungeon. And the doors are pretty low. Looks like you'll have to become a Dungeon Crawler [TODO: Think of a better name]!  
 _by Anna Buchele, Justin Kunimune, Leon Lam, and Max Wei_
 
-Install:
------------  
+### Install:  
   You will need pygame and pickle to play this game. If you do not have them, use  
-  '$ sudo apt-get install pygame'  
-  '$ sudo apt-get install pickle'
+  `$ sudo apt-get install pygame pickle`
   
-To Play:
------------  
-  To run, call  
-  '$ python driver.py'  
+### To Play:  
+  Simply call  
+  `$ python driver.py`  
   from the main directory. You will be prompted for a 'y' or an 'n' depending on whether you want to load a save or start over. Respond, and the game window should appear.
   
-Controls:
------------  
+### Controls:   
   Move with WASD or the arrow keys.
   Interact and attack with E or Q.
 
-Usage Rights:
------------  
+### Usage Rights:  
 MIT License
 
 Copyright (c) 2016 Buchimunelawei
