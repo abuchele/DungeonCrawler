@@ -285,11 +285,6 @@ class Potion(Item):
 		self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
 		self = Item(self,self.name,self.description,self.use_description,self.effect)
 
-
-
-
-
-
 if __name__ == "__main__":
     player = Player(0,0, "grid")
     d = []
