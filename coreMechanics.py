@@ -2,6 +2,7 @@ import dungeonGenerationAlgorithms as dga
 from terrainUtils import Null
 import entities
 import pickle
+import random as rng
 
 
 
@@ -48,6 +49,9 @@ class Dungeon(object):
 					self.player.x,self.player.y = self.player.facingCoordinates()		# also please try not to jump into more lava
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
 						print self.player.effected("killed")
+
+			if rng.random() < 0.006:
+				self.last_action = rng.choice(["You catch a waft of something rotting.","A cold breeze blows through.","You hear a faint, distant moan.","A cold chill runs down your spine.","A bit of moisture drips onto your shoulder.","You think you hear screaming."])
 
 
 	def getBlock(self,x,y):

@@ -39,7 +39,7 @@ class PyGameKeyboardController(object):
             if event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
                 block_to_interact_with = self.model.getBlock(*blockcoords) #grid is nested lists, (x,y) is grid[y][x]
-                block_to_interact_with.interact(self.model.player)
+                self.model.last_action = block_to_interact_with.interact(self.model.player) # interact with the block and print the result
             if event.key == pygame.K_r:
                 targetcoords = controllerDirections[self.model.player.direction]
                 target_to_attack = self.model.grid[self.model.player.y+blockcoords[1]][self.model.player.x+blockcoords[0]]
