@@ -23,6 +23,7 @@ class DungeonModelView(object):
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
         self.playerSprite = pygame.image.load("sprites/Player.png") # the player sprite
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
+        self.pauseScreen = pygame.image.load("sprites/Paused.png")
 
         self.sprites = loadSprites()
         self.shadows = loadShadowSprites()
@@ -80,6 +81,9 @@ class DungeonModelView(object):
 
         hp = 3*100
         pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
+
+        if self.model.paused:
+            self.screen.blit(self.pauseScreen, (0,0))
 
         pygame.display.update()
 

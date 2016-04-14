@@ -15,11 +15,19 @@ class PyGameKeyboardController(object):
     def handle_all_events(self, events):
         if len(events) > 0:
             for event in reversed(events):
-                if event.type == KEYDOWN and event.key in self.controls:
-                    running = self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
-                    return True
-                if event.type == QUIT:
-                    return False
+                if self.model.paused:
+                    if event.type == KEYDOWN:   # if it is paused, any key press resumes the game
+                        self.model.resume()
+                        return True
+                else:
+                    if event.type == KEYDOWN and event.key in self.controls:
+                        running = self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
+                        return True
+                    if event.type == QUIT:
+                        return False
+                    if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
+                        self.model.pause()
+                        return True
         return True
 
 
