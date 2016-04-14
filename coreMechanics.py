@@ -40,11 +40,11 @@ class Dungeon(object):
 
 		if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":	# you can jump over one block of lava
 			if self.getBlock(*self.player.facingCoordinates()).collides:			# if there is no block in front of you
-				print self.player.effected("burnt to a crisp")
+				print self.player.effected("killed")
 			else:
 				self.player.x,self.player.y = self.player.facingCoordinates()		# also please try not to jump into more lava
 				if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
-					print self.player.effected("burnt to a crisp")
+					print self.player.effected("killed")
 
 
 	def getBlock(self,x,y):
