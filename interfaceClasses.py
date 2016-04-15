@@ -15,11 +15,19 @@ class PyGameKeyboardController(object):
     def handle_all_events(self, events):
         if len(events) > 0:
             for event in reversed(events):
-                if event.type == KEYDOWN and event.key in self.controls:
-                    running = self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
-                    return True
-                if event.type == QUIT:
-                    return False
+                if self.model.paused:
+                    if event.type == KEYDOWN:   # if it is paused, any key press resumes the game
+                        self.model.resume()
+                        return True
+                else:
+                    if event.type == KEYDOWN and event.key in self.controls:
+                        running = self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
+                        return True
+                    if event.type == QUIT:
+                        return False
+                    if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
+                        self.model.pause()
+                        return True
         return True
 
 
@@ -31,7 +39,7 @@ class PyGameKeyboardController(object):
             if event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
                 block_to_interact_with = self.model.getBlock(*blockcoords) #grid is nested lists, (x,y) is grid[y][x]
-                block_to_interact_with.interact(self.model.player)
+                self.model.last_action = block_to_interact_with.interact(self.model.player) # interact with the block and print the result
             if event.key == pygame.K_r:
                 targetcoords = controllerDirections[self.model.player.direction]
                 target_to_attack = self.model.grid[self.model.player.y+blockcoords[1]][self.model.player.x+blockcoords[0]]

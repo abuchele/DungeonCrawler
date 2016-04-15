@@ -13,7 +13,7 @@ class Block(object):
 		return not self.collides
 
 	def interact(self, player):
-		print rng.choice(self.descriptions)
+		return "Boop."
 
 
 class Null(Block):
@@ -22,18 +22,23 @@ class Null(Block):
 		self.color = (0,0,0)
 		self.collides = False
 		self.transparent = False
-		self.descriptions = ["There's nothing there."]
 		self.sprite = 0
 
 	def __str__(self):
 		return "nl"
 
-class NPC(Block): #all we need is an opaque impassable block that can move and talk to you. Take passive move from entities
+	def interact(self,player):
+		return ""
+
+
+class NPC(Block): #all we need is an opaque impassable block that can move and talk to you. Take passive move from entities EDIT: I don't think it needs to move
 	def __init__(self):
 		Block.__init__(self)
 		self.collides = True
 		self.transparent = False
-		pass
+
+	def interact(self,player):
+		return "Hello!"
 
 class Floor(Block):
 	def __init__(self):
@@ -41,11 +46,13 @@ class Floor(Block):
 		self.color = (200,200,200)
 		self.collides = False
 		self.transparent = True
-		self.descriptions = ["An empty space.","Nothing to interact with here.","I wonder why there's tile down here."]
 		self.sprite = 1
 
 	def __str__(self):
 		return "  "
+
+	def interact(self,player):
+		return rng.choice(["An empty space.","Nothing to interact with here.","I wonder why there's tile down here."])
 
 
 class Stone(Block):
@@ -54,11 +61,13 @@ class Stone(Block):
 		self.color = (80,80,80)
 		self.collides = True
 		self.transparent = False
-		self.descriptions = ["It looks like some kind of sandstone... or maybe ignimbrite?","You lick the rock. It tastes dirty.","The walls here are surprisingly smooth."]
 		self.sprite = 2
 
 	def __str__(self):
 		return "@@"
+
+	def interact(self,player):
+		return rng.choice(["It looks like some kind of sandstone... or maybe ignimbrite?","You lick the rock. It tastes dirty.","The walls here are surprisingly smooth."])
 
 
 class Brick(Block):
@@ -67,11 +76,13 @@ class Brick(Block):
 		self.color = (70,70,70)
 		self.collides = True
 		self.transparent = False
-		self.descriptions = ["These stone bricks are huge!","Clearly man-made; who built this, and why?","The bricks are cold."]
 		self.sprite = 3
 
 	def __str__(self):
 		return "##"
+
+	def interact(self,player):
+		return rng.choice(["These stone bricks are huge!","Clearly man-made; who built this, and why?","The bricks are cold."])
 
 
 class Door(Block):
@@ -86,7 +97,6 @@ class Door(Block):
 			self.collides = True
 			self.sprite = 5
 		self.transparent = False
-		self.descriptions = ["The door is locked.","It appears to slide down into the ground when unlocked.","This is some high-quality mahogany"]
 
 	def __str__(self):
 		return "/\\"
@@ -100,7 +110,11 @@ class Door(Block):
 		self.sprite = 4
 
 	def interact(self, player):
-		self.open()
+		if self.collides:
+			self.open()
+			return rng.choice(["You push the door open."," The door slides into the ground.","The door creaks as it moves out of the way."])
+		else:
+			return "This door is already open."
 
 
 class Lava(Block):
@@ -109,11 +123,13 @@ class Lava(Block):
 		self.color = (255,20,0)
 		self.collides = False
 		self.transparent = True
-		self.descriptions = ["You can feel the heat from here.","I'd better not fall into that.","Magma... I must be deep!"]
 		self.sprite = 6
 
 	def __str__(self):
 		return "::"
+
+	def interact(self,player):
+		return rng.choice(["You can feel the heat from here.","I'd better not fall into that.","Magma... I must be deep!"])
 
 
 class Bedrock(Block):
@@ -122,11 +138,13 @@ class Bedrock(Block):
 		self.color = (0,0,0)
 		self.collides = True
 		self.transparent = False
-		self.descriptions = ["This rock is corse and tough.","You bite the rock. Mm, crunchy!","If you look closely, you can see minerals sparkling in the stone wall."]
 		self.sprite = 7
 
 	def __str__(self):
 		return "BB"
+
+	def interact(self,player):
+		return rng.choice(["This rock is corse and tough.","You bite the rock. Mm, crunchy!","If you look closely, you can see minerals sparkling in the stone wall."])
 
 
 class Obsidian(Block):
@@ -135,11 +153,13 @@ class Obsidian(Block):
 		self.color = (80,10,100)
 		self.collides = True
 		self.transparent = False
-		self.descriptions = ["The lava rock here is shiny and purple.","The walls are pourus and sharp.","This rooms seems to be a drained lava chamber."]
 		self.sprite = 8
 
 	def __str__(self):
 		return "XX"
+
+	def interact(self,player):
+		return rng.choice(["The lava rock here is shiny and purple.","The walls are pourus and sharp.","This rooms seems to be a drained lava chamber."])
 
 
 class Glass(Block):
@@ -148,11 +168,14 @@ class Glass(Block):
 		self.color = (240,240,240)
 		self.collides = True
 		self.transparent = True
-		self.descriptions = ["I wonder how they got glass down here.","The glass is surprisingly clean.","You breathe on the glass and draw a smiley face."]
 		self.sprite = 9
 
 	def __str__(self):
 		return "||"
+
+	def interact(self,player):
+		return rng.choice(["I wonder how they got glass down here.","The glass is surprisingly clean.","You breathe on the glass and draw a smiley face."])
+
 
 class Metal(Block):
 	def __init__(self):
@@ -160,31 +183,14 @@ class Metal(Block):
 		self.color = (140,140,140)
 		self.collides = True
 		self.transparent = False
-		self.descriptions = ["The walls here are metal and hollow.","You knock on the wall, and hear a resounding clang.","There are no bolts here; the metal is fused together."]
 		self.sprite = 10
 
 	def __str__(self):
 		return "//"
 
-class OneWayGlass(Block):
-	def __init__(self, direction):
-		Block.__init__(self)
-		self.color = (240,240,240)
-		self.collides = True
-		self.transparent = True
-		self.direction = direction
-		self.descriptions = ["This wall seems opaque, but you can just barely make something out on the other side."]
-		self.sprite = 11
+	def interact(self,player):
+		return rng.choice(["The walls here are metal and hollow.","You knock on the wall, and hear a resounding clang.","There are no bolts here; the metal is fused together."])
 
-	def __str__(self):
-		if self.direction == 0:
-			return " >"
-		elif self.direction == 1:
-			return "^^"
-		elif self.direction == 2:
-			return "< "
-		else:
-			return "vv"
 
 class Loot(Block):
 	def __init__(self, value, islocked = False, isopen = False):
@@ -212,21 +218,21 @@ class Loot(Block):
 
 	def interact(self, player):
 		if self.isopen == True:
-			print "This chest has been emptied."
+			return "This chest has been emptied."
 			#Have way to unlock
 		elif self.islocked == True:
-			print "This chest is locked."
+			return "This chest is locked."
 		else:
+			self.color = (229,225,50)
+			self.sprite = 13
 			if self.contents == None:
-				print "The chest is empty."
+				return "The chest is empty."
 			else:
-				print "You loot the chest:"
 				for item in self.contents:
-					print item
 					player.inventory[item]=player.inventory.get(item, 0)+1
 				self.isopen = True
 				self.contents = None
-			self.color = (229,225,50)
+				return "You loot the chest of its contents."
 
 
 
