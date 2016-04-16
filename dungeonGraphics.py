@@ -21,12 +21,17 @@ class DungeonModelView(object):
         self.minimap = loadMinimap(dungeon.grid)    # the 1 pixel/block map
         self.font = pygame.font.SysFont("Times New Roman", 30, bold=True)
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
-        self.playerSprite = pygame.image.load("sprites/Player.png") # the player sprite
+        self.playerSprite = pygame.image.load("sprites/PlayerFrontStand.png") # the player sprite
+        self.playerSpriteWalk = [pygame.image.load("sprites/PlayerFrontWalk1.png"),pygame.image.load("sprites/PlayerFrontWalk2.png")]
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
         self.pauseScreen = pygame.image.load("sprites/Paused.png")
 
         self.sprites = loadSprites()
         self.shadows = loadShadowSprites()
+        self.steps = 0
+        self.prex = self.model.player.x
+        self.prey = self.model.player.y
+        self.prevSprite = self.playerSprite
 
         self.losLst = []    # the list that will determine line of sight
         for r in range(2,max(self.screenBounds[1],self.screenBounds[3])+1):
@@ -66,7 +71,20 @@ class DungeonModelView(object):
                 else:
                     self.screen.blit(self.sprites[0], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
             if dy == 0:
-                self.screen.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
+                if (self.prex - self.model.player.x) == 0 and (self.prey - self.model.player.y) == 0:
+                    playerSpriteCurrent = self.prevSprite
+                else:
+                    if self.steps == 0:
+                        playerSpriteCurrent = self.playerSpriteWalk[0]
+                        self.steps = 1
+                    else:
+                        playerSpriteCurrent = self.playerSpriteWalk[1]
+                        self.steps = 0
+                    self.prex = self.model.player.x
+                    self.prey = self.model.player.y
+                    self.prevSprite = playerSpriteCurrent
+
+                self.screen.blit(playerSpriteCurrent, (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.size[0]-self.size[1], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
