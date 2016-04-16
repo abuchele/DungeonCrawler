@@ -50,22 +50,18 @@ class PyGameKeyboardController(object):
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 if not self.model.grid[self.model.player.y][self.model.player.x-1].collides:
                     self.model.player.x -= 1
-                    self.model.player.moving = True
                 self.model.player.direction = "L"
             elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                 if not self.model.grid[self.model.player.y][self.model.player.x+1].collides:
                     self.model.player.x += 1
-                    self.model.player.moving = True
                 self.model.player.direction = "R"
             elif event.key == pygame.K_UP or event.key == pygame.K_w:
                 if not self.model.grid[self.model.player.y-1][self.model.player.x].collides:
                     self.model.player.y -=1
-                    self.model.player.moving = True
                 self.model.player.direction = "U"
             elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 if not self.model.grid[self.model.player.y+1][self.model.player.x].collides:
                     self.model.player.y +=1
-                    self.model.player.moving = True
                 self.model.player.direction = "D"
             pygame.event.clear()
             return True
