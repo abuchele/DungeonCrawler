@@ -88,6 +88,7 @@ class Player(Entity):
         self.damageMod = 2
         self.inventory = dict()
         self.name = name
+
         
     def __str__(self):
         return self.name
