@@ -21,33 +21,20 @@ class DungeonModelView(object):
         self.minimap = loadMinimap(dungeon.grid)    # the 1 pixel/block map
         self.font = pygame.font.SysFont("Times New Roman", 30, bold=True)
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
-        self.playerSpriteFront = [pygame.image.load("sprites/PlayerFrontStand.png"),pygame.image.load("sprites/PlayerFrontWalk1.png"),pygame.image.load("sprites/PlayerFrontWalk2.png")]
-        self.playerSpriteBack = [pygame.image.load("sprites/PlayerBackStand.png"),pygame.image.load("sprites/PlayerBackWalk1.png"),pygame.image.load("sprites/PlayerBackWalk2.png")]
-        self.playerSpriteLeft = [pygame.image.load("sprites/PlayerLeftStand.png"),pygame.image.load("sprites/PlayerLeftWalk1.png"),pygame.image.load("sprites/PlayerLeftWalk2.png")]
-        self.playerSpriteRight = [pygame.image.load("sprites/PlayerRightStand.png"),pygame.image.load("sprites/PlayerRightWalk1.png"),pygame.image.load("sprites/PlayerRightWalk2.png")]
+
+        spriteNames = [["Stand","Walk1","Walk2"], ["Back","Front","Left","Right"]]
+        self.playerSprites = [[pygame.image.load("sprites/Player"+direc+movem+".png") for movem in spriteNames[0]] for direc in spriteNames[1]]
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
         self.pauseScreen = pygame.image.load("sprites/Paused.png")
         self.dialogueBox = pygame.image.load("sprites/Dialogue_GUI.png")
-        self.playerSprite = self.playerSpriteFront[0]
-        self.sprites = loadSprites()
-        self.shadows = loadShadowSprites()
-        self.steps = 0
-        self.prex = self.model.player.x
-        self.prey = self.model.player.y
-        self.prevdirection = self.model.player.direction
-        self.prevSprite = self.playerSprite
+        self.playerSprite = self.playerSprites[0][0]
 
-        self.losLst = []    # the list that will determine line of sight
-        for r in range(2,max(self.screenBounds[1],self.screenBounds[3])+1):
-            for t in range(-r,r):
-                if r < self.screenBounds[1] and t >= self.screenBounds[2] and t < self.screenBounds[3]:
-                    self.losLst.append(drawLOS(r,t))   # each element is a tuple with x,y of the point in question, and x,y of the point it is pointing to
-                if -r >= self.screenBounds[0] and -t >= self.screenBounds[2] and -t < self.screenBounds[3]:
-                    self.losLst.append(drawLOS(-r,-t))
-                if -t >= self.screenBounds[0] and -t < self.screenBounds[1] and r < self.screenBounds[3]:
-                    self.losLst.append(drawLOS(-t,r))
-                if t >= self.screenBounds[0] and t < self.screenBounds[1] and -r >= self.screenBounds[2]:
-                    self.losLst.append(drawLOS(t,-r))
+        spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+        self.sprites = loadSprites(spriteNames)
+        self.shadows = loadShadowSprites(spriteNames)
+        self.steps = 0
+
+        self.compose_LOS_list()  # do some preliminary calculations for Line of Sight
 
         self.visible = dict()
         for x in [-1,0,1]:
@@ -60,6 +47,8 @@ class DungeonModelView(object):
         Draws all entities, blocks, minimaps, etc. to the screen and displays
         to be called once per tick
         """
+        pSpriteInd = self.model.player.sprite
+
         for x1,y1,x2,y2 in self.losLst:
             self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.player.x+x2, self.model.player.y+y2).transparent
 
@@ -75,30 +64,7 @@ class DungeonModelView(object):
                 else:
                     self.screen.blit(self.sprites[0], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
             if dy == 0:
-                if (self.prex - self.model.player.x) == 0 and (self.prey - self.model.player.y) == 0:
-                    if self.prevdirection == self.model.player.direction:
-                        playerSpriteCurrent = self.prevSprite
-                        self.steps = 0
-                else:
-                    if self.steps is not 2:
-                        self.steps += 1
-                    else:
-                        self.steps = 1
-                if self.model.player.direction == "U":
-                    playerSpriteCurrent = self.playerSpriteBack[self.steps]
-                elif self.model.player.direction == "D":
-                    playerSpriteCurrent = self.playerSpriteFront[self.steps]
-                elif self.model.player.direction == "L":
-                    playerSpriteCurrent = self.playerSpriteLeft[self.steps]
-                elif self.model.player.direction == "R":
-                    playerSpriteCurrent = self.playerSpriteRight[self.steps]
-                self.prevSprite = playerSpriteCurrent
-                self.prex = self.model.player.x
-                self.prey = self.model.player.y
-
-              
-
-                self.screen.blit(playerSpriteCurrent, (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
+                self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.size[0]-self.size[1], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
@@ -122,6 +88,20 @@ class DungeonModelView(object):
         pygame.display.update()
 
 
+    def compose_LOS_list(self): # does preliminary calculations for line of sight
+        self.losLst = []    # the list that will determine line of sight
+        for r in range(2,max(self.screenBounds[1],self.screenBounds[3])+1):
+            for t in range(-r,r):
+                if r < self.screenBounds[1] and t >= self.screenBounds[2] and t < self.screenBounds[3]:
+                    self.losLst.append(drawLOS(r,t))   # each element is a tuple with x,y of the point in question, and x,y of the point it is pointing to
+                if -r >= self.screenBounds[0] and -t >= self.screenBounds[2] and -t < self.screenBounds[3]:
+                    self.losLst.append(drawLOS(-r,-t))
+                if -t >= self.screenBounds[0] and -t < self.screenBounds[1] and r < self.screenBounds[3]:
+                    self.losLst.append(drawLOS(-t,r))
+                if t >= self.screenBounds[0] and t < self.screenBounds[1] and -r >= self.screenBounds[2]:
+                    self.losLst.append(drawLOS(t,-r))
+
+
 def loadMinimap(grid):  # creates a minimap for the given block list-list
     output = pygame.Surface((len(grid[0]), len(grid)))
     for x in range(0, len(grid[0])):    # draw all the blocks
@@ -131,18 +111,16 @@ def loadMinimap(grid):  # creates a minimap for the given block list-list
     return output
 
 
-def loadSprites():
-    lst = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
-    return [pygame.image.load("sprites/{}.png".format(name)) for name in lst]
+def loadSprites(filenames):
+    return [pygame.image.load("sprites/{}.png".format(name)) for name in filenames]
 
 
-def loadShadowSprites():
-    lst = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
-    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in lst]
+def loadShadowSprites(filenames):
+    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in filenames]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)
-    return (x, y, int(math.floor(0.5+x-x/math.hypot(x,y))), int(math.floor(0.5+y-y/math.hypot(x,y))))
+    return (x, y, int(math.floor(0.5+x-1.4*x/math.hypot(x,y))), int(math.floor(0.5+y-1.4*y/math.hypot(x,y))))
 
 
 

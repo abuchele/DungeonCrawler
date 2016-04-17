@@ -38,6 +38,7 @@ class Entity(object):
         self.phasing = phasing
         self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
         self.hasAttacked = False
+        self.moving = False
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
@@ -76,15 +77,21 @@ class Entity(object):
     def facingCoordinates(self):    # the coordinates of the block you are facing
         return (self.x+self.directionCoordinates[self.direction][0], self.y+self.directionCoordinates[self.direction][1])
 
+    def update(self):
+        if self.moving:
+            self.x, self.y = self.facingCoordinates()
+        self.moving = False
+
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
     def __init__(self,grid,x,y, name = "You"):
-        Entity.__init__(self,grid) #grid is a global variable which needs to be defined before initializing any entities.
+        Entity.__init__(self,grid, direction="U") #grid is a global variable which needs to be defined before initializing any entities.
         # print self.directionCoordinates
         self.x = x
         self.y = y
-        self.direction = "U"
+        self.prex = x
+        self.prey = y
         self.health = 100
         self.maxhealth = 100
         self.armor = 10
@@ -95,6 +102,8 @@ class Player(Entity):
         self.inventory = dict()
         self.name = name
         self.attackSprite = "test"
+        self.sprite = (0,0)
+        self.steps = 0
         
     def __str__(self):
         return self.name
@@ -108,6 +117,29 @@ class Player(Entity):
     	self.inventory[Item] = quantity
     	if quantity == 0:
     		del self.inventory[Item]
+
+    def getCurrentSprite(self):   # figures out which sprite to use for the entity
+        if not self.moving:   # if the player has not moved
+            self.steps = 0    # then they use the standing sprite
+        else:
+            if self.steps is not 2:
+                self.steps += 1
+            else:
+                self.steps = 1
+        if self.direction == "U":
+            return (0,self.steps)
+        elif self.direction == "D":
+            return (1,self.steps)
+        elif self.direction == "L":
+            return (2,self.steps)
+        elif self.direction == "R":
+            return (3,self.steps)
+
+    def update(self):   # just kind of moves you around
+        self.sprite = self.getCurrentSprite()
+        if self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides:
+            self.x, self.y = self.facingCoordinates()
+        self.moving = False
 
 
 class Monster(Entity):
