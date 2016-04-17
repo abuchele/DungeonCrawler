@@ -15,16 +15,16 @@ class PyGameKeyboardController(object):
     def handle_all_events(self, events):
         if len(events) > 0:
             for event in reversed(events):
-                if self.model.paused:
+                if event.type == QUIT:
+                        return False
+                if self.model.state == "P":
                     if event.type == KEYDOWN:   # if it is paused, any key press resumes the game
                         self.model.resume()
                         return True
-                else:
+                elif self.model.state == "R":
                     if event.type == KEYDOWN and event.key in self.controls:
                         running = self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
                         return True
-                    if event.type == QUIT:
-                        return False
                     if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
                         self.model.pause()
                         return True
@@ -41,7 +41,7 @@ class PyGameKeyboardController(object):
             if event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
                 block_to_interact_with = self.model.getBlock(*blockcoords) #grid is nested lists, (x,y) is grid[y][x]
-                self.model.last_action = block_to_interact_with.interact(self.model.player) # interact with the block and print the result
+                self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
             if event.key == pygame.K_r:
                 blockcoords = self.model.player.facingCoordinates() #this gives the (x,y) coordinate which you are facing!
                 # targetcoords = self.controllerDirections[self.model.player.direction]
@@ -49,6 +49,7 @@ class PyGameKeyboardController(object):
                 # if type(target_to_attack).__name__ != Entity: #.__name__ isn't recognized, apparently
                 #     return
                 self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
+
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 if not self.model.grid[self.model.player.y][self.model.player.x-1].collides:
                     self.model.player.x -= 1

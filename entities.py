@@ -83,7 +83,10 @@ class Entity(object):
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self,grid, x,y, name = "You"):
+
+    def __init__(self, grid, x, y, name = "You"):
+
+
         Entity.__init__(self,grid) #grid is a global variable which needs to be defined before initializing any entities.
         # print self.directionCoordinates
         self.x = x

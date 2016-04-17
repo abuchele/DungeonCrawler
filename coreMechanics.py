@@ -24,11 +24,11 @@ class Dungeon(object):
 		self.last_save = 0
 		self.savePoints = thing[1] + [(None,None)]
 
-		self.paused = False
+		self.state = "R"	# R for running, P for paused, and D for dialogue
 
 
 	def __str__(self):
-		output = "{:03d} {:03d}\n".format(self.player.x,self.player.y)
+		output = ""
 		for row in self.grid:
 			for blk in row:
 				output = output+str(blk)
@@ -39,7 +39,7 @@ class Dungeon(object):
 		pass
 
 	def update(self):
-		if not self.paused:	# it doesn't update if the game is paused
+		if self.state == "R":	# it doesn't update if the game is paused
 			if self.player.x == self.savePoints[self.last_save][0] and self.player.y == self.savePoints[self.last_save][1]:
 				self.save("saves/last_save.dun")
 				self.last_save += 1
@@ -79,6 +79,18 @@ class Dungeon(object):
 		return count
 
 
+	def interp_action(self, action):	# interprets an action (should be a string!)
+		if len(action) <= 0:
+			return
+		elif action[0] == "$":
+			if action[1] == "D":
+				self.state = "D"
+			else:
+				raise TypeError("What the heck does %{} mean?!".format(action[1]))
+		else:
+			self.last_action = action
+
+
 	def save(self, filename):
 		file = open(filename, 'w')	# just pickles this dungeon to a file
 		pickle.dump(self, file)
@@ -90,11 +102,11 @@ class Dungeon(object):
 
 
 	def pause(self):
-		self.paused = True
+		self.state = "P"
 
 
 	def resume(self):
-		self.paused = False
+		self.state = "R"
 
 
 	def getWidth(self):

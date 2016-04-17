@@ -27,6 +27,7 @@ class DungeonModelView(object):
         self.playerSpriteRight = [pygame.image.load("sprites/PlayerRightStand.png"),pygame.image.load("sprites/PlayerRightWalk1.png"),pygame.image.load("sprites/PlayerRightWalk2.png")]
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
         self.pauseScreen = pygame.image.load("sprites/Paused.png")
+        self.dialogueBox = pygame.image.load("sprites/Dialogue_GUI.png")
         self.playerSprite = self.playerSpriteFront[0]
         self.sprites = loadSprites()
         self.shadows = loadShadowSprites()
@@ -115,8 +116,10 @@ class DungeonModelView(object):
         hp = 3*100
         pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
 
-        if self.model.paused:
+        if self.model.state == "P":
             self.screen.blit(self.pauseScreen, (0,0))
+        elif self.model.state == "D":
+            self.screen.blit(self.dialogueBox, (0,0))
 
         pygame.display.update()
 
@@ -131,11 +134,13 @@ def loadMinimap(grid):  # creates a minimap for the given block list-list
 
 
 def loadSprites():
-    return [pygame.image.load("sprites/{}.png".format(name)) for name in ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen"]]
+    lst = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+    return [pygame.image.load("sprites/{}.png".format(name)) for name in lst]
 
 
 def loadShadowSprites():
-    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen"]]
+    lst = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in lst]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)
