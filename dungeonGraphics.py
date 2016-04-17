@@ -21,12 +21,21 @@ class DungeonModelView(object):
         self.minimap = loadMinimap(dungeon.grid)    # the 1 pixel/block map
         self.font = pygame.font.SysFont("Times New Roman", 30, bold=True)
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
-        self.playerSprite = pygame.image.load("sprites/Player.png") # the player sprite
+        self.playerSpriteFront = [pygame.image.load("sprites/PlayerFrontStand.png"),pygame.image.load("sprites/PlayerFrontWalk1.png"),pygame.image.load("sprites/PlayerFrontWalk2.png")]
+        self.playerSpriteBack = [pygame.image.load("sprites/PlayerBackStand.png"),pygame.image.load("sprites/PlayerBackWalk1.png"),pygame.image.load("sprites/PlayerBackWalk2.png")]
+        self.playerSpriteLeft = [pygame.image.load("sprites/PlayerLeftStand.png"),pygame.image.load("sprites/PlayerLeftWalk1.png"),pygame.image.load("sprites/PlayerLeftWalk2.png")]
+        self.playerSpriteRight = [pygame.image.load("sprites/PlayerRightStand.png"),pygame.image.load("sprites/PlayerRightWalk1.png"),pygame.image.load("sprites/PlayerRightWalk2.png")]
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
         self.pauseScreen = pygame.image.load("sprites/Paused.png")
-
+        self.dialogueBox = pygame.image.load("sprites/Dialogue_GUI.png")
+        self.playerSprite = self.playerSpriteFront[0]
         self.sprites = loadSprites()
         self.shadows = loadShadowSprites()
+        self.steps = 0
+        self.prex = self.model.player.x
+        self.prey = self.model.player.y
+        self.prevdirection = self.model.player.direction
+        self.prevSprite = self.playerSprite
 
         self.losLst = []    # the list that will determine line of sight
         for r in range(2,max(self.screenBounds[1],self.screenBounds[3])+1):
@@ -66,7 +75,30 @@ class DungeonModelView(object):
                 else:
                     self.screen.blit(self.sprites[0], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
             if dy == 0:
-                self.screen.blit(self.playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
+                if (self.prex - self.model.player.x) == 0 and (self.prey - self.model.player.y) == 0:
+                    if self.prevdirection == self.model.player.direction:
+                        playerSpriteCurrent = self.prevSprite
+                        self.steps = 0
+                else:
+                    if self.steps is not 2:
+                        self.steps += 1
+                    else:
+                        self.steps = 1
+                if self.model.player.direction == "U":
+                    playerSpriteCurrent = self.playerSpriteBack[self.steps]
+                elif self.model.player.direction == "D":
+                    playerSpriteCurrent = self.playerSpriteFront[self.steps]
+                elif self.model.player.direction == "L":
+                    playerSpriteCurrent = self.playerSpriteLeft[self.steps]
+                elif self.model.player.direction == "R":
+                    playerSpriteCurrent = self.playerSpriteRight[self.steps]
+                self.prevSprite = playerSpriteCurrent
+                self.prex = self.model.player.x
+                self.prey = self.model.player.y
+
+              
+
+                self.screen.blit(playerSpriteCurrent, (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.size[0]-self.size[1], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
@@ -82,8 +114,10 @@ class DungeonModelView(object):
         hp = 3*100
         pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
 
-        if self.model.paused:
+        if self.model.state == "P":
             self.screen.blit(self.pauseScreen, (0,0))
+        elif self.model.state == "D":
+            self.screen.blit(self.dialogueBox, (0,0))
 
         pygame.display.update()
 
@@ -98,11 +132,13 @@ def loadMinimap(grid):  # creates a minimap for the given block list-list
 
 
 def loadSprites():
-    return [pygame.image.load("sprites/{}.png".format(name)) for name in ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen"]]
+    lst = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+    return [pygame.image.load("sprites/{}.png".format(name)) for name in lst]
 
 
 def loadShadowSprites():
-    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen"]]
+    lst = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in lst]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)

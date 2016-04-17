@@ -318,6 +318,7 @@ def generateWhole(w, h):
 		grid.append(sectors[2][y] + sectors[3][y])
 
 	savePoints = [(3*w/2+1,h/2)]
+	grid[h/2][3*w/2] = NPC()
 
 	for d in range(1,min(w,h)):			# does a dijkstra-type-thing to find the nearest open block in piece
 		done = False
