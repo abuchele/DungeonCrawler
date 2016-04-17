@@ -83,6 +83,8 @@ class DungeonModelView(object):
                         self.steps += 1
                     else:
                         self.steps = 1
+
+                direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
                 if self.model.player.direction == "U":
                     playerSpriteCurrent = self.playerSpriteBack[self.steps]
                 elif self.model.player.direction == "D":
@@ -95,9 +97,8 @@ class DungeonModelView(object):
                 self.prex = self.model.player.x
                 self.prey = self.model.player.y
 
-              
-
                 self.screen.blit(playerSpriteCurrent, (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
+                
 
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.size[0]-self.size[1], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
@@ -106,7 +107,8 @@ class DungeonModelView(object):
         self.screen.blit(self.dotSprite, (self.size[1]+int((self.model.player.x+0.5)*self.mimpSz[0]/self.rempSz[0])%self.mimpSz[0]-self.dotSprite.get_width()/2+1,
             int((self.model.player.y+0.5)*self.mimpSz[1]/self.rempSz[1])%self.mimpSz[1]-self.dotSprite.get_height()/2+1))  # draw the dot on the minimap
 
-        
+        if self.model.player.hasAttacked == True: # draw player attack sprite!
+                    self.screen.blit(pygame.transform.rotate(self.sprites[self.model.player.attackSprite], direction_to_angle[self.model.player.direction]),(self.dispSize[0]/2 + self.model.player.directionCoordinates[self.model.player.direction][0]*self.blockSize[0], self.dispSize[1]/2 + self.model.player.directionCoordinates[self.model.player.direction][1]*self.blockSize[1]))
         actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
         self.screen.blit(actionLog, (0, self.size[1]-34))
 

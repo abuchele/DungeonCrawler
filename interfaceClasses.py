@@ -36,17 +36,19 @@ class PyGameKeyboardController(object):
         """
         takes a pygame event and executes on it. Returns True if the program should continue running
         """
+        self.model.player.hasAttacked = False
         if event.type == KEYDOWN:
             if event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
                 block_to_interact_with = self.model.getBlock(*blockcoords) #grid is nested lists, (x,y) is grid[y][x]
                 self.model.last_action = block_to_interact_with.interact(self.model.player) # interact with the block and print the result
             if event.key == pygame.K_r:
-                targetcoords = controllerDirections[self.model.player.direction]
-                target_to_attack = self.model.grid[self.model.player.y+blockcoords[1]][self.model.player.x+blockcoords[0]]
-                if type(target_to_attack).__name__ != Entity:
-                    return
-                self.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
+                blockcoords = self.model.player.facingCoordinates() #this gives the (x,y) coordinate which you are facing!
+                # targetcoords = self.controllerDirections[self.model.player.direction]
+                target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]]
+                # if type(target_to_attack).__name__ != Entity: #.__name__ isn't recognized, apparently
+                #     return
+                self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 if not self.model.grid[self.model.player.y][self.model.player.x-1].collides:
                     self.model.player.x -= 1
