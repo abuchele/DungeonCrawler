@@ -37,7 +37,8 @@ class Entity(object):
         self.effect = effect
         self.phasing = phasing
         self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
-
+        self.hasAttacked = False
+        
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
 
@@ -50,7 +51,12 @@ class Entity(object):
             that.health -= damage
             if this.name!="You":
                 return "{} hits {} for {} damage!".format(str(this),str(that),damage)
+            
+            direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
+            """Pseudocode"""
+            # DISPLAY pygame.rotate(this.attackSprite, direction_to_angle[this.direction]) AT (this.x+this.directionCoordinates[0],this.y+this.directionCoordinates[1])
             return "{} hit {} for {} damage!".format(str(this),str(that),damage)
+
         if this.name!="You":
             return "{} misses {}!".format(str(this),str(that))
         return "{} miss {}!".format(str(this),str(that))
@@ -88,7 +94,7 @@ class Player(Entity):
         self.damageMod = 2
         self.inventory = dict()
         self.name = name
-
+        self.attackSprite = "test"
         
     def __str__(self):
         return self.name
