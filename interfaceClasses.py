@@ -44,10 +44,10 @@ class PyGameKeyboardController(object):
                 self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
             if event.key == pygame.K_r:
                 blockcoords = self.model.player.facingCoordinates() #this gives the (x,y) coordinate which you are facing!
-                # targetcoords = self.controllerDirections[self.model.player.direction]
-                target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]]
-                # if type(target_to_attack).__name__ != Entity: #.__name__ isn't recognized, apparently
-                #     return
+                """If we have a monster list with coordinates, we iterate over the list to see if there's a monster on blockcoords."""
+
+                target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]] #if we find no monster, this attacks a grid square or a block!
+
                 self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
 
             if event.key == pygame.K_LEFT or event.key == pygame.K_a:

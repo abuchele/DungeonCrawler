@@ -25,6 +25,8 @@ class Dungeon(object):
 		self.savePoints = thing[1] + [(None,None)]
 
 		self.state = "R"	# R for running, P for paused, and D for dialogue
+		self.monsterlist = [] #contains all the monster objects
+		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at that coordinate
 
 
 	def __str__(self):
@@ -35,8 +37,25 @@ class Dungeon(object):
 			output = output+"\n"
 		return output
 
-	def generateMonsters(self, last_save):
-		pass
+	def generateMonsters(self, last_save, monsterNumber = 200):
+		count = 0
+		for y in range(0,self.h-1):
+			for x in range(0,self.w-1):
+				if not self.grid[y][x].collides() and count<monsterNumber and rng.random()<float(monsterNumber)/5000:
+					if rng.randint(0,1) == 0:
+						zombie = entities.Zombie(x,y,self.Player,self.grid)
+						newlist = self.monstercoords.get((x,y),[])
+						newlist.append(zombie)
+						self.monstercoords[(x,y)] = newlist
+						self.monsterlist.append[zombie]
+						count +=1
+					else:
+						ghost = entities.Ghost(x,y,self.Player,self.grid)
+						newlist = self.monstercoords.get((x,y),[])
+						newlist.append(ghost)
+						self.monstercoords[(x,y)] = newlist
+						self.monsterlist.append[ghost]
+						count +=1
 
 	def update(self):
 		if self.state == "R":	# it doesn't update if the game is paused
@@ -128,3 +147,4 @@ if __name__ == "__main__":
 	doctest.testmod()
 	a = Dungeon(50,50,"fastH")
 	print a.grid
+	print 
