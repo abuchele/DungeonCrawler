@@ -54,7 +54,13 @@ class Dungeon(object):
 						print self.player.effected("killed")
 
 			if rng.random() < 0.006:
-				self.last_action = rng.choice(["You catch a waft of something rotting.","A cold breeze blows through.","You hear a faint, distant moan.","A cold chill runs down your spine.","A bit of moisture drips onto your shoulder.","You think you hear screaming."])
+				self.last_action = rng.choice(
+					["You catch a waft of something rotting.",
+					"A cold breeze blows through.",
+					"You hear a faint, distant moan.",
+					"A cold chill runs down your spine.",
+					"A bit of moisture drips onto your shoulder.",
+					"You think you hear screaming."])
 
 
 	def getBlock(self,x,y):

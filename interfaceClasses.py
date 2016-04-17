@@ -28,6 +28,7 @@ class PyGameKeyboardController(object):
                     if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
                         self.model.pause()
                         return True
+            pygame.event.clear()  #empties queue
         return True
 
 
@@ -62,6 +63,7 @@ class PyGameKeyboardController(object):
                 if not self.model.grid[self.model.player.y+1][self.model.player.x].collides:
                     self.model.player.y +=1
                 self.model.player.direction = "D"
+            pygame.event.clear()
             return True
 
         if event.type == QUIT:
