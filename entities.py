@@ -2,11 +2,18 @@
 To-do:
 
 Sprites for different entities
+
+
+Notes:
+
+Removed need for global variables. Now initializing player requires x, y, and grid, and each monster needs x, y, player and grid.
+It's a bit more of a pain to initialize (more variables required) but we can change stuff and feed it in, instead of them grabbing the global 
+    value for 'player' and 'grid'.
 """
 
 from random import randint
 
-grid = 0
+
 
 """Changes:"""
 
@@ -23,25 +30,20 @@ grid = 0
 
 
 class Entity(object):
-    def __init__(self, grid, health=30, maxhealth=30, speed=1, accuracy=2, flatDamage = 2, damageRange=2, damageMod=2, vision=3, armor=10, phasing = False, name = None, effect = dict()):
-        # self.xpos = xpos
-        # self.ypos = ypos
-        self.grid = grid        
+    def __init__(self, grid, direction="U", speed=1, phasing = False, name = None, effect = dict()):
+        self.grid = grid       
+        self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
-        self.health = health
-        self.maxhealth = maxhealth
         self.effect = effect
-        self.accuracy = accuracy
-        self.flatDamage = flatDamage
-        self.damageRange = damageRange
-        self.damageMod = damageMod
-        self.vision = vision #sight radius
-        self.armor = armor
         self.phasing = phasing
+        self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
+
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
+
     def damage(self):
         return randint(1,self.damageRange)+self.flatDamage #roll a damageRange-sided dice and add flatDamage to the roll
+
     def attack(this,that):
         if this.attackRoll() >= that.armor:
             damage = this.damage()
@@ -49,11 +51,15 @@ class Entity(object):
             if this.name!="You":
                 return "{} hits {} for {} damage!".format(str(this),str(that),damage)
             return "{} hit {} for {} damage!".format(str(this),str(that),damage)
-        return "{} misses {}!".format(str(this),str(that))
+        if this.name!="You":
+            return "{} misses {}!".format(str(this),str(that))
+        return "{} miss {}!".format(str(this),str(that))
+
     def effected(self,effect_specific):
     	self.effect[effect_specific] = True
     	p = ''
     	return p.join(["You've been ",effect_specific,'!'])
+
     def active_effects(self):
     	effect_list=list()
     	for x in self.effect:
@@ -61,22 +67,32 @@ class Entity(object):
     			effect_list.append(x)
     	return effect_list
 
+    def facingCoordinates(self):    # the coordinates of the block you are facing
+        return (self.x+self.directionCoordinates[self.direction][0], self.y+self.directionCoordinates[self.direction][1])
+
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self,x,y, direction="U", health = 100, maxhealth = 100, inventory = dict(), name = "You"):
-        Entity.__init__(self,grid)
+    def __init__(self,x,y,grid, name = "You"):
+        Entity.__init__(self,grid) #grid is a global variable which needs to be defined before initializing any entities.
+        # print self.directionCoordinates
         self.x = x
         self.y = y
-        # self.history = (xpos,ypos, xpos, ypos)
-        self.direction = direction #direction can be U for up, D for down, L for left, R for right
-        # self.speed = speed
-        self.health = health
-        self.maxhealth = maxhealth
-        self.inventory = inventory
+        self.direction = "U"
+        self.health = 100
+        self.maxhealth = 100
+        self.armor = 10
+        self.accuracy = 2
+        self.flatDamage = 2
+        self.damageRange = 2
+        self.damageMod = 2
+        self.inventory = dict()
         self.name = name
+
+        
     def __str__(self):
         return self.name
+
     def editinventory(self,Item,add=True): #add is whether the item is being added or removed. if True, the item is being added, if False, the item is being removed.
     	quantity = self.inventory.get(Item,0)
     	if add == True:
@@ -87,34 +103,73 @@ class Player(Entity):
     	if quantity == 0:
     		del self.inventory[Item]
 
+
 class Monster(Entity):
-    def __init__(self): #speed =1,  flatDamage=0, armor=0):
+    def __init__(self, player, grid): #speed =1,  flatDamage=0, armor=0):
         Entity.__init__(self,grid)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
         self.name = None
+        self.seenrange = 8
+        self.aggrorange = 5
+        self.player = player
+        # self.grid = grid #we shouldn't need this, since Entity takes grid
+
+    def checkstatus(self):
+        if abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange:
+            self.seen = True
+        if abs(self.x - self.player.x)<=self.aggrorange or abs(self.y - self.player.y)<=self.aggrorange:
+            self.aggro = True
+
     def passiveMove(self):
-        # if self.seen = True:
         direction = [(1,0),(0,1),(-1,0),(0,-1)]
-        if self.grid[self.x+1,self.y].collides():
-            direction.remove((1,0))
-        if self.grid[self.x,self.y+1].collides():
-            direction.remove((0,1))
-        if self.grid[self.x-1,self.y].collides():
-            direction.remove((-1,0))
-        if self.grid[self.x,self.y-1].collides():
-            direction.remove((0,-1))
-        move = direction[randint(0,3)]
+        if self.phasing == False:
+            if self.grid[self.y][self.x+1].collides():
+                direction.remove((1,0))
+            if self.grid[self.y+1][self.x].collides():
+                direction.remove((0,1))
+            if self.grid[self.y][self.x-1].collides():
+                direction.remove((-1,0))
+            if self.grid[self.y-1][self.x].collides():
+                direction.remove((0,-1))
+        move = direction[randint(0,len(direction)-1)]
         self.x+=move[0]
         self.y+=move[1]
-    def aggressiveMove(self,that):
-        pass
+
+    def aggressiveMove(self): #moves monster by match x -> match y method. Doesn't try to move into player space (do we want it to?) 
+        if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
+            if self.x>self.player.x+1 and not self.grid[self.y][self.x-1].collides():
+                self.x-=1
+            elif self.x<self.player.x-1 and not self.grid[self.y][self.x+1].collides():
+                self.x+=1
+            elif self.y>self.player.y+1 and not self.grid[self.y-1][self.x].collides():
+                self.y-=1
+            elif self.y<self.player.y-1 and not self.grid[self.y+1][self.x].collides():
+                self.y+=1
+        else:
+            if self.x>self.player.x+1:
+                self.x-=1
+            elif self.x<self.player.x-1:
+                self.x+=1
+            elif self.y>self.player.y+1:
+                self.y-=1
+            elif self.y<self.player.y-1:
+                self.y+=1
+
+    def decide(self): #monster checks its own status, then takes either a move or an attack action. We assume monster is melee.
+        self.checkstatus()
+        if self.aggro == True:
+            if abs(self.x-self.player.x) == 0 and abs(self.y-self.player.y) == 1 or abs(self.x-self.player.x) == 1 and abs(self.y-self.player.y) == 0:
+              self.attack(player)
+            self.aggressiveMove
+        elif self.seen == True:
+            self.passiveMove
 
 
 
 class Zombie(Monster):
-    def __init__(self,x,y):
-        Monster.__init__(self)
+    def __init__(self,x,y, player, grid):
+        Monster.__init__(self, player, grid)
         self.x = x
         self.y = y
         self.health = 30
@@ -127,8 +182,8 @@ class Zombie(Monster):
         return "Zombie"
 
 class Ghost(Monster):
-    def __init__(self,x,y):
-        Monster.__init__(self)
+    def __init__(self,x,y, player, grid):
+        Monster.__init__(self, player, grid)
         self.x = x
         self.y = y
         self.health = 20
@@ -241,32 +296,31 @@ class Potion(Item):
 		self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
 		self = Item(self,self.name,self.description,self.use_description,self.effect)
 
+if __name__ == "__main__":
+    player = Player(0,0, "grid")
+    d = []
+    for i in range (5):
+        zombie = Zombie(randint(1,20),randint(1,20), player, "grid")
+        d.append(zombie)
+    for monster in d:
+        monster.checkstatus()
+        print (monster.x,monster.y),monster.seen,monster.aggro
 
-
-
-
-
-
-
-
-
-a = Player(0,0)
-b = Zombie(1,1)
-c = Ghost(2,2)
-print b.attack(a)
-print a.attack(b)
-print c.attack(a)
-print a.inventory
-jar = Item('Jar','an empty glass jar.')
-print jar.pickup(a)
-print a.inventory
-frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
-print frog.pickup(a)
-print a.inventory
-print frog.use(a)
-heal = Potion('cure',1,'poisoned')
-print heal.pickup(a)
-print a.effected('poisoned')
-print a.active_effects()
-print heal.use(a)
-print a.active_effects()
+    c = Ghost(2,2, player, "grid")
+    # print b.attack(a)
+    print player.attack(c)
+    print c.attack(player)
+    # print a.inventory
+    # jar = Item('Jar','an empty glass jar.')
+    # print jar.pickup(a)
+    # print a.inventory
+    # frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
+    # print frog.pickup(a)
+    # print a.inventory
+    # print frog.use(a)
+    # heal = Potion('cure',1,'poisoned')
+    # print heal.pickup(a)
+    # print a.effected('poisoned')
+    # print a.active_effects()
+    # print heal.use(a)
+    # print a.active_effects()

@@ -1,10 +1,11 @@
 import time
 import pygame
 import pickle
+from pygame.locals import QUIT, KEYDOWN, MOUSEMOTION
 
 from dungeonGraphics import DungeonModelView
 from interfaceClasses import PyGameKeyboardController
-from Dungeon import Dungeon
+import coreMechanics
 import pickle
 
 
@@ -14,19 +15,20 @@ if __name__ == '__main__':
     screenX = 1080
     screenY = 720
     size = (screenX, screenY)
-    screen = pygame.display.set_mode(size)
-    #model = Dungeon(2*72,2*72, method="whole")
-    model = pickle.load(open("saves/pregeneratedDungeon.txt",'r'))
     
+    if raw_input("Would you like to start where you left off? [y/n]") == "y":
+        model = coreMechanics.load("saves/last_save.dun")
+    else:
+        model = pickle.load(open("saves/pregeneratedDungeon.txt",'r'))
+
+    screen = pygame.display.set_mode(size)
     view = DungeonModelView(model, screen, size)
     controller = PyGameKeyboardController(model) 
+
     running = True
     view.display()
     while running:
-        time.sleep(.25)
-
-        events = pygame.event.get()
-        if len(events) > 0:
-            running = controller.handle_event(events[-1])
-
+        time.sleep(.15)
+        running = controller.handle_all_events(pygame.event.get())
+        model.update()
         view.display()
