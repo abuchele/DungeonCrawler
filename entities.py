@@ -12,7 +12,7 @@ It's a bit more of a pain to initialize (more variables required) but we can cha
 """
 
 from random import randint
-
+import pygame
 
 
 """Changes:"""
@@ -30,15 +30,15 @@ from random import randint
 
 
 class Entity(object):
-    def __init__(self, grid, direction="U", speed=1, phasing = False, name = None, effect = dict()):
+    def __init__(self, grid, direction="U", speed=1, phasing = False, name = None, effect = dict(), hasAttacked = False):
         self.grid = grid       
         self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
         self.effect = effect
         self.phasing = phasing
         self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
-        self.hasAttacked = False
         self.moving = False
+        self.hasAttacked = hasAttacked
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
@@ -47,20 +47,24 @@ class Entity(object):
         return randint(1,self.damageRange)+self.flatDamage #roll a damageRange-sided dice and add flatDamage to the roll
 
     def attack(this,that):
-        if this.attackRoll() >= that.armor:
-            damage = this.damage()
-            that.health -= damage
-            if this.name!="You":
-                return "{} hits {} for {} damage!".format(str(this),str(that),damage)
-            
-            direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
-            """Pseudocode"""
-            # DISPLAY pygame.rotate(this.attackSprite, direction_to_angle[this.direction]) AT (this.x+this.directionCoordinates[0],this.y+this.directionCoordinates[1])
-            return "{} hit {} for {} damage!".format(str(this),str(that),damage)
+        try:
+            if this.attackRoll() >= that.armor:
+                damage = this.damage()
+                that.health -= damage
+                if this.name!="You":
+                    return "{} hits {} for {} damage!".format(str(this),str(that),damage)
+                
+                
+                """Pseudocode"""
+                # DISPLAY pygame.rotate(this.attackSprite, direction_to_angle[this.direction]) AT (this.x+this.directionCoordinates[0],this.y+this.directionCoordinates[1])
+                return "{} hit {} for {} damage!".format(str(this),str(that),damage)
 
-        if this.name!="You":
-            return "{} misses {}!".format(str(this),str(that))
-        return "{} miss {}!".format(str(this),str(that))
+            if this.name!="You":
+                return "{} misses {}!".format(str(this),str(that))
+            return "{} miss {}!".format(str(this),str(that))
+            this.hasAttacked = True
+        except AttributeError:
+            this.hasAttacked = True
 
     def effected(self,effect_specific):
     	self.effect[effect_specific] = True
@@ -86,8 +90,7 @@ class Entity(object):
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
     def __init__(self,grid,x,y, name = "You"):
-        Entity.__init__(self,grid, direction="U") #grid is a global variable which needs to be defined before initializing any entities.
-        # print self.directionCoordinates
+        Entity.__init__(self,grid) #grid is a global variable which needs to be defined before initializing any entities.
         self.x = x
         self.y = y
         self.prex = x
@@ -101,9 +104,10 @@ class Player(Entity):
         self.damageMod = 2
         self.inventory = dict()
         self.name = name
-        self.attackSprite = "test"
         self.sprite = (0,0)
         self.steps = 0
+        self.attackSprite = 3 #sprites is a list of .png images, so this calls sprites[self.attackSprite]
+        self.hasAttacked = False
         
     def __str__(self):
         return self.name
@@ -335,7 +339,7 @@ class Potion(Item):
 		self = Item(self,self.name,self.description,self.use_description,self.effect)
 
 if __name__ == "__main__":
-    player = Player(0,0, "grid")
+    player = Player("grid", 0,0)
     d = []
     for i in range (5):
         zombie = Zombie(randint(1,20),randint(1,20), player, "grid")
