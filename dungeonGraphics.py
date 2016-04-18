@@ -45,7 +45,6 @@ class DungeonModelView(object):
     def display(self):
         """
         Draws all entities, blocks, minimaps, etc. to the screen and displays
-        to be called once per tick
         """
         pSpriteInd = self.model.player.sprite
 
@@ -87,6 +86,9 @@ class DungeonModelView(object):
             self.screen.blit(self.pauseScreen, (0,0))
         elif self.model.state == "D":
             self.screen.blit(self.dialogueBox, (0,0))
+            paragraph = self.model.currentParagraph()
+            for line in paragraph:
+                self.screen.blit(line, (30,30))
 
         pygame.display.update()
 

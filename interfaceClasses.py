@@ -30,7 +30,7 @@ class PyGameKeyboardController(object):
                         return True
                 elif self.model.state == "D":
                     if event.type == KEYDOWN:
-                        print "Blah blah blah"
+                        self.model.advance_dialogue()
                         return True
             pygame.event.clear()  #empties queue
         return True
