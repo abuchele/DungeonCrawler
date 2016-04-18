@@ -41,24 +41,26 @@ class Dungeon(object):
 		count = 0
 		for y in range(0,self.h-1):
 			for x in range(0,self.w-1):
-				if not self.grid[y][x].collides() and count<monsterNumber and rng.random()<float(monsterNumber)/5000:
+				if not self.grid[y][x].collides and count<monsterNumber and rng.random()<float(monsterNumber)/5000:
 					if rng.randint(0,1) == 0:
-						zombie = entities.Zombie(x,y,self.Player,self.grid)
+						zombie = entities.Zombie(x,y,self.player,self.grid)
 						newlist = self.monstercoords.get((x,y),[])
 						newlist.append(zombie)
 						self.monstercoords[(x,y)] = newlist
-						self.monsterlist.append[zombie]
+						self.monsterlist.append(zombie)
 						count +=1
 					else:
-						ghost = entities.Ghost(x,y,self.Player,self.grid)
+						ghost = entities.Ghost(x,y,self.player,self.grid)
 						newlist = self.monstercoords.get((x,y),[])
 						newlist.append(ghost)
 						self.monstercoords[(x,y)] = newlist
-						self.monsterlist.append[ghost]
+						self.monsterlist.append(ghost)
 						count +=1
 
 	def update(self):
 		if self.state == "R":	# it doesn't update if the game is paused
+			self.player.update()
+
 			if self.player.x == self.savePoints[self.last_save][0] and self.player.y == self.savePoints[self.last_save][1]:
 				self.save("saves/last_save.dun")
 				self.last_save += 1
@@ -72,14 +74,16 @@ class Dungeon(object):
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
 						print self.player.effected("killed")
 
-			if rng.random() < 0.006:
+			if rng.random() < 0.003:
 				self.last_action = rng.choice(
 					["You catch a waft of something rotting.",
 					"A cold breeze blows through.",
 					"You hear a faint, distant moan.",
 					"A cold chill runs down your spine.",
 					"A bit of moisture drips onto your shoulder.",
-					"You think you hear screaming."])
+					"You think you hear screaming.",
+					"Something moves in the corner of your eye.",
+					"You think you hear footsteps."])
 
 
 	def getBlock(self,x,y):

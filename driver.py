@@ -23,12 +23,16 @@ if __name__ == '__main__':
 
     screen = pygame.display.set_mode(size)
     view = DungeonModelView(model, screen, size)
-    controller = PyGameKeyboardController(model) 
+    controller = PyGameKeyboardController(model)
+    events = []
 
     running = True
     view.display()
     while running:
-        time.sleep(.15)
-        running = controller.handle_all_events(pygame.event.get())
+        end_time = time.time()+0.2
+        running = controller.handle_all_events(events)
         model.update()
         view.display()
+        events = [] # I know what you're thinking: "What is this convoluted events variable? pygame does all that automatically. This variable should be entirely unnecessary to make the game function properly." to which I respond, "Yes, it should."
+        while time.time() < end_time:
+            events = events+pygame.event.get()
