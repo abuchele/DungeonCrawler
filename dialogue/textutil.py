@@ -46,10 +46,8 @@ class TextUtility(object):
 			Also requires a rect tuple parameter, the size of the text box, and
 			a color tuple, the color of the text. 
 		"""
-		n = 2	# the number of lines per box 
+		n = 4	# the number of lines per box 
 		x, y, w, h = rect
-		fontHeight = self.myFont.size("Tg")[1]
-		line_spacing = 2
 
 		dialogue_list = self.pull(convo_id) #Get the list of dialogue lines
 		chat_list = [] #The list of resulting dialogues from breaking up the dialogue to fit.  
@@ -63,6 +61,7 @@ class TextUtility(object):
 				next_word = words.pop(0)								# look at the next word
 				if self.myFont.size(curr_line+" "+next_word)[0] > w:	# if this word would make the line too wide
 					image = self.myFont.render(curr_line, True, color)	# take the line as it is
+					line_list.append(image)
 					curr_line = next_word
 				else:													# otherwise
 					curr_line = curr_line+" "+next_word					# keep adding to this line

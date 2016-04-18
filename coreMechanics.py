@@ -4,6 +4,7 @@ import entities
 import pickle
 import random as rng
 from dialogue.textutil import TextUtility
+import pygame
 
 
 
@@ -122,8 +123,9 @@ class Dungeon(object):
 	def start_dialogue(self, conv_id):	# enters dialogue mode
 		self.state = "D"
 		self.text = TextUtility()
-		self.lines = self.text.text_wrapper(conv_id, (20,20,680,150), (255,0,0))
+		self.lines = self.text.text_wrapper(conv_id, (20,20,660,150), (0,0,0))
 		self.lnInd = 0
+		pygame.key.set_repeat()
 
 
 	def advance_dialogue(self):	# moves to the next line
@@ -132,6 +134,7 @@ class Dungeon(object):
 			self.state = "R"				# resume the game
 			self.text = None				# clear these variables
 			self.lines = None				# because they take up too much space
+			pygame.key.set_repeat(50,50)
 
 
 	def currentParagraph(self):				# the surface that represents the current bit of dialogue

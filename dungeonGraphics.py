@@ -87,8 +87,8 @@ class DungeonModelView(object):
         elif self.model.state == "D":
             self.screen.blit(self.dialogueBox, (0,0))
             paragraph = self.model.currentParagraph()
-            for line in paragraph:
-                self.screen.blit(line, (30,30))
+            for y, line in enumerate(paragraph):
+                self.screen.blit(line, (30,30+30*y))
 
         pygame.display.update()
 
