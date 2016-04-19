@@ -7,3 +7,66 @@ Console: This shouldn't be used for anything but testing.$$
 Player: Wow! I wonder if the text will render correctly if I say something really really long that takes up multiple lines like this one right here that I am currently saying that will almost definitely spill over into multiple lines if the program renders correctly. Hm, I'm not sure if this is long enough. Just for good measure, let me get a nice big monologue in here. Hm, what's a good monologue? Didn't Hamlet have a nice big monologue at some point? You know, after everyone else died? Maybe I'll recite that. Erm, nah. This is probably long enough. I'm too lazy to go look that up.$$
 end_0000
 
+id=0001
+Mr.E: Hey you!  Yeah you!  Listen up here!$$
+Player: ...$$
+Mr.E: Is that any way to treat this poor old man who strained his back pulling you from the river?$$
+Player: ...$$
+Mr.E: Oh, I get it, you're one of them silent protagonists, huh?  Well, I guess that means I'm the poor chump who has to put you through the tutorial!$$S
+Player: !!$$
+Mr.E: I see, the word "Tutorial" is enough to send shivers down your spine.  Well, if you haven't noticed yet, I'm Mr.E.$$
+Player: ...$$
+Mr.E: That's a pun you say?  Well, I'm sure it's not intentional.  So kid, you got a name?$$
+end_0001
+
+id=0002
+Mr.E: Your Driver's ID says @player@, huh?  What kind of name is that?  Hahaha.  Back to protocol.  Do you remember anything besides your name?$$
+pPlayer@: ...  I need to find my friend.$$
+Mr.E: Son of a gun!  You CAN talk!$$
+@player@: Do you know where my friend could be?$$
+Mr.E: For the low price of $19.99, I could give you what's going on right now.$$
+Mr.E: ...$$
+Mr.E: You're flat broke, aren't you?$$
+Mr.E: Tell you what, if you call me the "Great, Magnificent, Better than than his crazy deathbeam building contemporary Mr. E" and ask again, I'll reconsider.$
+@player@: ...$$
+Mr.E: The silent treatment, huh?  Well, I'll show you!$$
+The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E: Hahaha.  Thankfully, Mr.E is tightlipped.  He would never let slip such a cliche story like how your friend is in
+the Fields of Encounter, and that you as a player must go through different worlds for a reunion.$$
+@player@: What?$$
+The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E: *cough cough* I said, I would never let slip such a *cough* cliche.$$
+@player@: My friend is in the Fields of Encounter?$$
+Mr.E: Did pulling you from the river affect your comprehension, too?$$
+Mr.E: Anyway, let's see how much you can do.  To move, have whoever's pulling your strings use the WASD or Arrow keys.  To interact with something, have that person put their finger down on the "E" key.$$
+end_0002
+
+id=0003
+Mr.E: Hey, @player@!  Come back, man!  There are ants at the door and you don't want to crush them!$$
+end_0003
+
+id=0004
+Mr.E: Good.  Good.  Well, see?  Isn't interaction nice?$$
+@player@: So how do I beat up monsters?$$
+Mr.E: What?  You think this is a fantasy RPG game?  Well...  If you MUST attack something, have your voodoo magic guideperson press the Q key-- hey wait, don't do that near me!$$
+end_0004
+
+id=0005
+@player@: So how do I check my inventory?  Like the stuff I will undoubtedly pick up?$$
+Mr.E: You're asking me this?  You don't even have a bag on you.  Where do you even keep all your things?$$
+@player@: In my pockets.$$
+Mr.E: ...  Well, for NORMAL people in this world, we access our INVENTORIES with having your controller person press the "return" key.  Use the keys to navigate - q is confirm, and e is return$$
+end_0005
+
+id=0006
+Mr.E: Ugh.  I'm so ashamed.  But I couldn't think of anything else.  As much as it pains me to say this, could you go out and kill 3 monsters for me?$$
+end_0006
+
+id=0007
+Mr.E:  Well done.  But the shame, oh the shame of sending someone out on a boring grindquest.  But in the time that you took to kill those monsters, I have came up with a master plan!  I will have my
+dog, Kerberoge help you with your quest for your friend!  Just meet me at the end of this dungeon.$$
+end_0007
+
+id=0008
+Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$s
+end_0008
+
+
