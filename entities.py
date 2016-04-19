@@ -30,7 +30,7 @@ import pygame
 
 
 class Entity(object):
-    def __init__(self, grid, direction="U", speed=1, phasing = False, name = None, effect = dict(), hasAttacked = False):
+    def __init__(self, grid, x=0, y=0, direction="U", speed=1, phasing = False, name = None, effect = dict(), hasAttacked = False):
         self.grid = grid       
         self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
@@ -38,6 +38,10 @@ class Entity(object):
         self.phasing = phasing
         self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
         self.moving = False
+        self.x = x
+        self.y = y
+        self.prex = x
+        self.prey = y
         self.hasAttacked = hasAttacked
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
@@ -81,8 +85,12 @@ class Entity(object):
     def facingCoordinates(self):    # the coordinates of the block you are facing
         return (self.x+self.directionCoordinates[self.direction][0], self.y+self.directionCoordinates[self.direction][1])
 
+    def getCoords(self, t):   # calculates coordinates based on current x,y, previous x,y, and time t
+        return (self.x*t + self.prex*(1-t), self.y*t + self.prey*(1-t))
+
     def update(self):
-        if self.moving:
+        self.prex, self.prey = (self.x, self.y)
+        if self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides:
             self.x, self.y = self.facingCoordinates()
         self.moving = False
 
@@ -90,9 +98,7 @@ class Entity(object):
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
     def __init__(self,grid,x,y, name = "You"):
-        Entity.__init__(self,grid) #grid is a global variable which needs to be defined before initializing any entities.
-        self.x = x
-        self.y = y
+        Entity.__init__(self,grid,x,y) #grid is a global variable which needs to be defined before initializing any entities.
         self.prex = x
         self.prey = y
         self.health = 100
@@ -141,14 +147,13 @@ class Player(Entity):
 
     def update(self):   # just kind of moves you around
         self.sprite = self.getCurrentSprite()
-        if self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides:
-            self.x, self.y = self.facingCoordinates()
-        self.moving = False
+        Entity.update(self)
+        
 
 
 class Monster(Entity):
-    def __init__(self, player, grid): #speed =1,  flatDamage=0, armor=0):
-        Entity.__init__(self,grid)
+    def __init__(self, x, y, player, grid): #speed =1,  flatDamage=0, armor=0):
+        Entity.__init__(self,grid,x,y)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
         self.name = None
@@ -211,9 +216,7 @@ class Monster(Entity):
 
 class Zombie(Monster):
     def __init__(self,x,y, player, grid):
-        Monster.__init__(self, player, grid)
-        self.x = x
-        self.y = y
+        Monster.__init__(self, x,y, player, grid)
         self.health = 30
         self.accuracy = 3
         self.damageRange = 3
@@ -229,9 +232,7 @@ class Zombie(Monster):
 
 class Ghost(Monster):
     def __init__(self,x,y, player, grid):
-        Monster.__init__(self, player, grid)
-        self.x = x
-        self.y = y
+        Monster.__init__(self, x,y, player, grid)
         self.health = 20
         self.accuracy = 4
         self.damageRange = 2

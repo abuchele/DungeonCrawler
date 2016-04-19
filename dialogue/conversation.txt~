@@ -1,0 +1,9 @@
+Conversation File
+
+id=0000
+Console: This is the text test conversation.$$
+Player: What does it mean?$$
+Console: This shouldn't be used for anything but testing.$$
+Player: Wow! I wonder if the text will render correctly if I say something really really long that takes up multiple lines like this one right here that I am currently saying that will almost definitely spill over into multiple lines if the program renders correctly.$$
+end_0000
+

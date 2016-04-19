@@ -3,6 +3,8 @@ from terrainUtils import Null
 import entities
 import pickle
 import random as rng
+from dialogue.textutil import TextUtility
+import pygame
 
 
 
@@ -26,7 +28,11 @@ class Dungeon(object):
 
 		self.state = "R"	# R for running, P for paused, and D for dialogue
 		self.monsterlist = [] #contains all the monster objects
-		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at that coordinate
+		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
+
+		self.text = None	# the class that will help to organize the dialogue
+		self.lnInd = 0		# the line number in this conversation
+		self.lines = None	# the list of surfaces that represent this conversation
 
 
 	def __str__(self):
@@ -107,11 +113,32 @@ class Dungeon(object):
 			return
 		elif action[0] == "$":
 			if action[1] == "D":
-				self.state = "D"
+				self.start_dialogue(int(action[2:]))
 			else:
-				raise TypeError("What the heck does %{} mean?!".format(action[1]))
+				raise TypeError("What the heck does ${} mean?".format(action[1]))
 		else:
 			self.last_action = action
+
+
+	def start_dialogue(self, conv_id):	# enters dialogue mode
+		self.state = "D"
+		self.text = TextUtility()
+		self.lines = self.text.text_wrapper(conv_id, (20,20,660,150), (0,0,0))
+		self.lnInd = 0
+		pygame.key.set_repeat()
+
+
+	def advance_dialogue(self):	# moves to the next line
+		self.lnInd += 1
+		if self.lnInd >= len(self.lines):	# if the dialogue is over
+			self.state = "R"				# resume the game
+			self.text = None				# clear these variables
+			self.lines = None				# because they take up too much space
+			pygame.key.set_repeat(50,50)
+
+
+	def currentParagraph(self):				# the surface that represents the current bit of dialogue
+		return self.lines[self.lnInd]
 
 
 	def save(self, filename):
