@@ -163,35 +163,36 @@ class Monster(Entity):
         # self.grid = grid #we shouldn't need this, since Entity takes grid
 
     def checkstatus(self):
-        if abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange:
-            self.seen = True
-        if abs(self.x - self.player.x)<=self.aggrorange or abs(self.y - self.player.y)<=self.aggrorange:
-            self.aggro = True
+        self.seen = (abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange)
+            # self.seen = True
+        self.aggro = (abs(self.x - self.player.x)<=self.aggrorange or abs(self.y - self.player.y)<=self.aggrorange)
+            # self.aggro = True
 
     def passiveMove(self):
         direction = [(1,0),(0,1),(-1,0),(0,-1)]
         if self.phasing == False:
-            if self.grid[self.y][self.x+1].collides():
+            if self.grid[self.y][self.x+1].collides:
                 direction.remove((1,0))
-            if self.grid[self.y+1][self.x].collides():
+            if self.grid[self.y+1][self.x].collides:
                 direction.remove((0,1))
-            if self.grid[self.y][self.x-1].collides():
+            if self.grid[self.y][self.x-1].collides:
                 direction.remove((-1,0))
-            if self.grid[self.y-1][self.x].collides():
+            if self.grid[self.y-1][self.x].collides:
                 direction.remove((0,-1))
         move = direction[randint(0,len(direction)-1)]
         self.x+=move[0]
         self.y+=move[1]
+        print (self.x,self.y), "Passively Moving"
 
     def aggressiveMove(self): #moves monster by match x -> match y method. Doesn't try to move into player space (do we want it to?) 
         if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
-            if self.x>self.player.x+1 and not self.grid[self.y][self.x-1].collides():
+            if self.x>self.player.x+1 and not self.grid[self.y][self.x-1].collides:
                 self.x-=1
-            elif self.x<self.player.x-1 and not self.grid[self.y][self.x+1].collides():
+            elif self.x<self.player.x-1 and not self.grid[self.y][self.x+1].collides:
                 self.x+=1
-            elif self.y>self.player.y+1 and not self.grid[self.y-1][self.x].collides():
+            elif self.y>self.player.y+1 and not self.grid[self.y-1][self.x].collides:
                 self.y-=1
-            elif self.y<self.player.y-1 and not self.grid[self.y+1][self.x].collides():
+            elif self.y<self.player.y-1 and not self.grid[self.y+1][self.x].collides:
                 self.y+=1
         else:
             if self.x>self.player.x+1:
@@ -202,15 +203,16 @@ class Monster(Entity):
                 self.y-=1
             elif self.y<self.player.y-1:
                 self.y+=1
+        print (self.x,self.y), "Aggressively Moving"
 
     def decide(self): #monster checks its own status, then takes either a move or an attack action. We assume monster is melee.
         self.checkstatus()
         if self.aggro == True:
             if abs(self.x-self.player.x) == 0 and abs(self.y-self.player.y) == 1 or abs(self.x-self.player.x) == 1 and abs(self.y-self.player.y) == 0:
-              self.attack(player)
-            self.aggressiveMove
+              self.attack(self.player)
+            self.aggressiveMove()
         elif self.seen == True:
-            self.passiveMove
+            self.passiveMove()
 
 
 

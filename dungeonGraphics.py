@@ -58,13 +58,21 @@ class DungeonModelView(object):
 
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
-                block = self.model.getBlock(pxr+dx, pyr+dy)
                 blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
+                monsters = self.model.activemonstercoords.get((pxr+dx,pyr+dy),0) #this is a list
+
+                block = self.model.getBlock(pxr+dx, pyr+dy)
+                
 
                 if self.visible[(dx,dy)]:                                       # if it is visible,
-                    self.screen.blit(self.sprites[block.sprite], blockCoords)   # just draw it
+                    
+                    self.screen.blit(self.sprites[block.sprite], blockCoords)
+                    if monsters != 0:
+                        self.screen.blit(self.monsterSprites[monsters[0].sprite],blockCoords)# just draw it
                     self.minimap.set_at((pxr+dx, pyr+dy), block.color)          # and mark it on the minimap
                     block.explored = True                                       # and remember it for later
+
+
                 elif block.explored:                                            # if it is not visible but we've been here before
                     self.screen.blit(self.shadows[block.sprite], blockCoords)   # draw it, but darker
                 else:                                                           # if we don't know what it looks like
