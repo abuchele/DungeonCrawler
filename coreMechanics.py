@@ -29,7 +29,7 @@ class Dungeon(object):
 		self.state = "R"	# R for running, P for paused, and D for dialogue
 		self.monsterlist = [] #contains all the monster objects
 		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
-		self.activemonsterlist = []
+		# self.activemonsterlist = []
 		self.activemonstercoords = {}
 		self.text = None	# the class that will help to organize the dialogue
 		self.lnInd = 0		# the line number in this conversation
@@ -85,7 +85,7 @@ class Dungeon(object):
 				for dx in range(7):
 					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),0) #this is a list of monsters
 					if monsters != 0:
-						self.activemonsterlist += monsters
+						# self.activemonsterlist += monsters
 						for monster in monsters:
 							monster.decide()
 							# self.activemonsterlist.append(monster)
