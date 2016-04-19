@@ -25,8 +25,12 @@ def generate(w,h,method):
 		return generateMazes(w,h, 12, 300, 3, False)
 	elif method == "cells":
 		return generateCells(w,h, 3, 4, 0.33, 3)
-	else:
+	elif method == "RBFSM":
+		return generateRBFSM(w,h)
+	elif method == "whole":
 		return generateWhole(w/2,h/2)
+	else:
+		raise TypeError(method+" is not a real thing.")
 
 
 def generatePanel(w,h):
@@ -69,6 +73,29 @@ def generatePanel(w,h):
 	for y in range(0,h+1):
 		grid[y][0] = Metal()
 		grid[y][h] = Metal()
+
+	return [grid, [(w/2,h/2)]]
+
+
+def generateRBFSM(w,h):
+	"""
+	A true labyrinth, it produces a maze of twisty corridors and dead ends
+	"""
+	grid = []
+	for y in range(0,h+1):
+		row = []
+		for x in range(0,w+1):
+			if x <= 0 or x >= w or y <= 0 or y >= h or rng.random() < 0.9:
+				row.append(Metal())
+			else:
+				row.append(Glass())
+		grid.append(row)
+
+	randomQueueFlood(w/2+1,h/2+1,grid)
+
+	for x in range(w*3/8, w*5/8):
+		for y in range(h*3/8, h*5/8):
+			grid[y][x] = Floor()
 
 	return [grid, [(w/2,h/2)]]
 
@@ -309,7 +336,7 @@ def generateWhole(w, h):
 	Generates a huge dungeon incorporating the piece, panel, cellular, and maze algorithms
 	w, h = the dimensions of each section
 	"""
-	sectors = [generate(w,h,"piece")[0], generate(w,h,"panel")[0], generate(w,h,"cells")[0], generate(w,h,"maze1")[0]]
+	sectors = [generate(w,h,method)[0] for method in ["piece","RBFSM","cells","maze1"]]
 
 	grid = []
 	for y in range(h+1):
