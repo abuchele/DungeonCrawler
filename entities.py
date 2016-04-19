@@ -94,6 +94,9 @@ class Entity(object):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
 
+    def interact(self,player):
+        return "You poke the thing."
+
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
@@ -163,35 +166,36 @@ class Monster(Entity):
         # self.grid = grid #we shouldn't need this, since Entity takes grid
 
     def checkstatus(self):
-        if abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange:
-            self.seen = True
-        if abs(self.x - self.player.x)<=self.aggrorange or abs(self.y - self.player.y)<=self.aggrorange:
-            self.aggro = True
+        self.seen = (abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange)
+            # self.seen = True
+        self.aggro = (abs(self.x - self.player.x)<=self.aggrorange or abs(self.y - self.player.y)<=self.aggrorange)
+            # self.aggro = True
 
     def passiveMove(self):
         direction = [(1,0),(0,1),(-1,0),(0,-1)]
         if self.phasing == False:
-            if self.grid[self.y][self.x+1].collides():
+            if self.grid[self.y][self.x+1].collides:
                 direction.remove((1,0))
-            if self.grid[self.y+1][self.x].collides():
+            if self.grid[self.y+1][self.x].collides:
                 direction.remove((0,1))
-            if self.grid[self.y][self.x-1].collides():
+            if self.grid[self.y][self.x-1].collides:
                 direction.remove((-1,0))
-            if self.grid[self.y-1][self.x].collides():
+            if self.grid[self.y-1][self.x].collides:
                 direction.remove((0,-1))
         move = direction[randint(0,len(direction)-1)]
         self.x+=move[0]
         self.y+=move[1]
+        print (self.x,self.y), "Passively Moving"
 
     def aggressiveMove(self): #moves monster by match x -> match y method. Doesn't try to move into player space (do we want it to?) 
         if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
-            if self.x>self.player.x+1 and not self.grid[self.y][self.x-1].collides():
+            if self.x>self.player.x+1 and not self.grid[self.y][self.x-1].collides:
                 self.x-=1
-            elif self.x<self.player.x-1 and not self.grid[self.y][self.x+1].collides():
+            elif self.x<self.player.x-1 and not self.grid[self.y][self.x+1].collides:
                 self.x+=1
-            elif self.y>self.player.y+1 and not self.grid[self.y-1][self.x].collides():
+            elif self.y>self.player.y+1 and not self.grid[self.y-1][self.x].collides:
                 self.y-=1
-            elif self.y<self.player.y-1 and not self.grid[self.y+1][self.x].collides():
+            elif self.y<self.player.y-1 and not self.grid[self.y+1][self.x].collides:
                 self.y+=1
         else:
             if self.x>self.player.x+1:
@@ -202,21 +206,26 @@ class Monster(Entity):
                 self.y-=1
             elif self.y<self.player.y-1:
                 self.y+=1
+        print (self.x,self.y), "Aggressively Moving"
 
     def decide(self): #monster checks its own status, then takes either a move or an attack action. We assume monster is melee.
         self.checkstatus()
         if self.aggro == True:
             if abs(self.x-self.player.x) == 0 and abs(self.y-self.player.y) == 1 or abs(self.x-self.player.x) == 1 and abs(self.y-self.player.y) == 0:
-              self.attack(player)
-            self.aggressiveMove
+              self.attack(self.player)
+            self.aggressiveMove()
         elif self.seen == True:
-            self.passiveMove
+            self.passiveMove()
+
+    def interact(self,player):
+        return "You try to poke the "+self.name+", but it swats your hand away."
 
 
 
 class Zombie(Monster):
     def __init__(self,x,y, player, grid):
         Monster.__init__(self, x,y, player, grid)
+        self.name = "Zombie"
         self.health = 30
         self.accuracy = 3
         self.damageRange = 3
@@ -233,6 +242,7 @@ class Zombie(Monster):
 class Ghost(Monster):
     def __init__(self,x,y, player, grid):
         Monster.__init__(self, x,y, player, grid)
+        self.name = "Ghost"
         self.health = 20
         self.accuracy = 4
         self.damageRange = 2
@@ -242,7 +252,34 @@ class Ghost(Monster):
         self.phasing = True
         self.sprite = 1
     def __str__(self):
-        return "Ghost"        
+        return "Ghost"
+
+
+class NPC(Entity):
+    def __init__(self,grid,x,y,player,checklist,name,sprite,convID=0):
+        Entity.__init__(self,grid,x,y)
+        self.name = name
+        self.sprite = sprite
+        self.convID = convID
+        self.checklist = checklist
+        self.player = player
+
+    def interact(self,player):
+        return "$D{}".format(self.convID)
+
+
+class MrE(NPC):
+    def __init__(self, grid, x, y, player, checklist):
+        NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 1)
+
+    def interact(self,player):
+        if not met_Mr_E:
+            return "$D001"
+        elif not tutorial_Dialogue_Finished:
+            return "$D002"
+        else:
+            return "$D003"
+
 
 # allows easy creation/organization of different attacks and their stats (useful if a creature has more than one attack)
 class Attack(Entity):

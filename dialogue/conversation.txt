@@ -66,7 +66,7 @@ dog, Kerberoge help you with your quest for your friend!  Just meet me at the en
 end_0007
 
 id=0008
-Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$s
+Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  I messed that up-- anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$
 end_0008
 
 

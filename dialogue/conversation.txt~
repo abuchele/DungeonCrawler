@@ -46,13 +46,27 @@ end_0003
 id=0004
 Mr.E: Good.  Good.  Well, see?  Isn't interaction nice?$$
 @player@: So how do I beat up monsters?$$
-Mr.E: What?  You think this is a fantasy RPG game?  If you must attack something, have your voodoo magic guideperson press the Q key-- hey wait, don't do that near me!$$
+Mr.E: What?  You think this is a fantasy RPG game?  Well...  If you MUST attack something, have your voodoo magic guideperson press the Q key-- hey wait, don't do that near me!$$
 end_0004
 
 id=0005
 @player@: So how do I check my inventory?  Like the stuff I will undoubtedly pick up?$$
 Mr.E: You're asking me this?  You don't even have a bag on you.  Where do you even keep all your things?$$
 @player@: In my pockets.$$
-Mr.E: ...  Well, for NORMAL people,
+Mr.E: ...  Well, for NORMAL people in this world, we access our INVENTORIES with having your controller person press the "return" key.  Use the keys to navigate - q is confirm, and e is return$$
+end_0005
+
+id=0006
+Mr.E: Ugh.  I'm so ashamed.  But I couldn't think of anything else.  As much as it pains me to say this, could you go out and kill 3 monsters for me?$$
+end_0006
+
+id=0007
+Mr.E:  Well done.  But the shame, oh the shame of sending someone out on a boring grindquest.  But in the time that you took to kill those monsters, I have came up with a master plan!  I will have my
+dog, Kerberoge help you with your quest for your friend!  Just meet me at the end of this dungeon.$$
+end_0007
+
+id=0008
+Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  I messed that up-- anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$
+end_0008
 
 
