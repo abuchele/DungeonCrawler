@@ -12,7 +12,7 @@ It's a bit more of a pain to initialize (more variables required) but we can cha
 """
 
 from random import randint
-
+import pygame
 
 
 """Changes:"""
@@ -30,14 +30,20 @@ from random import randint
 
 
 class Entity(object):
-    def __init__(self, grid, direction="U", speed=1, phasing = False, name = None, effect = dict()):
+    def __init__(self, grid, x=0, y=0, direction="U", speed=1, phasing = False, name = None, effect = dict(), hasAttacked = False):
         self.grid = grid       
         self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
         self.effect = effect
         self.phasing = phasing
         self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
-
+        self.moving = False
+        self.x = x
+        self.y = y
+        self.prex = x
+        self.prey = y
+        self.hasAttacked = hasAttacked
+        
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
 
@@ -45,15 +51,24 @@ class Entity(object):
         return randint(1,self.damageRange)+self.flatDamage #roll a damageRange-sided dice and add flatDamage to the roll
 
     def attack(this,that):
-        if this.attackRoll() >= that.armor:
-            damage = this.damage()
-            that.health -= damage
+        try:
+            if this.attackRoll() >= that.armor:
+                damage = this.damage()
+                that.health -= damage
+                if this.name!="You":
+                    return "{} hits {} for {} damage!".format(str(this),str(that),damage)
+                
+                
+                """Pseudocode"""
+                # DISPLAY pygame.rotate(this.attackSprite, direction_to_angle[this.direction]) AT (this.x+this.directionCoordinates[0],this.y+this.directionCoordinates[1])
+                return "{} hit {} for {} damage!".format(str(this),str(that),damage)
+
             if this.name!="You":
-                return "{} hits {} for {} damage!".format(str(this),str(that),damage)
-            return "{} hit {} for {} damage!".format(str(this),str(that),damage)
-        if this.name!="You":
-            return "{} misses {}!".format(str(this),str(that))
-        return "{} miss {}!".format(str(this),str(that))
+                return "{} misses {}!".format(str(this),str(that))
+            return "{} miss {}!".format(str(this),str(that))
+            this.hasAttacked = True
+        except AttributeError:
+            this.hasAttacked = True
 
     def effected(self,effect_specific):
     	self.effect[effect_specific] = True
@@ -70,15 +85,22 @@ class Entity(object):
     def facingCoordinates(self):    # the coordinates of the block you are facing
         return (self.x+self.directionCoordinates[self.direction][0], self.y+self.directionCoordinates[self.direction][1])
 
+    def getCoords(self, t):   # calculates coordinates based on current x,y, previous x,y, and time t
+        return (self.x*t + self.prex*(1-t), self.y*t + self.prey*(1-t))
+
+    def update(self):
+        self.prex, self.prey = (self.x, self.y)
+        if self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides:
+            self.x, self.y = self.facingCoordinates()
+        self.moving = False
+
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self,x,y,grid, name = "You"):
-        Entity.__init__(self,grid) #grid is a global variable which needs to be defined before initializing any entities.
-        # print self.directionCoordinates
-        self.x = x
-        self.y = y
-        self.direction = "U"
+    def __init__(self,grid,x,y, name = "You"):
+        Entity.__init__(self,grid,x,y) #grid is a global variable which needs to be defined before initializing any entities.
+        self.prex = x
+        self.prey = y
         self.health = 100
         self.maxhealth = 100
         self.armor = 10
@@ -88,7 +110,10 @@ class Player(Entity):
         self.damageMod = 2
         self.inventory = dict()
         self.name = name
-
+        self.sprite = (0,0)
+        self.steps = 0
+        self.attackSprite = 3 #sprites is a list of .png images, so this calls sprites[self.attackSprite]
+        self.hasAttacked = False
         
     def __str__(self):
         return self.name
@@ -103,10 +128,32 @@ class Player(Entity):
     	if quantity == 0:
     		del self.inventory[Item]
 
+    def getCurrentSprite(self):   # figures out which sprite to use for the entity
+        if not self.moving:   # if the player has not moved
+            self.steps = 0    # then they use the standing sprite
+        else:
+            if self.steps is not 2:
+                self.steps += 1
+            else:
+                self.steps = 1
+        if self.direction == "U":
+            return (0,self.steps)
+        elif self.direction == "D":
+            return (1,self.steps)
+        elif self.direction == "L":
+            return (2,self.steps)
+        elif self.direction == "R":
+            return (3,self.steps)
+
+    def update(self):   # just kind of moves you around
+        self.sprite = self.getCurrentSprite()
+        Entity.update(self)
+        
+
 
 class Monster(Entity):
-    def __init__(self, player, grid): #speed =1,  flatDamage=0, armor=0):
-        Entity.__init__(self,grid)
+    def __init__(self, x, y, player, grid): #speed =1,  flatDamage=0, armor=0):
+        Entity.__init__(self,grid,x,y)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
         self.name = None
@@ -169,9 +216,7 @@ class Monster(Entity):
 
 class Zombie(Monster):
     def __init__(self,x,y, player, grid):
-        Monster.__init__(self, player, grid)
-        self.x = x
-        self.y = y
+        Monster.__init__(self, x,y, player, grid)
         self.health = 30
         self.accuracy = 3
         self.damageRange = 3
@@ -183,9 +228,7 @@ class Zombie(Monster):
 
 class Ghost(Monster):
     def __init__(self,x,y, player, grid):
-        Monster.__init__(self, player, grid)
-        self.x = x
-        self.y = y
+        Monster.__init__(self, x,y, player, grid)
         self.health = 20
         self.accuracy = 4
         self.damageRange = 2
@@ -297,7 +340,7 @@ class Potion(Item):
 		self = Item(self,self.name,self.description,self.use_description,self.effect)
 
 if __name__ == "__main__":
-    player = Player(0,0, "grid")
+    player = Player("grid", 0,0)
     d = []
     for i in range (5):
         zombie = Zombie(randint(1,20),randint(1,20), player, "grid")

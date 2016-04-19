@@ -21,21 +21,85 @@ class DungeonModelView(object):
         self.minimap = loadMinimap(dungeon.grid)    # the 1 pixel/block map
         self.font = pygame.font.SysFont("Times New Roman", 30, bold=True)
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
-        self.playerSpriteFront = [pygame.image.load("sprites/PlayerFrontStand.png"),pygame.image.load("sprites/PlayerFrontWalk1.png"),pygame.image.load("sprites/PlayerFrontWalk2.png")]
-        self.playerSpriteBack = [pygame.image.load("sprites/PlayerBackStand.png"),pygame.image.load("sprites/PlayerBackWalk1.png"),pygame.image.load("sprites/PlayerBackWalk2.png")]
-        self.playerSpriteLeft = [pygame.image.load("sprites/PlayerLeftStand.png"),pygame.image.load("sprites/PlayerLeftWalk1.png"),pygame.image.load("sprites/PlayerLeftWalk2.png")]
-        self.playerSpriteRight = [pygame.image.load("sprites/PlayerRightStand.png"),pygame.image.load("sprites/PlayerRightWalk1.png"),pygame.image.load("sprites/PlayerRightWalk2.png")]
+
+        spriteNames = [["Stand","Walk1","Walk2"], ["Back","Front","Left","Right"]]
+        self.playerSprites = [[pygame.image.load("sprites/Player"+direc+movem+".png") for movem in spriteNames[0]] for direc in spriteNames[1]]
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
         self.pauseScreen = pygame.image.load("sprites/Paused.png")
-        self.playerSprite = self.playerSpriteFront[0]
-        self.sprites = loadSprites()
-        self.shadows = loadShadowSprites()
-        self.steps = 0
-        self.prex = self.model.player.x
-        self.prey = self.model.player.y
-        self.prevdirection = self.model.player.direction
-        self.prevSprite = self.playerSprite
+        self.dialogueBox = pygame.image.load("sprites/Dialogue_GUI.png")
+        self.playerSprite = self.playerSprites[0][0]
 
+        spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+        self.sprites = loadSprites(spriteNames)
+        self.shadows = loadShadowSprites(spriteNames)
+        self.steps = 0
+
+        self.compose_LOS_list()  # do some preliminary calculations for Line of Sight
+
+        self.visible = dict()
+        for x in [-1,0,1]:
+            for y in [-1,0,1]:
+                self.visible[(x,y)] = True  # keeps track fo which blocks are visible
+        
+
+    def display(self, t):
+        """
+        Draws all entities, blocks, minimaps, etc. to the screen and displays
+        takes input t, a float between 0 and 1 that represents at what point in the tick we are (0=beginning, 1=end)
+        """
+        pSpriteInd = self.model.player.sprite
+        pxr, pyr = (self.model.player.x, self.model.player.y)   # the "real" coordinates
+        pxc, pyc = (self.model.player.getCoords(t))             # the calculated coordinates that produce smoother motion
+
+        for x1,y1,x2,y2 in self.losLst:
+            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(pxr+x2, pyr+y2).transparent
+
+        for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks
+            for dx in range(self.screenBounds[0], self.screenBounds[1]):
+                block = self.model.getBlock(pxr+dx, pyr+dy)
+                blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
+
+                if self.visible[(dx,dy)]:                                       # if it is visible,
+                    self.screen.blit(self.sprites[block.sprite], blockCoords)   # just draw it
+                    self.minimap.set_at((pxr+dx, pyr+dy), block.color)          # and mark it on the minimap
+                    block.explored = True                                       # and remember it for later
+                elif block.explored:                                            # if it is not visible but we've been here before
+                    self.screen.blit(self.shadows[block.sprite], blockCoords)   # draw it, but darker
+                else:                                                           # if we don't know what it looks like
+                    self.screen.blit(self.sprites[0], blockCoords)              # put in a placeholder block
+
+            if dy == 1:
+                self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
+
+        direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
+                
+        pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.size[0]-self.size[1], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
+        self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
+            area = ((self.model.player.x/self.rempSz[0]*self.mimpSz[0], self.model.player.y/self.rempSz[1]*self.mimpSz[1]), self.mimpSz))    # draw the minimap
+
+        self.screen.blit(self.dotSprite, (self.size[1]+int((self.model.player.x+0.5)*self.mimpSz[0]/self.rempSz[0])%self.mimpSz[0]-self.dotSprite.get_width()/2+1,
+            int((self.model.player.y+0.5)*self.mimpSz[1]/self.rempSz[1])%self.mimpSz[1]-self.dotSprite.get_height()/2+1))  # draw the dot on the minimap
+
+        if self.model.player.hasAttacked == True: # draw player attack sprite!
+                    self.screen.blit(pygame.transform.rotate(self.sprites[self.model.player.attackSprite], direction_to_angle[self.model.player.direction]),(self.dispSize[0]/2 + self.model.player.directionCoordinates[self.model.player.direction][0]*self.blockSize[0], self.dispSize[1]/2 + self.model.player.directionCoordinates[self.model.player.direction][1]*self.blockSize[1]))
+        actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
+        self.screen.blit(actionLog, (0, self.size[1]-34))
+
+        hp = 3*100
+        pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
+
+        if self.model.state == "P":
+            self.screen.blit(self.pauseScreen, (0,0))
+        elif self.model.state == "D":
+            self.screen.blit(self.dialogueBox, (0,0))
+            paragraph = self.model.currentParagraph()
+            for y, line in enumerate(paragraph):
+                self.screen.blit(line, (30,30+30*y))
+
+        pygame.display.update()
+
+
+    def compose_LOS_list(self): # does preliminary calculations for line of sight
         self.losLst = []    # the list that will determine line of sight
         for r in range(2,max(self.screenBounds[1],self.screenBounds[3])+1):
             for t in range(-r,r):
@@ -48,76 +112,6 @@ class DungeonModelView(object):
                 if t >= self.screenBounds[0] and t < self.screenBounds[1] and -r >= self.screenBounds[2]:
                     self.losLst.append(drawLOS(t,-r))
 
-        self.visible = dict()
-        for x in [-1,0,1]:
-            for y in [-1,0,1]:
-                self.visible[(x,y)] = True  # keeps track fo which blocks are visible
-        
-
-    def display(self):
-        """
-        Draws all entities, blocks, minimaps, etc. to the screen and displays
-        to be called once per tick
-        """
-        for x1,y1,x2,y2 in self.losLst:
-            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.player.x+x2, self.model.player.y+y2).transparent
-
-        for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks
-            for dx in range(self.screenBounds[0], self.screenBounds[1]):
-                block = self.model.getBlock(self.model.player.x+dx, self.model.player.y+dy)
-                if self.visible[(dx,dy)]:
-                    self.screen.blit(self.sprites[block.sprite], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-                    self.minimap.set_at((self.model.player.x+dx, self.model.player.y+dy), block.color)
-                    block.explored = True
-                elif block.explored:
-                    self.screen.blit(self.shadows[block.sprite], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-                else:
-                    self.screen.blit(self.sprites[0], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-            if dy == 0:
-                if (self.prex - self.model.player.x) == 0 and (self.prey - self.model.player.y) == 0:
-                    if self.prevdirection == self.model.player.direction:
-                        playerSpriteCurrent = self.prevSprite
-                        self.steps = 0
-                else:
-                    if self.steps is not 2:
-                        self.steps += 1
-                    else:
-                        self.steps = 1
-                if self.model.player.direction == "U":
-                    playerSpriteCurrent = self.playerSpriteBack[self.steps]
-                elif self.model.player.direction == "D":
-                    playerSpriteCurrent = self.playerSpriteFront[self.steps]
-                elif self.model.player.direction == "L":
-                    playerSpriteCurrent = self.playerSpriteLeft[self.steps]
-                elif self.model.player.direction == "R":
-                    playerSpriteCurrent = self.playerSpriteRight[self.steps]
-                self.prevSprite = playerSpriteCurrent
-                self.prex = self.model.player.x
-                self.prey = self.model.player.y
-
-              
-
-                self.screen.blit(playerSpriteCurrent, (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
-
-        pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.size[0]-self.size[1], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
-        self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
-            area = ((self.model.player.x/self.rempSz[0]*self.mimpSz[0], self.model.player.y/self.rempSz[1]*self.mimpSz[1]), self.mimpSz))    # draw the minimap
-
-        self.screen.blit(self.dotSprite, (self.size[1]+int((self.model.player.x+0.5)*self.mimpSz[0]/self.rempSz[0])%self.mimpSz[0]-self.dotSprite.get_width()/2+1,
-            int((self.model.player.y+0.5)*self.mimpSz[1]/self.rempSz[1])%self.mimpSz[1]-self.dotSprite.get_height()/2+1))  # draw the dot on the minimap
-
-        
-        actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
-        self.screen.blit(actionLog, (0, self.size[1]-34))
-
-        hp = 3*100
-        pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
-
-        if self.model.paused:
-            self.screen.blit(self.pauseScreen, (0,0))
-
-        pygame.display.update()
-
 
 def loadMinimap(grid):  # creates a minimap for the given block list-list
     output = pygame.Surface((len(grid[0]), len(grid)))
@@ -128,16 +122,16 @@ def loadMinimap(grid):  # creates a minimap for the given block list-list
     return output
 
 
-def loadSprites():
-    return [pygame.image.load("sprites/{}.png".format(name)) for name in ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen"]]
+def loadSprites(filenames):
+    return [pygame.image.load("sprites/{}.png".format(name)) for name in filenames]
 
 
-def loadShadowSprites():
-    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen"]]
+def loadShadowSprites(filenames):
+    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in filenames]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)
-    return (x, y, int(math.floor(0.5+x-x/math.hypot(x,y))), int(math.floor(0.5+y-y/math.hypot(x,y))))
+    return (x, y, int(math.floor(0.5+x-1.4*x/math.hypot(x,y))), int(math.floor(0.5+y-1.4*y/math.hypot(x,y))))
 
 
 

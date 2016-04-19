@@ -3,6 +3,8 @@ from terrainUtils import Null
 import entities
 import pickle
 import random as rng
+from dialogue.textutil import TextUtility
+import pygame
 
 
 
@@ -24,23 +26,51 @@ class Dungeon(object):
 		self.last_save = 0
 		self.savePoints = thing[1] + [(None,None)]
 
-		self.paused = False
+		self.state = "R"	# R for running, P for paused, and D for dialogue
+		self.monsterlist = [] #contains all the monster objects
+		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
+
+		self.text = None	# the class that will help to organize the dialogue
+		self.lnInd = 0		# the line number in this conversation
+		self.lines = None	# the list of surfaces that represent this conversation
 
 
 	def __str__(self):
-		output = "{:03d} {:03d}\n".format(self.player.x,self.player.y)
+		output = ""
 		for row in self.grid:
 			for blk in row:
 				output = output+str(blk)
 			output = output+"\n"
 		return output
 
+	def generateMonsters(self, last_save, monsterNumber = 200):
+		count = 0
+		for y in range(0,self.h-1):
+			for x in range(0,self.w-1):
+				if not self.grid[y][x].collides and count<monsterNumber and rng.random()<float(monsterNumber)/5000:
+					if rng.randint(0,1) == 0:
+						zombie = entities.Zombie(x,y,self.player,self.grid)
+						newlist = self.monstercoords.get((x,y),[])
+						newlist.append(zombie)
+						self.monstercoords[(x,y)] = newlist
+						self.monsterlist.append(zombie)
+						count +=1
+					else:
+						ghost = entities.Ghost(x,y,self.player,self.grid)
+						newlist = self.monstercoords.get((x,y),[])
+						newlist.append(ghost)
+						self.monstercoords[(x,y)] = newlist
+						self.monsterlist.append(ghost)
+						count +=1
 
 	def update(self):
-		if not self.paused:	# it doesn't update if the game is paused
+		if self.state == "R":	# it doesn't update if the game is paused
+			self.player.update()
+
 			if self.player.x == self.savePoints[self.last_save][0] and self.player.y == self.savePoints[self.last_save][1]:
 				self.save("saves/last_save.dun")
 				self.last_save += 1
+				self.generateMonsters(self.last_save)
 
 			if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":	# you can jump over one block of lava
 				if self.getBlock(*self.player.facingCoordinates()).collides:			# if there is no block in front of you
@@ -50,14 +80,16 @@ class Dungeon(object):
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
 						print self.player.effected("killed")
 
-			if rng.random() < 0.006:
+			if rng.random() < 0.003:
 				self.last_action = rng.choice(
 					["You catch a waft of something rotting.",
 					"A cold breeze blows through.",
 					"You hear a faint, distant moan.",
 					"A cold chill runs down your spine.",
 					"A bit of moisture drips onto your shoulder.",
-					"You think you hear screaming."])
+					"You think you hear screaming.",
+					"Something moves in the corner of your eye.",
+					"You think you hear footsteps."])
 
 
 	def getBlock(self,x,y):
@@ -76,6 +108,39 @@ class Dungeon(object):
 		return count
 
 
+	def interp_action(self, action):	# interprets an action (should be a string!)
+		if len(action) <= 0:
+			return
+		elif action[0] == "$":
+			if action[1] == "D":
+				self.start_dialogue(int(action[2:]))
+			else:
+				raise TypeError("What the heck does ${} mean?".format(action[1]))
+		else:
+			self.last_action = action
+
+
+	def start_dialogue(self, conv_id):	# enters dialogue mode
+		self.state = "D"
+		self.text = TextUtility()
+		self.lines = self.text.text_wrapper(conv_id, (20,20,660,150), (0,0,0))
+		self.lnInd = 0
+		pygame.key.set_repeat()
+
+
+	def advance_dialogue(self):	# moves to the next line
+		self.lnInd += 1
+		if self.lnInd >= len(self.lines):	# if the dialogue is over
+			self.state = "R"				# resume the game
+			self.text = None				# clear these variables
+			self.lines = None				# because they take up too much space
+			pygame.key.set_repeat(50,50)
+
+
+	def currentParagraph(self):				# the surface that represents the current bit of dialogue
+		return self.lines[self.lnInd]
+
+
 	def save(self, filename):
 		file = open(filename, 'w')	# just pickles this dungeon to a file
 		pickle.dump(self, file)
@@ -87,11 +152,11 @@ class Dungeon(object):
 
 
 	def pause(self):
-		self.paused = True
+		self.state = "P"
 
 
 	def resume(self):
-		self.paused = False
+		self.state = "R"
 
 
 	def getWidth(self):
@@ -113,3 +178,4 @@ if __name__ == "__main__":
 	doctest.testmod()
 	a = Dungeon(50,50,"fastH")
 	print a.grid
+	print 

@@ -8,25 +8,29 @@ class PyGameKeyboardController(object):
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
             pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1}
-        pygame.key.set_repeat(1,35)
+        pygame.key.set_repeat(50,50)
         self.controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
 
 
     def handle_all_events(self, events):
         if len(events) > 0:
             for event in reversed(events):
-                if self.model.paused:
+                if event.type == QUIT:
+                        return False
+                if self.model.state == "P":
                     if event.type == KEYDOWN:   # if it is paused, any key press resumes the game
                         self.model.resume()
                         return True
-                else:
+                elif self.model.state == "R":
                     if event.type == KEYDOWN and event.key in self.controls:
                         running = self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
                         return True
-                    if event.type == QUIT:
-                        return False
                     if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
                         self.model.pause()
+                        return True
+                elif self.model.state == "D":
+                    if event.type == KEYDOWN:
+                        self.model.advance_dialogue()
                         return True
             pygame.event.clear()  #empties queue
         return True
@@ -36,38 +40,32 @@ class PyGameKeyboardController(object):
         """
         takes a pygame event and executes on it. Returns True if the program should continue running
         """
+        self.model.player.hasAttacked = False
         if event.type == KEYDOWN:
             if event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
                 block_to_interact_with = self.model.getBlock(*blockcoords) #grid is nested lists, (x,y) is grid[y][x]
-                self.model.last_action = block_to_interact_with.interact(self.model.player) # interact with the block and print the result
+                self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
             if event.key == pygame.K_r:
-                targetcoords = controllerDirections[self.model.player.direction]
-                target_to_attack = self.model.grid[self.model.player.y+blockcoords[1]][self.model.player.x+blockcoords[0]]
-                if type(target_to_attack).__name__ != Entity:
-                    return
-                self.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
-            if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                if not self.model.grid[self.model.player.y][self.model.player.x-1].collides:
-                    self.model.player.x -= 1
+                blockcoords = self.model.player.facingCoordinates() #this gives the (x,y) coordinate which you are facing!
+                """If we have a monster list with coordinates, we iterate over the list to see if there's a monster on blockcoords."""
+
+                target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]] #if we find no monster, this attacks a grid square or a block!
+
+                self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
+
+            elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
                 self.model.player.direction = "L"
+                self.model.player.moving = True
             elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                if not self.model.grid[self.model.player.y][self.model.player.x+1].collides:
-                    self.model.player.x += 1
                 self.model.player.direction = "R"
+                self.model.player.moving = True
             elif event.key == pygame.K_UP or event.key == pygame.K_w:
-                if not self.model.grid[self.model.player.y-1][self.model.player.x].collides:
-                    self.model.player.y -=1
                 self.model.player.direction = "U"
+                self.model.player.moving = True
             elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                if not self.model.grid[self.model.player.y+1][self.model.player.x].collides:
-                    self.model.player.y +=1
                 self.model.player.direction = "D"
-            pygame.event.clear()
-            return True
+                self.model.player.moving = True
 
-        if event.type == QUIT:
-            pygame.quit()
-            return False
-
+        pygame.event.clear()
         return True

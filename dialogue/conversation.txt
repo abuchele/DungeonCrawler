@@ -1,0 +1,9 @@
+Conversation File
+
+id=0000
+Console: This is the text test conversation.$$
+Player: What does it mean?$$
+Console: This shouldn't be used for anything but testing.$$
+Player: Wow! I wonder if the text will render correctly if I say something really really long that takes up multiple lines like this one right here that I am currently saying that will almost definitely spill over into multiple lines if the program renders correctly. Hm, I'm not sure if this is long enough. Just for good measure, let me get a nice big monologue in here. Hm, what's a good monologue? Didn't Hamlet have a nice big monologue at some point? You know, after everyone else died? Maybe I'll recite that. Erm, nah. This is probably long enough. I'm too lazy to go look that up.$$
+end_0000
+

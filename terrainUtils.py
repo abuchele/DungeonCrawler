@@ -34,11 +34,15 @@ class Null(Block):
 class NPC(Block): #all we need is an opaque impassable block that can move and talk to you. Take passive move from entities EDIT: I don't think it needs to move
 	def __init__(self):
 		Block.__init__(self)
+		self.color = (200,200,200)
 		self.collides = True
-		self.transparent = False
+		self.transparent = True
+		self.sprite = 14
+		self.convID = 0
 
 	def interact(self,player):
-		return "Hello!"
+		return "$D000"
+
 
 class Floor(Block):
 	def __init__(self):
