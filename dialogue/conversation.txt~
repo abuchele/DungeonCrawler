@@ -6,7 +6,6 @@ Player: What does it mean?$$
 Console: This shouldn't be used for anything but testing.$$
 Player: Wow! I wonder if the text will render correctly if I say something really really long that takes up multiple lines like this one right here that I am currently saying that will almost definitely spill over into multiple lines if the program renders correctly. Hm, I'm not sure if this is long enough. Just for good measure, let me get a nice big monologue in here. Hm, what's a good monologue? Didn't Hamlet have a nice big monologue at some point? You know, after everyone else died? Maybe I'll recite that. Erm, nah. This is probably long enough. I'm too lazy to go look that up.$$
 end_0000
-<<<<<<< HEAD
 
 id=0001
 Mr.E: Hey you!  Yeah you!  Listen up here!$$
@@ -52,45 +51,8 @@ end_0004
 
 id=0005
 @player@: So how do I check my inventory?  Like the stuff I will undoubtedly pick up?$$
-Mr.E: You're asking me this?  You don't even have a bag on you.  How do you 
+Mr.E: You're asking me this?  You don't even have a bag on you.  Where do you even keep all your things?$$
+@player@: In my pockets.$$
+Mr.E: ...  Well, for NORMAL people,
 
 
-=======
-id=0001
-Mr. E: Well, it's about time you woke up.
-@Player@: Aaahh!
-BANG BANG BANG BANG BANG!
-Mr. E: Hey, no need to be rude. I just dragged you out of a river!
-@Player@: What? Who are you? Where am I?
-Mr. E: You mean you don't remember?
-@Player@: I... uh...
-@Player@: I was looking for someone. My friend. I came to find them.
-Mr. E: Ah. Interesting. Well, in that case, I might be able to help you.
-@Player@: You've seen my friend?
-Mr. E: Do you want to play a game?
-@Player@: What? No. You said you'd help me.
-Mr. E: I said 'might'! Come on, your friend's probably not going anywhere. Have some fun! If you play with me, I will tell you what I know.
-@Player@: Alright. What's the game?
-Mr. E: Tag! Come and get me!
-Mr. E: What, did you forget how to use your legs? You can use WASD or the arrow keys. It's pretty self-explanatory.
-end_0001
-id=0002
-Mr. E: Ah, you got me!
-@Player@: It wasn't that hard. You barely moved.
-Mr. E: Onto the next game!
-@Player@: You said you'd give me information if I played with you.
-Mr. E: I don't think I ever said that. Loosen up. Have you met my dog?
-@Player@: How many heads does that dog have?
-Mr. E: Three. Can't you count? Now take a stick. You'll need it. Sick 'em, Kerberoge!
-end_0002
-id=0002
-@Player@: Are you crazy? That dog could have killed me!
-Mr. E: Relax. You had a stick.
-@Player@: Where is my friend?
-Mr. E: I don't know.
-@Player@: Well, then why am I wasting my time with you?
-Mr. E: You tell me. If that's really how you feel, maybe I'll just leave.
-@Player@: By all means!
-Mr. E: Fine. I'm going to the Losso Office Building where the records on all people who enter and leave this area are kept and the security footage of this very room is probably being watched right now.
-Mr. E: Oh, and if you're carrying a guitar around down here, you might want this. Just press R to use it.
->>>>>>> 975b6fb8bc0d5699ddf9ccbce340548ffbd39730
