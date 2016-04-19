@@ -36,7 +36,8 @@ class Dungeon(object):
 
 		self.monsterlist.append(entities.MrE(self.grid, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist))	# the first NPC
 
-		#self.checklist = Checklist()
+		self.activemonsterlist = []
+		self.activemonstercoords = {}
 		self.text = None	# the class that will help to organize the dialogue
 		self.lnInd = 0		# the line number in this conversation
 		self.lines = None	# the list of surfaces that represent this conversation
@@ -50,7 +51,7 @@ class Dungeon(object):
 			output = output+"\n"
 		return output
 
-	def generateMonsters(self, last_save, monsterNumber = 200):
+	def generateMonsters(self, last_save, monsterNumber = 1000):
 		count = 0
 		for y in range(0,self.h-1):
 			for x in range(0,self.w-1):
@@ -86,6 +87,30 @@ class Dungeon(object):
 					self.player.x,self.player.y = self.player.facingCoordinates()		# also please try not to jump into more lava
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
 						print self.player.effected("killed")
+
+			for dy in range(7):
+				for dx in range(7):
+					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),0) #this is a list of monsters
+					if monsters != 0:
+						self.activemonsterlist += monsters
+						for monster in monsters:
+							monster.decide()
+							# self.activemonsterlist.append(monster)
+							try:
+								newlist = self.activemonstercoords[(monster.x,monster.y)]
+							except KeyError:
+								newlist = []
+							newlist.append(monster)
+							self.activemonstercoords[(monster.x,monster.y)] = newlist
+							if not monster.seen:
+								newlist1 = self.activemonstercoords[(monster.x,monster.y)]
+								newlist1.remove(monster)
+								self.activemonstercoords[(monster.x,monster.y)] = newlist1
+								 #this changes monster.x and monster.y but monstercoords still has the original position as key.
+								
+							# print "Aggro:", monster.aggro
+							# print "Seen:", monster.seen
+
 
 			if rng.random() < 0.003:
 				self.last_action = rng.choice(
