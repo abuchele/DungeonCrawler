@@ -42,27 +42,33 @@ class DungeonModelView(object):
                 self.visible[(x,y)] = True  # keeps track fo which blocks are visible
         
 
-    def display(self):
+    def display(self, t):
         """
         Draws all entities, blocks, minimaps, etc. to the screen and displays
+        takes input t, a float between 0 and 1 that represents at what point in the tick we are (0=beginning, 1=end)
         """
         pSpriteInd = self.model.player.sprite
+        pxr, pyr = (self.model.player.x, self.model.player.y)   # the "real" coordinates
+        pxc, pyc = (self.model.player.getCoords(t))             # the calculated coordinates that produce smoother motion
 
         for x1,y1,x2,y2 in self.losLst:
-            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.player.x+x2, self.model.player.y+y2).transparent
+            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(pxr+x2, pyr+y2).transparent
 
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
-                block = self.model.getBlock(self.model.player.x+dx, self.model.player.y+dy)
-                if self.visible[(dx,dy)]:
-                    self.screen.blit(self.sprites[block.sprite], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-                    self.minimap.set_at((self.model.player.x+dx, self.model.player.y+dy), block.color)
-                    block.explored = True
-                elif block.explored:
-                    self.screen.blit(self.shadows[block.sprite], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-                else:
-                    self.screen.blit(self.sprites[0], (dx*self.blockSize[0]+self.dispSize[0]/2, dy*self.blockSize[1]+self.dispSize[1]/2))
-            if dy == 0:
+                block = self.model.getBlock(pxr+dx, pyr+dy)
+                blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
+
+                if self.visible[(dx,dy)]:                                       # if it is visible,
+                    self.screen.blit(self.sprites[block.sprite], blockCoords)   # just draw it
+                    self.minimap.set_at((pxr+dx, pyr+dy), block.color)          # and mark it on the minimap
+                    block.explored = True                                       # and remember it for later
+                elif block.explored:                                            # if it is not visible but we've been here before
+                    self.screen.blit(self.shadows[block.sprite], blockCoords)   # draw it, but darker
+                else:                                                           # if we don't know what it looks like
+                    self.screen.blit(self.sprites[0], blockCoords)              # put in a placeholder block
+
+            if dy == 1:
                 self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
         direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
