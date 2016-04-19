@@ -30,8 +30,10 @@ class DungeonModelView(object):
         self.playerSprite = self.playerSprites[0][0]
 
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM"]
         self.sprites = loadSprites(spriteNames)
         self.shadows = loadShadowSprites(spriteNames)
+        self.monsterSprites = loadSprites(monsterSpriteNames)
         self.steps = 0
 
         self.compose_LOS_list()  # do some preliminary calculations for Line of Sight
