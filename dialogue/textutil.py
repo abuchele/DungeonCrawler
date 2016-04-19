@@ -14,6 +14,7 @@ class TextUtility(object):
 
 		#Every Conversation has its own ID, tentatively from 0000 to 9999.
 		#Every change in character speech ends with a $$.  
+		#The player's name is written @Player@, which will be replaced.  
 		#Every Conversation ends with "end_{convo_id}"
 
 	
@@ -32,6 +33,8 @@ class TextUtility(object):
 		start = self.conversation.index("id="+str(convo_id)) + 7 #Finds start of dialogue
 		end = self.conversation.index("end_"+str(convo_id)) - 1 #Finds end of dialogue
 		convo = self.conversation[start:end]
+		player_name = "Ray" #TODO: Set Player Name.  
+		convo.replace("@player@", player_name)
 		
 		while len(convo) > 0:
 			line = convo[1:convo.index("$$")]
