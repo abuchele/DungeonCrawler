@@ -92,7 +92,7 @@ class Dungeon(object):
 				for dx in range(7):
 					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),0) #this is a list of monsters
 					if monsters != 0:
-						self.activemonsterlist += monsters
+						# self.activemonsterlist += monsters
 						for monster in monsters:
 							monster.decide()
 							# self.activemonsterlist.append(monster)
