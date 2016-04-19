@@ -220,6 +220,10 @@ class Zombie(Monster):
         self.flatDamage = 2
         self.armor = 8
         self.speed = 1
+        if random.randint(0,1) == 0:
+            self.sprite = 2
+        else:
+            self.sprite = 3
     def __str__(self):
         return "Zombie"
 
@@ -235,6 +239,7 @@ class Ghost(Monster):
         self.armor = 10
         self.speed = 1
         self.phasing = True
+        self.sprite = 1
     def __str__(self):
         return "Ghost"        
 
