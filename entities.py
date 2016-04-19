@@ -94,6 +94,9 @@ class Entity(object):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
 
+    def interact(self,player):
+        return "You poke the thing."
+
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
@@ -212,11 +215,15 @@ class Monster(Entity):
         elif self.seen == True:
             self.passiveMove
 
+    def interact(self,player):
+        return "You try to poke the "+self.name+", but it swats your hand away."
+
 
 
 class Zombie(Monster):
     def __init__(self,x,y, player, grid):
         Monster.__init__(self, x,y, player, grid)
+        self.name = "Zombie"
         self.health = 30
         self.accuracy = 3
         self.damageRange = 3
@@ -233,6 +240,7 @@ class Zombie(Monster):
 class Ghost(Monster):
     def __init__(self,x,y, player, grid):
         Monster.__init__(self, x,y, player, grid)
+        self.name = "Ghost"
         self.health = 20
         self.accuracy = 4
         self.damageRange = 2
@@ -242,7 +250,34 @@ class Ghost(Monster):
         self.phasing = True
         self.sprite = 1
     def __str__(self):
-        return "Ghost"        
+        return "Ghost"
+
+
+class NPC(Entity):
+    def __init__(self,grid,x,y,player,checklist,name,sprite,convID=0):
+        Entity.__init__(self,grid,x,y)
+        self.name = name
+        self.sprite = sprite
+        self.convID = convID
+        self.checklist = checklist
+        self.player = player
+
+    def interact(self,player):
+        return "$D{}".format(self.convID)
+
+
+class MrE(NPC):
+    def __init__(self, grid, x, y, player, checklist):
+        NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 1)
+
+    def interact(self,player):
+        if not met_Mr_E:
+            return "$D001"
+        elif not tutorial_Dialogue_Finished:
+            return "$D002"
+        else:
+            return "$D003"
+
 
 # allows easy creation/organization of different attacks and their stats (useful if a creature has more than one attack)
 class Attack(Entity):
