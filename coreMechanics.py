@@ -48,7 +48,7 @@ class Dungeon(object):
 		count = 0
 		for y in range(0,self.h-1):
 			for x in range(0,self.w-1):
-				if not self.grid[y][x].collides and count<monsterNumber and rng.random()<float(monsterNumber)/5000:
+				if not self.grid[y][x].collides and count<monsterNumber and rng.random()<float(monsterNumber)/2500:
 					if rng.randint(0,1) == 0:
 						zombie = entities.Zombie(x,y,self.player,self.grid)
 						newlist = self.monstercoords.get((x,y),[])
@@ -81,8 +81,8 @@ class Dungeon(object):
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
 						print self.player.effected("killed")
 
-			for dy in range(7):
-				for dx in range(7):
+			for dy in range(-8,9):
+				for dx in range(-8,9):
 					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),0) #this is a list of monsters
 					if monsters != 0:
 						# self.activemonsterlist += monsters
@@ -90,15 +90,15 @@ class Dungeon(object):
 							monster.decide()
 							# self.activemonsterlist.append(monster)
 							try:
-								newlist = self.activemonstercoords[(monster.x,monster.y)]
+								newlist = self.monstercoords[(monster.x,monster.y)]
 							except KeyError:
 								newlist = []
 							newlist.append(monster)
-							self.activemonstercoords[(monster.x,monster.y)] = newlist
-							if not monster.seen:
-								newlist1 = self.activemonstercoords[(monster.x,monster.y)]
-								newlist1.remove(monster)
-								self.activemonstercoords[(monster.x,monster.y)] = newlist1
+							self.monstercoords[(monster.x,monster.y)] = newlist
+							# if not monster.seen:
+							# 	newlist1 = self.activemonstercoords[(monster.x,monster.y)]
+							# 	newlist1.remove(monster)
+							# 	self.activemonstercoords[(monster.x,monster.y)] = newlist1
 								 #this changes monster.x and monster.y but monstercoords still has the original position as key.
 								
 							# print "Aggro:", monster.aggro

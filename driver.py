@@ -41,3 +41,4 @@ if __name__ == '__main__':
         while time.time() < end_time:
             events = events+pygame.event.get()
             view.display((time.time()-start_time)/delay)
+        # model.update()

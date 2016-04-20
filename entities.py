@@ -56,7 +56,7 @@ class Entity(object):
                 damage = this.damage()
                 that.health -= damage
                 if this.name!="You":
-                    return "{} hits {} for {} damage!".format(str(this),str(that),damage)
+                    print "{} hits {} for {} damage!".format(str(this),str(that),damage)
                 
                 
                 """Pseudocode"""
@@ -64,7 +64,7 @@ class Entity(object):
                 return "{} hit {} for {} damage!".format(str(this),str(that),damage)
 
             if this.name!="You":
-                return "{} misses {}!".format(str(this),str(that))
+                print "{} misses {}!".format(str(this),str(that))
             return "{} miss {}!".format(str(this),str(that))
             this.hasAttacked = True
         except AttributeError:
@@ -164,8 +164,10 @@ class Monster(Entity):
 
     def checkstatus(self):
         self.seen = (abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange)
+        print "seen:", self.seen
             # self.seen = True
         self.aggro = (abs(self.x - self.player.x)<=self.aggrorange or abs(self.y - self.player.y)<=self.aggrorange)
+        print "aggro:", self.aggro
             # self.aggro = True
 
     def passiveMove(self):
@@ -184,33 +186,42 @@ class Monster(Entity):
         self.y+=move[1]
         print (self.x,self.y), "Passively Moving"
 
-    def aggressiveMove(self): #moves monster by match x -> match y method. Doesn't try to move into player space (do we want it to?) 
+    def aggressiveMove(self): #can't move right or down at the moment
+        print "Self:", (self.x,self.y)
+        print "Player:", (self.player.x,self.player.y) 
         if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
-            if self.x>self.player.x+1 and not self.grid[self.y][self.x-1].collides:
+            if (self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x-1].collides:
                 self.x-=1
-            elif self.x<self.player.x-1 and not self.grid[self.y][self.x+1].collides:
+                print "i'm to the player's right!"
+            elif (self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x+1].collides:
                 self.x+=1
-            elif self.y>self.player.y+1 and not self.grid[self.y-1][self.x].collides:
-                self.y-=1
-            elif self.y<self.player.y-1 and not self.grid[self.y+1][self.x].collides:
-                self.y+=1
+                print "i'm to the player's left!"
+            else:
+                if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides:
+                    self.y-=1
+                if (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides:
+                    self.y+=1
         else:
-            if self.x>self.player.x+1:
+            if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y):
                 self.x-=1
-            elif self.x<self.player.x-1:
+                print "i'm to the player's right!"
+            elif self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y):
                 self.x+=1
-            elif self.y>self.player.y+1:
-                self.y-=1
-            elif self.y<self.player.y-1:
-                self.y+=1
-        print (self.x,self.y), "Aggressively Moving"
+                print "i'm to the player's left!"
+            else:
+                if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x):
+                    self.y-=1
+                if self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x):
+                    self.y+=1
+        # print (self.x,self.y), "Aggressively Moving"
 
     def decide(self): #monster checks its own status, then takes either a move or an attack action. We assume monster is melee.
         self.checkstatus()
         if self.aggro == True:
-            if abs(self.x-self.player.x) == 0 and abs(self.y-self.player.y) == 1 or abs(self.x-self.player.x) == 1 and abs(self.y-self.player.y) == 0:
-              self.attack(self.player)
-            self.aggressiveMove()
+            if (self.x-self.player.x == 0 and (self.y-self.player.y == 1 or self.y-self.player.y == -1)) or ((self.x-self.player.x == 1 or self.x-self.player.x == -1) and self.y-self.player.y == 0):
+                self.attack(self.player)
+            else:
+                self.aggressiveMove()
         elif self.seen == True:
             self.passiveMove()
 
