@@ -283,12 +283,12 @@ class NPC(Monster): # people who do not take damage, and have dialogue
 
 class MrE(NPC):
     def __init__(self, grid, x, y, player, checklist):
-        NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 0)
+        NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 4)
 
     def interact(self,player):
-        if not self.checklist.met_Mr_E:
+        if not self.checklist.player_Named:
             return "$D001"
-        elif not self.checklist.tutorial_Dialogue_Finished:
+        elif not self.checklist.tutorial_Dialogue002_Finished:
             return "$D002"
         else:
             return "$D003"

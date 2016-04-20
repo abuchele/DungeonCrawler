@@ -30,7 +30,7 @@ class DungeonModelView(object):
         self.playerSprite = self.playerSprites[0][0]
 
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
-        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM"]
+        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC"]
         self.sprites = loadSprites(spriteNames)
         self.shadows = loadShadowSprites(spriteNames)
         self.monsterSprites = loadSprites(monsterSpriteNames)
