@@ -7,7 +7,6 @@ class Checklist():
 		killcount = 0 #monsters killed
 
 		#World1
-<<<<<<< HEAD
 		Player_Named = False #Has the player entered a name? 
 		Tutorial_Dialogue002_Finished = False # If finished dialogue 2.  Can't leave room otherwise
 		Tutorial_Dialogue004_Finished = False # If finished dialogue 4.
@@ -25,9 +24,3 @@ class Checklist():
 		#The player can trigger dialogue 6.  Once that is finished, the player can go outside.  
 		#Once the player kills enough monsters, the quest will be finished.  If this is true, then 
 		#Mr. E will have dialogue 0007, and then mark the quest confirm as true.  
-=======
-		met_Mr_E = False		# the first dialogue
-		tutorial_Dialogue_Finished = False #If they can leave the room.  If not, Mr. E plays id=0003
-		tutorial_quest = False #Kill 3 monsters
-		tutorial_quest_confirm = False #Talk to Mr.E after finishing the quest.
->>>>>>> 0ec5965132ffae78d92f61d504ee31fcc40d32af
