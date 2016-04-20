@@ -34,8 +34,6 @@ class Dungeon(object):
 		self.monsterlist = [] #contains all the monster objects
 		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
 
-		self.monsterlist.append(entities.MrE(self.grid, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist))	# the first NPC
-
 		self.activemonsterlist = []
 		self.activemonstercoords = {}
 		self.text = None	# the class that will help to organize the dialogue
@@ -52,10 +50,17 @@ class Dungeon(object):
 		return output
 
 	def generateMonsters(self, last_save, monsterNumber = 1000):
+		"""
+		Fills the world with monsters of various kinds
+		"""
+		mr_E = entities.MrE(self.grid, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
+		self.monstercoords[(mr_E.x, mr_E.y)] = [mr_E]	# the first npc
+		self.monsterlist.append(mr_E)
+
 		count = 0
-		for y in range(0,self.h-1):
-			for x in range(0,self.w-1):
-				if not self.grid[y][x].collides and count<monsterNumber and rng.random()<float(monsterNumber)/2500:
+		for y in rng.sample(range(0,self.h-1), self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
+			for x in rng.sample(range(0,self.w-1), self.w-1):
+				if not self.grid[y][x].collides:
 					if rng.randint(0,1) == 0:
 						zombie = entities.Zombie(x,y,self.player,self.grid)
 						newlist = self.monstercoords.get((x,y),[])
@@ -70,6 +75,9 @@ class Dungeon(object):
 						self.monstercoords[(x,y)] = newlist
 						self.monsterlist.append(ghost)
 						count +=1
+
+				if count >= monsterNumber:
+					return
 
 	def update(self):
 		if self.state == "R":	# it doesn't update if the game is paused

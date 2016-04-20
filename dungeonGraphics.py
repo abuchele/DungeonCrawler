@@ -56,7 +56,7 @@ class DungeonModelView(object):
         for x1,y1,x2,y2 in self.losLst:
             self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(pxr+x2, pyr+y2).transparent
 
-        for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks
+        for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
                 monsters = self.model.monstercoords.get((pxr+dx,pyr+dy),0) #this is a list

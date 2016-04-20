@@ -245,7 +245,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 	while x < w:	# fill in all dead ends
 		y = 1
 		while y < h:
-			if not grid[y][x].collides:
+			if grid[y][x].passable():
 				adjWalls = 0
 				for p in [(0,1),(0,-1),(1,0),(-1,0)]:
 					if not grid[y+p[1]][x+p[0]].passable():

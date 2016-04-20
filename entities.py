@@ -266,27 +266,29 @@ class Ghost(Monster):
         return "Ghost"
 
 
-class NPC(Entity):
+class NPC(Monster): # people who do not take damage, and have dialogue
     def __init__(self,grid,x,y,player,checklist,name,sprite,convID=0):
-        Entity.__init__(self,grid,x,y)
+        Monster.__init__(self,x,y,player,grid)
         self.name = name
         self.sprite = sprite
         self.convID = convID
         self.checklist = checklist
-        self.player = player
 
     def interact(self,player):
         return "$D{}".format(self.convID)
 
+    def decide(self):
+        pass
+
 
 class MrE(NPC):
     def __init__(self, grid, x, y, player, checklist):
-        NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 1)
+        NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 0)
 
     def interact(self,player):
-        if not met_Mr_E:
+        if not self.checklist.met_Mr_E:
             return "$D001"
-        elif not tutorial_Dialogue_Finished:
+        elif not self.checklist.tutorial_Dialogue_Finished:
             return "$D002"
         else:
             return "$D003"
