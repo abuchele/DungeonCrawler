@@ -5,6 +5,7 @@ import pickle
 import random as rng
 from dialogue.textutil import TextUtility
 import pygame
+import eventList
 
 
 
@@ -27,9 +28,15 @@ class Dungeon(object):
 		self.savePoints = thing[1] + [(None,None)]
 
 		self.state = "R"	# R for running, P for paused, and D for dialogue
+
+		self.checklist = eventList.Checklist()
+
 		self.monsterlist = [] #contains all the monster objects
 		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
-		# self.activemonsterlist = []
+
+		self.monsterlist.append(entities.MrE(self.grid, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist))	# the first NPC
+
+		self.activemonsterlist = []
 		self.activemonstercoords = {}
 		self.text = None	# the class that will help to organize the dialogue
 		self.lnInd = 0		# the line number in this conversation
@@ -203,4 +210,3 @@ if __name__ == "__main__":
 	doctest.testmod()
 	a = Dungeon(50,50,"fastH")
 	print a.grid
-	print 

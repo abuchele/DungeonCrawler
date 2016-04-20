@@ -94,6 +94,9 @@ class Entity(object):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
 
+    def interact(self,player):
+        return "You poke the thing."
+
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
@@ -164,10 +167,10 @@ class Monster(Entity):
 
     def checkstatus(self):
         self.seen = (abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange)
-        print "seen:", self.seen
+        # print "seen:", self.seen
             # self.seen = True
         self.aggro = (abs(self.x - self.player.x)<=self.aggrorange or abs(self.y - self.player.y)<=self.aggrorange)
-        print "aggro:", self.aggro
+        # print "aggro:", self.aggro
             # self.aggro = True
 
     def passiveMove(self):
@@ -184,7 +187,7 @@ class Monster(Entity):
         move = direction[randint(0,len(direction)-1)]
         self.x+=move[0]
         self.y+=move[1]
-        print (self.x,self.y), "Passively Moving"
+        # print (self.x,self.y), "Passively Moving"
 
     def aggressiveMove(self): #can't move right or down at the moment
         print "Self:", (self.x,self.y)
@@ -192,10 +195,10 @@ class Monster(Entity):
         if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
             if (self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x-1].collides:
                 self.x-=1
-                print "i'm to the player's right!"
+                # print "i'm to the player's right!"
             elif (self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x+1].collides:
                 self.x+=1
-                print "i'm to the player's left!"
+                # print "i'm to the player's left!"
             else:
                 if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides:
                     self.y-=1
@@ -204,10 +207,10 @@ class Monster(Entity):
         else:
             if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y):
                 self.x-=1
-                print "i'm to the player's right!"
+                # print "i'm to the player's right!"
             elif self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y):
                 self.x+=1
-                print "i'm to the player's left!"
+                # print "i'm to the player's left!"
             else:
                 if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x):
                     self.y-=1
@@ -225,11 +228,15 @@ class Monster(Entity):
         elif self.seen == True:
             self.passiveMove()
 
+    def interact(self,player):
+        return "You try to poke the "+self.name+", but it swats your hand away."
+
 
 
 class Zombie(Monster):
     def __init__(self,x,y, player, grid):
         Monster.__init__(self, x,y, player, grid)
+        self.name = "Zombie"
         self.health = 30
         self.accuracy = 3
         self.damageRange = 3
@@ -246,6 +253,7 @@ class Zombie(Monster):
 class Ghost(Monster):
     def __init__(self,x,y, player, grid):
         Monster.__init__(self, x,y, player, grid)
+        self.name = "Ghost"
         self.health = 20
         self.accuracy = 4
         self.damageRange = 2
@@ -255,7 +263,34 @@ class Ghost(Monster):
         self.phasing = True
         self.sprite = 1
     def __str__(self):
-        return "Ghost"        
+        return "Ghost"
+
+
+class NPC(Entity):
+    def __init__(self,grid,x,y,player,checklist,name,sprite,convID=0):
+        Entity.__init__(self,grid,x,y)
+        self.name = name
+        self.sprite = sprite
+        self.convID = convID
+        self.checklist = checklist
+        self.player = player
+
+    def interact(self,player):
+        return "$D{}".format(self.convID)
+
+
+class MrE(NPC):
+    def __init__(self, grid, x, y, player, checklist):
+        NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 1)
+
+    def interact(self,player):
+        if not met_Mr_E:
+            return "$D001"
+        elif not tutorial_Dialogue_Finished:
+            return "$D002"
+        else:
+            return "$D003"
+
 
 # allows easy creation/organization of different attacks and their stats (useful if a creature has more than one attack)
 class Attack(Entity):
