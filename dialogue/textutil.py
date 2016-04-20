@@ -30,8 +30,8 @@ class TextUtility(object):
 		['Console: This is the text test conversation.', 'Player: What does it mean?', "Console: This shouldn't be used for anything but testing."]
 		"""
 		dialogue_list = []
-		start = self.conversation.index("id="+str(convo_id)) + 7 #Finds start of dialogue
-		end = self.conversation.index("end_"+str(convo_id)) - 1 #Finds end of dialogue
+		start = self.conversation.index("id={:04d}".format(convo_id)) + 7 #Finds start of dialogue
+		end = self.conversation.index("end_{:04d}".format(convo_id)) - 1 #Finds end of dialogue
 		convo = self.conversation[start:end]
 		player_name = "Ray" #TODO: Set Player Name.  
 		convo.replace("@player@", player_name)

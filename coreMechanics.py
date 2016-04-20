@@ -33,6 +33,7 @@ class Dungeon(object):
 
 		self.monsterlist = [] #contains all the monster objects
 		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
+		self.generateMonsters()
 
 		self.activemonsterlist = []
 		self.activemonstercoords = {}
@@ -49,7 +50,7 @@ class Dungeon(object):
 			output = output+"\n"
 		return output
 
-	def generateMonsters(self, last_save, monsterNumber = 1000):
+	def generateMonsters(self, monsterNumber = 1000):
 		"""
 		Fills the world with monsters of various kinds
 		"""
@@ -86,7 +87,6 @@ class Dungeon(object):
 			if self.player.x == self.savePoints[self.last_save][0] and self.player.y == self.savePoints[self.last_save][1]:
 				self.save("saves/last_save.dun")
 				self.last_save += 1
-				self.generateMonsters(self.last_save)
 
 			if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":	# you can jump over one block of lava
 				if self.getBlock(*self.player.facingCoordinates()).collides:			# if there is no block in front of you

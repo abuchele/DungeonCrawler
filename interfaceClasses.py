@@ -44,8 +44,12 @@ class PyGameKeyboardController(object):
         if event.type == KEYDOWN:
             if event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
-                block_to_interact_with = self.model.getBlock(*blockcoords) #grid is nested lists, (x,y) is grid[y][x]
-                self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
+                monsters = self.model.monstercoords.get(blockcoords, 0)
+                if monsters != 0:                           # if there is a mob,
+                    self.model.interp_action(monsters[0].interact(self.model.player))   # interact with the mob
+                else:                                                   # otherwise
+                    block_to_interact_with = self.model.getBlock(*blockcoords)
+                    self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
             if event.key == pygame.K_r:
                 blockcoords = self.model.player.facingCoordinates() #this gives the (x,y) coordinate which you are facing!
                 """If we have a monster list with coordinates, we iterate over the list to see if there's a monster on blockcoords."""
