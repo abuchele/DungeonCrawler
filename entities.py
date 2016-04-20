@@ -29,6 +29,8 @@ import pygame
 # 	  cure_potion.pickup(Anna) -> (fun flair text) -> Anna.inventory = {'Weird Blue Potion' , 1} -> cure_potion.use(Anna) -> (fun cured flair text) -> Anna.active_effects = []
 
 
+"""General Classes"""
+
 class Entity(object):
     def __init__(self, grid, x=0, y=0, direction="U", speed=1, phasing = False, name = None, effect = dict(), hasAttacked = False):
         self.grid = grid       
@@ -97,6 +99,7 @@ class Entity(object):
     def interact(self,player):
         return "You poke the thing."
 
+"""Player Related"""
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
@@ -153,6 +156,7 @@ class Player(Entity):
         Entity.update(self)
         
 
+"""Monster Subclass"""
 
 class Monster(Entity):
     def __init__(self, x, y, player, grid): #speed =1,  flatDamage=0, armor=0):
@@ -266,6 +270,9 @@ class Ghost(Monster):
         return "Ghost"
 
 
+
+"""NPC Subclass"""
+
 class NPC(Monster): # people who do not take damage, and have dialogue
     def __init__(self,grid,x,y,player,checklist,name,sprite,convID=0):
         Monster.__init__(self,x,y,player,grid)
@@ -280,6 +287,8 @@ class NPC(Monster): # people who do not take damage, and have dialogue
     def decide(self):
         pass
 
+# Perhaps we should organize the code such that everything to do with the player is in one section
+#The group of NPCs is in another, and then the monsters and such are in a third.  
 
 class MrE(NPC):
     def __init__(self, grid, x, y, player, checklist):
@@ -293,6 +302,8 @@ class MrE(NPC):
         else:
             return "$D003"
 
+
+"""Entity Related Subclasses that aren't entities"""
 
 # allows easy creation/organization of different attacks and their stats (useful if a creature has more than one attack)
 class Attack(Entity):
