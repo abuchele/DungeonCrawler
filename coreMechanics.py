@@ -100,14 +100,13 @@ class Dungeon(object):
 				for dx in range(-8,9):
 					monsters = self.monstercoords.get((self.player.x+dx,self.player.y+dy),[])
 					for monster in monsters:
-						monster.think()
+						monster.update()
 
 			for dy in range(-8,9):
 				for dx in range(-8,9):
 					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),[]) #this is a list of monsters
 					# self.activemonsterlist += monsters
 					for monster in monsters:
-						monster.update()
 						# self.activemonsterlist.append(monster)
 						try:
 							newlist = self.monstercoords[(monster.x,monster.y)]

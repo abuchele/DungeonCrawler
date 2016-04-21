@@ -59,15 +59,9 @@ class DungeonModelView(object):
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
-                monsters = self.model.monstercoords.get((pxr+dx,pyr+dy),0) #this is a list
                 block = self.model.getBlock(pxr+dx, pyr+dy)
                 if self.visible[(dx,dy)]:                                       # if it is visible,
                     self.screen.blit(self.sprites[block.sprite], blockCoords)
-                    if monsters != 0:
-                        mxr, myr = (monsters[0].x, monsters[0].y)
-                        mxc, myc = monsters[0].getCoords(t)
-                        monstCoords = (blockCoords[0]+mxc-mxr, blockCoords[1]+myc-myr)
-                        self.screen.blit(self.monsterSprites[monsters[0].sprite],monstCoords)   # just draw it and the monsters on it
                     self.minimap.set_at((pxr+dx, pyr+dy), block.color)          # and mark it on the minimap
                     block.explored = True                                       # and remember it for later
 
@@ -76,8 +70,18 @@ class DungeonModelView(object):
                 else:                                                           # if we don't know what it looks like
                     self.screen.blit(self.sprites[0], blockCoords)              # put in a placeholder block
 
-            if dy == 1:
-                self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
+        for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
+            for dx in range(self.screenBounds[0], self.screenBounds[1]):
+                blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
+                monsters = self.model.monstercoords.get((pxr+dx,pyr+dy),0) #this is a list
+                if self.visible[(dx,dy)]:                                       # if it is visible,
+                    if monsters != 0:
+                        mxr, myr = (monsters[0].x, monsters[0].y)
+                        mxc, myc = monsters[0].getCoords(t)
+                        monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
+                        self.screen.blit(self.monsterSprites[monsters[0].sprite],monstCoords)   # just draw it and the monsters on it
+
+        self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
         direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
                 
