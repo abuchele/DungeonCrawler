@@ -123,7 +123,7 @@ class Player(Entity):
         self.name = name
         self.sprite = (0,0)
         self.steps = 0
-        self.attackSprite = 3 #sprites is a list of .png images, so this calls sprites[self.attackSprite]
+        self.attackSprite = 0 #attackSprites is a list of .png images, so this calls attackSprites[self.attackSprite]
         self.hasAttacked = False
         
     def __str__(self):

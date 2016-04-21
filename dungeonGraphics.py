@@ -31,9 +31,12 @@ class DungeonModelView(object):
 
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
         monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC"]
+        attackSpriteNames = ["SwordSprite"]
         self.sprites = loadSprites(spriteNames)
         self.shadows = loadShadowSprites(spriteNames)
         self.monsterSprites = loadSprites(monsterSpriteNames)
+        self.attackSprites = loadSprites(attackSpriteNames)
+
         self.steps = 0
 
         self.compose_LOS_list()  # do some preliminary calculations for Line of Sight
@@ -99,7 +102,7 @@ class DungeonModelView(object):
     def drawAttacks(self, t, pxr, pyr, pxc, pyc):
         direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
         if self.model.player.hasAttacked == True: # draw player attack sprite!
-            attackSprite = pygame.transform.rotate(self.sprites[self.model.player.attackSprite], direction_to_angle[self.model.player.direction])
+            attackSprite = pygame.transform.rotate(self.attackSprites[self.model.player.attackSprite], direction_to_angle[self.model.player.direction])
             attackCoords = (self.dispSize[0]/2 + self.model.player.directionCoordinates[self.model.player.direction][0]*self.blockSize[0],
                             self.dispSize[1]/2 + self.model.player.directionCoordinates[self.model.player.direction][1]*self.blockSize[1])
             self.screen.blit(attackSprite,attackCoords)
