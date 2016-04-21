@@ -43,7 +43,7 @@ def generatePanel(w,h):
 	for y in range(0,h+1):
 		row = []
 		for x in range(0,w+1):
-			row.append(Floor())
+			row.append(Floor(biome=1))
 		grid.append(row)
 
 	rx1 = w*3/8	# the coordinates of the central room
@@ -54,7 +54,7 @@ def generatePanel(w,h):
 	for x in range(2,w-1,2):
 		for y in range(2+2*(x/2%2),h-1,4):	# certain tiles must be metal
 			if (x < rx1 or x >= rx2 or y < ry1 or y >= ry2):	# skips the middle area
-				grid[y][x] = Metal()
+				grid[y][x] = Metal(biome=1)
 
 	for x in range(2,w-1,4):	# the nodes of the first round of panels
 		for y in range(2,h-1,4):
@@ -68,11 +68,11 @@ def generatePanel(w,h):
 				erectPanel(x,y,grid)
 
 	for x in range(0,w+1):
-		grid[0][x] = Metal()
-		grid[w][x] = Metal()
+		grid[0][x] = Metal(biome=1)
+		grid[w][x] = Metal(biome=1)
 	for y in range(0,h+1):
-		grid[y][0] = Metal()
-		grid[y][h] = Metal()
+		grid[y][0] = Metal(biome=1)
+		grid[y][h] = Metal(biome=1)
 
 	return [grid, [(w/2,h/2)]]
 
@@ -110,11 +110,11 @@ def generatePiece(w, h, n):
 	for y in range(h+1):
 		row = []
 		for x in range(w+1):
-			row.append(Brick())
+			row.append(Brick(biome=0))
 		grid.append(row)
 	for y in range(h/2-2, h/2+3):
 		for x in range(w/2-2, w/2+3):
-			grid[y][x] = Floor()
+			grid[y][x] = Floor(biome=0)
 
 	corridoring = False	# whether we just made a corridor. If not, we are free to put rooms wherever we want
 	for i in range(n):
@@ -145,16 +145,16 @@ def generatePiece(w, h, n):
 			success = makeCircleRoom(*wall+(drc, rng.uniform(2,5), grid))
 		corridoring = success and r < 0.4
 		if success:
-			grid[wall[1]][wall[0]] = Door()
+			grid[wall[1]][wall[0]] = Door(biome=0)
 
 	for x in rng.sample(range(1,w), w-1):
 		for y in rng.sample(range(1,h), h-1):	# places doors where appropriate
 			if grid[y][x].collides:
 				adjWall = [(grid[y+p[1]][x+p[0]].collides, x+p[0], y+p[1]) for p in [(0,1),(0,-1),(1,0),(-1,0)]]
 				if adjWall[0][0] and adjWall[1][0] and not adjWall[2][0] and not adjWall[3][0] and dist(adjWall[2][1:3],adjWall[3][1:3],grid) >= 50:
-					grid[y][x] = Door()
+					grid[y][x] = Door(biome=0)
 				if adjWall[2][0] and adjWall[3][0] and not adjWall[0][0] and not adjWall[1][0] and dist(adjWall[0][1:3],adjWall[1][1:3],grid) >= 50:
-					grid[y][x] = Door()
+					grid[y][x] = Door(biome=0)
 
 	x = 1
 	while x < w:	# fill in all dead ends
@@ -166,7 +166,7 @@ def generatePiece(w, h, n):
 					if not grid[y+p[1]][x+p[0]].passable():
 						adjWalls = adjWalls+1
 				if adjWalls >= 3:			# if this is a dead end
-					grid[y][x] = Brick()	# fill it in
+					grid[y][x] = Brick(biome=0)	# fill it in
 					x = 0					# start over
 					y = 0
 			y = y+1
@@ -193,11 +193,11 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 	for y in range(h+1):
 		row = []
 		for x in range(w+1):
-			row.append(Stone())
+			row.append(Stone(biome=3))
 		grid.append(row)
 	for y in range(h/2-3, h/2+4):
 		for x in range(w/2-3, w/2+4):
-			grid[y][x] = Floor()
+			grid[y][x] = Floor(biome=3)
 			grid[y][x].region = 0
 
 	regionN = 1	# helps keep track of which tiles are connected to others
@@ -209,7 +209,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 		if isClear(x0, y0, x0+rw-1, y0+rh-1, grid):
 			for x in range(x0,x0+rw):
 				for y in range(y0,y0+rh):
-					grid[y][x] = Floor()
+					grid[y][x] = Floor(biome=3)
 					grid[y][x].region = regionN
 			regionN = regionN+1
 
@@ -236,7 +236,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 		for iterationVariable in range(doors):
 			if len(importantWalls) > 0:
 				x,y,r1,r2 = rng.choice(importantWalls)
-				grid[y][x] = Door()
+				grid[y][x] = Door(biome=3)
 				for i in range(regionN):	# knock out a door and unite the two regions
 					if regions[i] == r1:
 						regions[i] = r2
@@ -251,7 +251,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 					if not grid[y+p[1]][x+p[0]].passable():
 						adjWalls = adjWalls+1
 				if adjWalls >= 3:			# if this is a dead end
-					grid[y][x] = Stone()	# fill it in
+					grid[y][x] = Stone(biome=3)	# fill it in
 					x = 0					# start over
 					y = 0
 			y = y+1
@@ -274,14 +274,14 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 		row = [Obsidian()]
 		for x in range(1,w):
 			if rng.random() < prob:
-				row.append(Obsidian())
+				row.append(Obsidian(biome=2))
 			else:
-				row.append(Floor())
-		row.append(Obsidian())
+				row.append(Floor(biome=2))
+		row.append(Obsidian(biome=2))
 		grid.append(row)
 	for x in range(0,w+1):
-		grid[0][x] = Obsidian()
-		grid[w][x] = Obsidian()
+		grid[0][x] = Obsidian(biome=2)
+		grid[w][x] = Obsidian(biome=2)
 
 	for i in range(n):
 		newGrid = []
@@ -298,9 +298,9 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 						if grid[y+dy][x+dx].collides:
 							adj = adj+1
 				if adj > birthLim:
-					newGrid[y][x] = Obsidian()
+					newGrid[y][x] = Obsidian(biome=2)
 				if adj < deathLim:
-					newGrid[y][x] = Floor()
+					newGrid[y][x] = Floor(biome=2)
 		grid = newGrid
 
 	regions = []
@@ -317,7 +317,7 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 	for i in range(0,len(regions)):
 		if i != maxRIndx:
 			for x,y in regions[i]:
-				grid[y][x] = Obsidian()		# fill in all but the biggest region
+				grid[y][x] = Obsidian(biome=2)		# fill in all but the biggest region
 
 	for d in [-1,1]:
 		flowLava(w/2, h/2, grid, 2*(w+h), d)	# creates lava rivers
@@ -336,7 +336,7 @@ def generateWhole(w, h):
 	Generates a huge dungeon incorporating the piece, panel, cellular, and maze algorithms
 	w, h = the dimensions of each section
 	"""
-	sectors = [generate(w,h,method)[0] for method in ["piece","RBFSM","cells","maze1"]]
+	sectors = [generate(w,h,method)[0] for method in ["piece","panel","cells","maze1"]]
 
 	grid = []
 	for y in range(h+1):
@@ -353,9 +353,9 @@ def generateWhole(w, h):
 			y0 = 1+(d-t)
 			if grid[y0][x0].passable():
 				for x in range(w,x0):	# and digs a hallway to it
-					grid[1][x] = Floor()
+					grid[1][x] = Floor(biome=grid[1][x].biome)
 				for y in range(1,y0):
-					grid[y][x0] = Floor()
+					grid[y][x0] = Floor(biome=grid[y][x0].biome)
 				done = True
 				break
 		if done:
@@ -369,9 +369,9 @@ def generateWhole(w, h):
 			y0 = h+2+(d-t)
 			if grid[y0][x0].passable():
 				for y in range(h,y0):
-					grid[y][1] = Floor()
+					grid[y][1] = Floor(biome=grid[y][1].biome)
 				for x in range(1,x0):
-					grid[y0][x] = Floor()
+					grid[y0][x] = Floor(biome=grid[y0][x].biome)
 				done = True
 				break
 		if done:
@@ -385,9 +385,9 @@ def generateWhole(w, h):
 			y0 = 2*h-(d-t)
 			if grid[y0][x0].passable():
 				for x in range(w,x0,-1):
-					grid[2*h][x] = Floor()
+					grid[2*h][x] = Floor(biome=grid[2*h][x].biome)
 				for y in range(2*h,y0,-1):
-					grid[y][x0] = Floor()
+					grid[y][x0] = Floor(biome=grid[y][x0].biome)
 				done = True
 				break
 		if done:
@@ -399,9 +399,9 @@ def generateWhole(w, h):
 			y0 = 2*h-(d-t)
 			if grid[y0][x0].passable():
 				for x in range(w+1,x0, 1):
-					grid[2*h][x] = Floor()
+					grid[2*h][x] = Floor(biome=grid[2*h][x].biome)
 				for y in range(2*h,y0,-1):
-					grid[y][x0] = Floor()
+					grid[y][x0] = Floor(biome=grid[y][x0].biome)
 				done = True
 				break
 		if done:
