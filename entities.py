@@ -159,7 +159,7 @@ class Player(Entity):
 """Monster Subclass"""
 
 class Monster(Entity):
-    def __init__(self, x, y, player, grid): #speed =1,  flatDamage=0, armor=0):
+    def __init__(self, x, y, player, grid): #speed =256,  flatDamage=0, armor=0):
         Entity.__init__(self,grid,x,y)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
@@ -167,7 +167,7 @@ class Monster(Entity):
         self.seenrange = 8
         self.aggrorange = 5
         self.player = player
-        # self.grid = grid #we shouldn't need this, since Entity takes grid
+        self.distance = 0   # it moves when this reaches 256
 
     def checkstatus(self):
         self.seen = (abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange)
@@ -232,6 +232,12 @@ class Monster(Entity):
         elif self.seen == True:
             self.passiveMove()
 
+    def update(self):
+        self.distance += self.speed
+        if self.distance >= 256:
+            self.distance -= 256
+            self.decide()
+
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
 
@@ -246,7 +252,7 @@ class Zombie(Monster):
         self.damageRange = 3
         self.flatDamage = 2
         self.armor = 8
-        self.speed = 1
+        self.speed = 127    # speed goes from 1 to 256
         if randint(0,1) == 0:
             self.sprite = 2
         else:
@@ -263,7 +269,7 @@ class Ghost(Monster):
         self.damageRange = 2
         self.flatDamage = 1
         self.armor = 10
-        self.speed = 1
+        self.speed = 150
         self.phasing = True
         self.sprite = 1
     def __str__(self):

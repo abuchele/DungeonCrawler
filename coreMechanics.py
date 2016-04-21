@@ -102,7 +102,7 @@ class Dungeon(object):
 					if monsters != 0:
 						# self.activemonsterlist += monsters
 						for monster in monsters:
-							monster.decide()
+							monster.update()
 							# self.activemonsterlist.append(monster)
 							try:
 								newlist = self.monstercoords[(monster.x,monster.y)]
@@ -174,7 +174,7 @@ class Dungeon(object):
 			self.state = "R"				# resume the game
 			self.text = None				# clear these variables
 			self.lines = None				# because they take up too much space
-			pygame.key.set_repeat(50,50)
+			pygame.key.set_repeat(150,150)
 
 
 	def currentParagraph(self):				# the surface that represents the current bit of dialogue
