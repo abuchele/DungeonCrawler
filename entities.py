@@ -105,8 +105,6 @@ class Entity(object):
 class Player(Entity):
     def __init__(self,grid,x,y, name = "Ray"):
         Entity.__init__(self,grid,x,y) #grid is a global variable which needs to be defined before initializing any entities.
-        self.prex = x
-        self.prey = y
         self.health = 100
         self.maxhealth = 100
         self.armor = 10
@@ -230,12 +228,11 @@ class Monster(Entity):
         elif self.seen == True:
             self.passiveMove()
 
-    def update(self):
+    def think(self):
         self.distance += self.speed
         if self.distance >= 256:
             self.distance -= 256
             self.decide()
-        Entity.update(self)
 
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
