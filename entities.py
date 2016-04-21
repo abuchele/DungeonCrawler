@@ -57,20 +57,23 @@ class Entity(object):
             if this.attackRoll() >= that.armor:
                 damage = this.damage()
                 that.health -= damage
-                if this.name!="You":
-                    print "{} hits {} for {} damage!".format(str(this),str(that),damage)
+                # if this.name!="You":
+                    # print "{} hits {} for {} damage!".format(str(this),str(that),damage)
                 
                 
                 """Pseudocode"""
                 # DISPLAY pygame.rotate(this.attackSprite, direction_to_angle[this.direction]) AT (this.x+this.directionCoordinates[0],this.y+this.directionCoordinates[1])
-                return "{} hit {} for {} damage!".format(str(this),str(that),damage)
+                print "{} hit {} for {} damage!".format(str(this),str(that),damage)
 
-            if this.name!="You":
-                print "{} misses {}!".format(str(this),str(that))
-            return "{} miss {}!".format(str(this),str(that))
+            # if this.name!="You":
+            #     print "{} misses {}!".format(str(this),str(that))
+            else:
+                print "{} miss {}!".format(str(this),str(that))
             this.hasAttacked = True
+            # print "Attacked entity!"
         except AttributeError:
             this.hasAttacked = True
+            # print "Attacked tile!"
 
     def effected(self,effect_specific):
     	self.effect[effect_specific] = True
@@ -159,7 +162,7 @@ class Player(Entity):
 """Monster Subclass"""
 
 class Monster(Entity):
-    def __init__(self, x, y, player, grid): #speed =256,  flatDamage=0, armor=0):
+    def __init__(self, x, y, player, grid, monsterCoords): #speed =256,  flatDamage=0, armor=0):
         Entity.__init__(self,grid,x,y)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
@@ -168,7 +171,7 @@ class Monster(Entity):
         self.aggrorange = 5
         self.player = player
         self.distance = 0   # it moves when this reaches 256
-
+        self.monsterCoords = monsterCoords
     def checkstatus(self):
         self.seen = (abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange)
         # print "seen:", self.seen
@@ -180,13 +183,13 @@ class Monster(Entity):
     def passiveMove(self):
         direction = [(1,0),(0,1),(-1,0),(0,-1)]
         if self.phasing == False:
-            if self.grid[self.y][self.x+1].collides:
+            if self.grid[self.y][self.x+1].collides or self.monsterCoords.get((self.x+1,self.y),0) != 0:
                 direction.remove((1,0))
-            if self.grid[self.y+1][self.x].collides:
+            if self.grid[self.y+1][self.x].collides or self.monsterCoords.get((self.x,self.y+1),0) != 0:
                 direction.remove((0,1))
-            if self.grid[self.y][self.x-1].collides:
+            if self.grid[self.y][self.x-1].collides or self.monsterCoords.get((self.x-1,self.y),0) != 0:
                 direction.remove((-1,0))
-            if self.grid[self.y-1][self.x].collides:
+            if self.grid[self.y-1][self.x].collides or self.monsterCoords.get((self.x,self.y-1),0) != 0:
                 direction.remove((0,-1))
         move = direction[randint(0,len(direction)-1)]
         self.x+=move[0]
@@ -194,31 +197,31 @@ class Monster(Entity):
         # print (self.x,self.y), "Passively Moving"
 
     def aggressiveMove(self): #can't move right or down at the moment
-        print "Self:", (self.x,self.y)
-        print "Player:", (self.player.x,self.player.y) 
+        # print "Self:", (self.x,self.y)
+        # print "Player:", (self.player.x,self.player.y) 
         if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
-            if (self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x-1].collides:
+            if (self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x-1].collides and self.monsterCoords.get((self.x-1,self.y),0) == 0:
                 self.x-=1
                 # print "i'm to the player's right!"
-            elif (self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x+1].collides:
+            elif (self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x+1].collides and self.monsterCoords.get((self.x+1,self.y),0) == 0:
                 self.x+=1
                 # print "i'm to the player's left!"
             else:
-                if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides:
+                if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides and self.monsterCoords.get((self.x,self.y-1),0) == 0:
                     self.y-=1
-                if (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides:
+                if (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides and self.monsterCoords.get((self.x,self.y+1),0) == 0:
                     self.y+=1
         else:
-            if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y):
+            if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y) and self.monsterCoords.get((self.x-1,self.y),0) == 0:
                 self.x-=1
                 # print "i'm to the player's right!"
-            elif self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y):
+            elif self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y) and self.monsterCoords.get((self.x+1,self.y),0) == 0:
                 self.x+=1
                 # print "i'm to the player's left!"
             else:
-                if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x):
+                if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x) and self.monsterCoords.get((self.x,self.y-1),0) == 0:
                     self.y-=1
-                if self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x):
+                if self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x) and self.monsterCoords.get((self.x,self.y+1),0) == 0:
                     self.y+=1
         # print (self.x,self.y), "Aggressively Moving"
 
@@ -244,8 +247,8 @@ class Monster(Entity):
 
 
 class Zombie(Monster):
-    def __init__(self,x,y, player, grid):
-        Monster.__init__(self, x,y, player, grid)
+    def __init__(self,x,y, player, grid, monsterCoords):
+        Monster.__init__(self, x,y, player, grid, monsterCoords)
         self.name = "Zombie"
         self.health = 30
         self.accuracy = 3
@@ -261,8 +264,8 @@ class Zombie(Monster):
         return "Zombie"
 
 class Ghost(Monster):
-    def __init__(self,x,y, player, grid):
-        Monster.__init__(self, x,y, player, grid)
+    def __init__(self,x,y, player, grid, monsterCoords):
+        Monster.__init__(self, x,y, player, grid, monsterCoords)
         self.name = "Ghost"
         self.health = 20
         self.accuracy = 4
@@ -281,7 +284,7 @@ class Ghost(Monster):
 
 class NPC(Monster): # people who do not take damage, and have dialogue
     def __init__(self,grid,x,y,player,checklist,name,sprite,convID=0):
-        Monster.__init__(self,x,y,player,grid)
+        Monster.__init__(self,x,y,player,grid, 0)
         self.name = name
         self.sprite = sprite
         self.convID = convID

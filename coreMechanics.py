@@ -31,7 +31,7 @@ class Dungeon(object):
 
 		self.checklist = eventList.Checklist()
 
-		self.monsterlist = [] #contains all the monster objects
+		# self.monsterlist = [] #contains all the monster objects
 		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
 		self.generateMonsters()
 
@@ -56,25 +56,25 @@ class Dungeon(object):
 		"""
 		mr_E = entities.MrE(self.grid, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
 		self.monstercoords[(mr_E.x, mr_E.y)] = [mr_E]	# the first npc
-		self.monsterlist.append(mr_E)
+		# self.monsterlist.append(mr_E)
 
 		count = 0
 		for y in rng.sample(range(0,self.h-1), self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
 			for x in rng.sample(range(0,self.w-1), self.w-1):
 				if not self.grid[y][x].collides:
 					if rng.randint(0,1) == 0:
-						zombie = entities.Zombie(x,y,self.player,self.grid)
+						zombie = entities.Zombie(x,y,self.player,self.grid, self.monstercoords)
 						newlist = self.monstercoords.get((x,y),[])
 						newlist.append(zombie)
 						self.monstercoords[(x,y)] = newlist
-						self.monsterlist.append(zombie)
+						# self.monsterlist.append(zombie)
 						count +=1
 					else:
-						ghost = entities.Ghost(x,y,self.player,self.grid)
+						ghost = entities.Ghost(x,y,self.player,self.grid, self.monstercoords)
 						newlist = self.monstercoords.get((x,y),[])
 						newlist.append(ghost)
 						self.monstercoords[(x,y)] = newlist
-						self.monsterlist.append(ghost)
+						# self.monsterlist.append(ghost)
 						count +=1
 
 				if count >= monsterNumber:
