@@ -58,16 +58,16 @@ class Entity(object):
             if this.attackRoll() >= that.armor:
                 damage = this.damage()
                 that.health -= damage
-                # if this.name!="You":
-                    # print "{} hits {} for {} damage!".format(str(this),str(that),damage)
+                if this.name!="You":
+                    print "{} hits {} for {} damage!".format(str(this),str(that),damage)
                 
                 
                 """Pseudocode"""
                 # DISPLAY pygame.rotate(this.attackSprite, direction_to_angle[this.direction]) AT (this.x+this.directionCoordinates[0],this.y+this.directionCoordinates[1])
                 print "{} hit {} for {} damage!".format(str(this),str(that),damage)
 
-            # if this.name!="You":
-            #     print "{} misses {}!".format(str(this),str(that))
+            if this.name!="You":
+                print "{} misses {}!".format(str(this),str(that))
             else:
                 print "{} miss {}!".format(str(this),str(that))
             this.hasAttacked = True

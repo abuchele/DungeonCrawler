@@ -57,27 +57,40 @@ class PyGameKeyboardController(object):
                 monsters = self.model.monstercoords.get(blockcoords,0)
                 if monsters != 0:
                     target_to_attack = monsters[0]
-                    print "Attempting to attack entity!" + str(target_to_attack.__repr__)
+                    # print "Attempting to attack entity!" + str(target_to_attack.__repr__)
                 else:
                     target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]] #if we find no monster, this attacks a grid square or a block!
                 self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
 
-            elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+            elif event.key == pygame.K_LEFT:
                 if self.model.player.direction == "L":
                     self.model.player.moving = True
                 self.model.player.direction = "L"
-            elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+            elif event.key == pygame.K_RIGHT:
                 if self.model.player.direction == "R":
                     self.model.player.moving = True
                 self.model.player.direction = "R"
-            elif event.key == pygame.K_UP or event.key == pygame.K_w:
+            elif event.key == pygame.K_UP:
                 if self.model.player.direction == "U":
                     self.model.player.moving = True
                 self.model.player.direction = "U"
-            elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+            elif event.key == pygame.K_DOWN:
                 if self.model.player.direction == "D":
                     self.model.player.moving = True
                 self.model.player.direction = "D"
+
+            elif event.key == pygame.K_a:
+                self.model.player.direction = "L"
+                self.model.player.moving = True
+            elif event.key == pygame.K_d:
+                self.model.player.direction = "R"
+                self.model.player.moving = True
+            elif event.key == pygame.K_w:
+                self.model.player.direction = "U"
+                self.model.player.moving = True
+            elif event.key == pygame.K_s:
+                self.model.player.direction = "D"
+                self.model.player.moving = True
 
         pygame.event.clear()
         return True
