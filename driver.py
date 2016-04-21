@@ -20,7 +20,7 @@ if __name__ == '__main__':
     if raw_input("Would you like to start where you left off? [y/n]") == "y":
         model = coreMechanics.load("saves/last_save.dun")
     else:
-        model = pickle.load(open("saves/pregeneratedDungeon.txt",'r'))
+        model = pickle.load(open("saves/pregeneratedDungeon.dun",'r'))
 
     screen = pygame.display.set_mode(size)
     view = DungeonModelView(model, screen, size)

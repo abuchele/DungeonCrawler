@@ -46,6 +46,7 @@ class PyGameKeyboardController(object):
                 blockcoords = self.model.player.facingCoordinates()
                 monsters = self.model.monstercoords.get(blockcoords, 0)
                 if monsters != 0:                           # if there is a mob,
+                    self.model.current_interactee = monsters[0]
                     self.model.interp_action(monsters[0].interact(self.model.player))   # interact with the mob
                 else:                                                   # otherwise
                     block_to_interact_with = self.model.getBlock(*blockcoords)
