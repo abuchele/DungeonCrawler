@@ -51,7 +51,7 @@ class DungeonModelView(object):
         """
         pSpriteInd = self.model.player.sprite
         pxr, pyr = (self.model.player.x, self.model.player.y)   # the "real" coordinates
-        pxc, pyc = (self.model.player.getCoords(t))             # the calculated coordinates that produce smoother motion
+        pxc, pyc = self.model.player.getCoords(t)             # the calculated coordinates that produce smoother motion
 
         for x1,y1,x2,y2 in self.losLst:
             self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(pxr+x2, pyr+y2).transparent
@@ -64,10 +64,12 @@ class DungeonModelView(object):
                 if self.visible[(dx,dy)]:                                       # if it is visible,
                     self.screen.blit(self.sprites[block.sprite], blockCoords)
                     if monsters != 0:
-                        self.screen.blit(self.monsterSprites[monsters[0].sprite],blockCoords)# just draw it
+                        mxr, myr = (monsters[0].x, monsters[0].y)
+                        mxc, myc = monsters[0].getCoords(t)
+                        monstCoords = (blockCoords[0]+mxc-mxr, blockCoords[1]+myc-myr)
+                        self.screen.blit(self.monsterSprites[monsters[0].sprite],monstCoords)   # just draw it and the monsters on it
                     self.minimap.set_at((pxr+dx, pyr+dy), block.color)          # and mark it on the minimap
                     block.explored = True                                       # and remember it for later
-
 
                 elif block.explored:                                            # if it is not visible but we've been here before
                     self.screen.blit(self.shadows[block.sprite], blockCoords)   # draw it, but darker

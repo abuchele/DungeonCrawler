@@ -98,26 +98,31 @@ class Dungeon(object):
 
 			for dy in range(-8,9):
 				for dx in range(-8,9):
-					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),0) #this is a list of monsters
-					if monsters != 0:
-						# self.activemonsterlist += monsters
-						for monster in monsters:
-							monster.update()
-							# self.activemonsterlist.append(monster)
-							try:
-								newlist = self.monstercoords[(monster.x,monster.y)]
-							except KeyError:
-								newlist = []
-							newlist.append(monster)
-							self.monstercoords[(monster.x,monster.y)] = newlist
-							# if not monster.seen:
-							# 	newlist1 = self.activemonstercoords[(monster.x,monster.y)]
-							# 	newlist1.remove(monster)
-							# 	self.activemonstercoords[(monster.x,monster.y)] = newlist1
-								 #this changes monster.x and monster.y but monstercoords still has the original position as key.
-								
-							# print "Aggro:", monster.aggro
-							# print "Seen:", monster.seen
+					monsters = self.monstercoords.get((self.player.x+dx,self.player.y+dy),[])
+					for monster in monsters:
+						monster.think()
+
+			for dy in range(-8,9):
+				for dx in range(-8,9):
+					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),[]) #this is a list of monsters
+					# self.activemonsterlist += monsters
+					for monster in monsters:
+						monster.update()
+						# self.activemonsterlist.append(monster)
+						try:
+							newlist = self.monstercoords[(monster.x,monster.y)]
+						except KeyError:
+							newlist = []
+						newlist.append(monster)
+						self.monstercoords[(monster.x,monster.y)] = newlist
+						# if not monster.seen:
+						# 	newlist1 = self.activemonstercoords[(monster.x,monster.y)]
+						# 	newlist1.remove(monster)
+						# 	self.activemonstercoords[(monster.x,monster.y)] = newlist1
+							 #this changes monster.x and monster.y but monstercoords still has the original position as key.
+							
+						# print "Aggro:", monster.aggro
+						# print "Seen:", monster.seen
 
 
 			if rng.random() < 0.003:
