@@ -9,6 +9,7 @@ class Checklist():
 		"tutorial_Dialogue005_Finished":False,"tutorial_Dialogue006_Finished":False,"tutorial_quest":False,"tutorial_quest_confirm:"False,
 		"kerberoge_start":False, "kerberoge_defeated":False}
 		#World1
+<<<<<<< HEAD
 		# self.player_Named = False #Has the player entered a name? 
 		# self.tutorial_Dialogue002_Finished = False # If finished dialogue 2.  Can't leave room otherwise
 		# self.tutorial_Dialogue004_Finished = False # If finished dialogue 4.

@@ -114,7 +114,7 @@ class Player(Entity):
         Entity.__init__(self,grid,x,y, monstercoords) #grid is a global variable which needs to be defined before initializing any entities.
         self.health = 100
         self.maxhealth = 100
-        self.armor = 10
+        self.armor= 10
         self.accuracy = 2
         self.flatDamage = 2
         self.damageRange = 2
@@ -300,6 +300,9 @@ class NPC(Monster): # people who do not take damage, and have dialogue
     def decide(self):
         pass
 
+    def post_dialogue_action(self, conv_id):
+        pass
+
 # Perhaps we should organize the code such that everything to do with the player is in one section
 #The group of NPCs is in another, and then the monsters and such are in a third.  
 
@@ -314,6 +317,13 @@ class MrE(NPC):
             return "$D002"
         else:
             return "$D003"
+    def post_dialogue_action(self, conv_id):
+        print conv_id
+        if conv_id == 1:
+            name = raw_input("What is your name?")
+            self.player_name = name
+            self.checklist.player_Named = True
+            return
 
 
 """Entity Related Subclasses that aren't entities"""
