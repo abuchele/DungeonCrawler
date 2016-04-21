@@ -57,7 +57,7 @@ class PyGameKeyboardController(object):
                 monsters = self.model.monstercoords.get(blockcoords,0)
                 if monsters != 0:
                     target_to_attack = monsters[0]
-                    print "Attempting to attack entity!" + str(target_to_attack.__repr__)
+                    # print "Attempting to attack entity!" + str(target_to_attack.__repr__)
                 else:
                     target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]] #if we find no monster, this attacks a grid square or a block!
                 self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
