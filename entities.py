@@ -11,7 +11,7 @@ It's a bit more of a pain to initialize (more variables required) but we can cha
     value for 'player' and 'grid'.
 """
 
-from random import randint
+from random import randint, choice
 import pygame
 
 
@@ -32,7 +32,7 @@ import pygame
 """General Classes"""
 
 class Entity(object):
-    def __init__(self, grid, x=0, y=0, direction="U", speed=1, phasing = False, name = None, effect = dict(), hasAttacked = False):
+    def __init__(self, grid, x=0, y=0, monstercoords = 0, direction="U", speed=1, phasing = False, name = None, effect = dict(), hasAttacked = False):
         self.grid = grid       
         self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
@@ -45,6 +45,7 @@ class Entity(object):
         self.prex = x
         self.prey = y
         self.hasAttacked = hasAttacked
+        self.monstercoords = monstercoords
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
@@ -57,20 +58,23 @@ class Entity(object):
             if this.attackRoll() >= that.armor:
                 damage = this.damage()
                 that.health -= damage
-                if this.name!="You":
-                    print "{} hits {} for {} damage!".format(str(this),str(that),damage)
+                # if this.name!="You":
+                    # print "{} hits {} for {} damage!".format(str(this),str(that),damage)
                 
                 
                 """Pseudocode"""
                 # DISPLAY pygame.rotate(this.attackSprite, direction_to_angle[this.direction]) AT (this.x+this.directionCoordinates[0],this.y+this.directionCoordinates[1])
-                return "{} hit {} for {} damage!".format(str(this),str(that),damage)
+                print "{} hit {} for {} damage!".format(str(this),str(that),damage)
 
-            if this.name!="You":
-                print "{} misses {}!".format(str(this),str(that))
-            return "{} miss {}!".format(str(this),str(that))
+            # if this.name!="You":
+            #     print "{} misses {}!".format(str(this),str(that))
+            else:
+                print "{} miss {}!".format(str(this),str(that))
             this.hasAttacked = True
+            # print "Attacked entity!"
         except AttributeError:
             this.hasAttacked = True
+            # print "Attacked tile!"
 
     def effected(self,effect_specific):
     	self.effect[effect_specific] = True
@@ -92,7 +96,10 @@ class Entity(object):
 
     def update(self):
         self.prex, self.prey = (self.x, self.y)
-        if self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides:
+        if self.phasing:
+            if self.moving and self.monstercoords.get((self.facingCoordinates()),0) == 0:
+                self.x,self.y = self.facingCoordinates()
+        elif self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and self.monstercoords.get((self.facingCoordinates()),0) == 0:
             self.x, self.y = self.facingCoordinates()
         self.moving = False
 
@@ -103,10 +110,8 @@ class Entity(object):
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self,grid,x,y, name = "Ray"):
-        Entity.__init__(self,grid,x,y) #grid is a global variable which needs to be defined before initializing any entities.
-        self.prex = x
-        self.prey = y
+    def __init__(self,grid,monstercoords,x,y, name = "Ray"):
+        Entity.__init__(self,grid,x,y, monstercoords) #grid is a global variable which needs to be defined before initializing any entities.
         self.health = 100
         self.maxhealth = 100
         self.armor= 10
@@ -118,7 +123,7 @@ class Player(Entity):
         self.name = name
         self.sprite = (0,0)
         self.steps = 0
-        self.attackSprite = 3 #sprites is a list of .png images, so this calls sprites[self.attackSprite]
+        self.attackSprite = 0 #attackSprites is a list of .png images, so this calls attackSprites[self.attackSprite]
         self.hasAttacked = False
         
     def __str__(self):
@@ -159,8 +164,8 @@ class Player(Entity):
 """Monster Subclass"""
 
 class Monster(Entity):
-    def __init__(self, x, y, player, grid): #speed =256,  flatDamage=0, armor=0):
-        Entity.__init__(self,grid,x,y)
+    def __init__(self, x, y, player, grid, monstercoords): #speed =256,  flatDamage=0, armor=0):
+        Entity.__init__(self,grid,x,y, monstercoords)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
         self.name = None
@@ -177,49 +182,50 @@ class Monster(Entity):
         # print "aggro:", self.aggro
             # self.aggro = True
 
-    def passiveMove(self):
-        direction = [(1,0),(0,1),(-1,0),(0,-1)]
+    def passiveMove(self): # decides where to move and sets its variables accordingly
+        direction = ["R","D","L","U"]
         if self.phasing == False:
-            if self.grid[self.y][self.x+1].collides:
-                direction.remove((1,0))
-            if self.grid[self.y+1][self.x].collides:
-                direction.remove((0,1))
-            if self.grid[self.y][self.x-1].collides:
-                direction.remove((-1,0))
-            if self.grid[self.y-1][self.x].collides:
-                direction.remove((0,-1))
-        move = direction[randint(0,len(direction)-1)]
-        self.x+=move[0]
-        self.y+=move[1]
+            if self.grid[self.y][self.x+1].collides or self.monstercoords.get((self.x+1,self.y),0) != 0:
+                direction.remove("R")
+            if self.grid[self.y+1][self.x].collides or self.monstercoords.get((self.x,self.y+1),0) != 0:
+                direction.remove("D")
+            if self.grid[self.y][self.x-1].collides or self.monstercoords.get((self.x-1,self.y),0) != 0:
+                direction.remove("L")
+            if self.grid[self.y-1][self.x].collides or self.monstercoords.get((self.x,self.y-1),0) != 0:
+                direction.remove("U")
+        try:
+            self.direction = choice(direction)
+        except IndexError:
+            return
+        self.moving = True
         # print (self.x,self.y), "Passively Moving"
 
-    def aggressiveMove(self): #can't move right or down at the moment
-        print "Self:", (self.x,self.y)
-        print "Player:", (self.player.x,self.player.y) 
+    def aggressiveMove(self): # decides where to move and sets its variables accordingly
+        self.moving = True
         if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
-            if (self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x-1].collides:
-                self.x-=1
+            if (self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x-1].collides and self.monstercoords.get((self.x-1,self.y),0) == 0:
+                self.direction = "L"
                 # print "i'm to the player's right!"
-            elif (self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x+1].collides:
-                self.x+=1
+            elif (self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x+1].collides and self.monstercoords.get((self.x+1,self.y),0) == 0:
+                self.direction = "R"
                 # print "i'm to the player's left!"
             else:
-                if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides:
-                    self.y-=1
-                if (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides:
-                    self.y+=1
+                if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides and self.monstercoords.get((self.x,self.y-1),0) == 0:
+                    self.direction = "U"
+                elif (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides and self.monstercoords.get((self.x,self.y+1),0) == 0:
+                    self.direction = "D"
         else:
-            if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y):
-                self.x-=1
+            if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y) and self.monstercoords.get((self.x-1,self.y),0) == 0:
+                self.direction = "L"
                 # print "i'm to the player's right!"
-            elif self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y):
-                self.x+=1
+            elif self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y) and self.monstercoords.get((self.x+1,self.y),0) == 0:
+                self.direction = "R"
                 # print "i'm to the player's left!"
             else:
-                if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x):
-                    self.y-=1
-                if self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x):
-                    self.y+=1
+                if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x) and self.monstercoords.get((self.x,self.y-1),0) == 0:
+                    self.direction = "U"
+                elif self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x) and self.monstercoords.get((self.x,self.y+1),0) == 0:
+                    self.direction = "D"
         # print (self.x,self.y), "Aggressively Moving"
 
     def decide(self): #monster checks its own status, then takes either a move or an attack action. We assume monster is melee.
@@ -237,6 +243,7 @@ class Monster(Entity):
         if self.distance >= 256:
             self.distance -= 256
             self.decide()
+        Entity.update(self)
 
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
@@ -244,8 +251,8 @@ class Monster(Entity):
 
 
 class Zombie(Monster):
-    def __init__(self,x,y, player, grid):
-        Monster.__init__(self, x,y, player, grid)
+    def __init__(self,x,y, player, grid, monstercoords):
+        Monster.__init__(self, x,y, player, grid, monstercoords)
         self.name = "Zombie"
         self.health = 30
         self.accuracy = 3
@@ -261,8 +268,8 @@ class Zombie(Monster):
         return "Zombie"
 
 class Ghost(Monster):
-    def __init__(self,x,y, player, grid):
-        Monster.__init__(self, x,y, player, grid)
+    def __init__(self,x,y, player, grid, monstercoords):
+        Monster.__init__(self, x,y, player, grid, monstercoords)
         self.name = "Ghost"
         self.health = 20
         self.accuracy = 4
@@ -281,7 +288,7 @@ class Ghost(Monster):
 
 class NPC(Monster): # people who do not take damage, and have dialogue
     def __init__(self,grid,x,y,player,checklist,name,sprite,convID=0):
-        Monster.__init__(self,x,y,player,grid)
+        Monster.__init__(self,x,y,player,grid, 0)
         self.name = name
         self.sprite = sprite
         self.convID = convID

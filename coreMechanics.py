@@ -20,8 +20,12 @@ class Dungeon(object):
 		self.grid = thing[0]
 
 		self.nullBlock = Null()
+<<<<<<< HEAD
 		self.player = entities.Player(self.grid, *(thing[1][0]))
 		self.player_name = "Ray"
+=======
+		
+>>>>>>> 137b883e58648e06bc52041c78c7a1bae7a33965
 
 		self.last_action = "You wake up near an underground river."
 		self.current_convo = ""
@@ -34,8 +38,9 @@ class Dungeon(object):
 
 		self.checklist = eventList.Checklist()
 
-		self.monsterlist = [] #contains all the monster objects
+		# self.monsterlist = [] #contains all the monster objects
 		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
+		self.player = entities.Player(self.grid, self.monstercoords, *(thing[1][0]))
 		self.generateMonsters()
 
 		self.activemonsterlist = []
@@ -60,25 +65,25 @@ class Dungeon(object):
 		mr_E = entities.MrE(self.grid, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
 		
 		self.monstercoords[(mr_E.x, mr_E.y)] = [mr_E]	# the first npc
-		self.monsterlist.append(mr_E)
+		# self.monsterlist.append(mr_E)
 
 		count = 0
 		for y in rng.sample(range(0,self.h-1), self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
 			for x in rng.sample(range(0,self.w-1), self.w-1):
 				if not self.grid[y][x].collides:
 					if rng.randint(0,1) == 0:
-						zombie = entities.Zombie(x,y,self.player,self.grid)
+						zombie = entities.Zombie(x,y,self.player,self.grid, self.monstercoords)
 						newlist = self.monstercoords.get((x,y),[])
 						newlist.append(zombie)
 						self.monstercoords[(x,y)] = newlist
-						self.monsterlist.append(zombie)
+						# self.monsterlist.append(zombie)
 						count +=1
 					else:
-						ghost = entities.Ghost(x,y,self.player,self.grid)
+						ghost = entities.Ghost(x,y,self.player,self.grid, self.monstercoords)
 						newlist = self.monstercoords.get((x,y),[])
 						newlist.append(ghost)
 						self.monstercoords[(x,y)] = newlist
-						self.monsterlist.append(ghost)
+						# self.monsterlist.append(ghost)
 						count +=1
 
 				if count >= monsterNumber:
@@ -102,26 +107,30 @@ class Dungeon(object):
 
 			for dy in range(-8,9):
 				for dx in range(-8,9):
-					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),0) #this is a list of monsters
-					if monsters != 0:
-						# self.activemonsterlist += monsters
-						for monster in monsters:
-							monster.update()
-							# self.activemonsterlist.append(monster)
-							try:
-								newlist = self.monstercoords[(monster.x,monster.y)]
-							except KeyError:
-								newlist = []
-							newlist.append(monster)
-							self.monstercoords[(monster.x,monster.y)] = newlist
-							# if not monster.seen:
-							# 	newlist1 = self.activemonstercoords[(monster.x,monster.y)]
-							# 	newlist1.remove(monster)
-							# 	self.activemonstercoords[(monster.x,monster.y)] = newlist1
-								 #this changes monster.x and monster.y but monstercoords still has the original position as key.
-								
-							# print "Aggro:", monster.aggro
-							# print "Seen:", monster.seen
+					monsters = self.monstercoords.get((self.player.x+dx,self.player.y+dy),[])
+					for monster in monsters:
+						monster.update()
+
+			for dy in range(-8,9):
+				for dx in range(-8,9):
+					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),[]) #this is a list of monsters
+					# self.activemonsterlist += monsters
+					for monster in monsters:
+						# self.activemonsterlist.append(monster)
+						try:
+							newlist = self.monstercoords[(monster.x,monster.y)]
+						except KeyError:
+							newlist = []
+						newlist.append(monster)
+						self.monstercoords[(monster.x,monster.y)] = newlist
+						# if not monster.seen:
+						# 	newlist1 = self.activemonstercoords[(monster.x,monster.y)]
+						# 	newlist1.remove(monster)
+						# 	self.activemonstercoords[(monster.x,monster.y)] = newlist1
+							 #this changes monster.x and monster.y but monstercoords still has the original position as key.
+							
+						# print "Aggro:", monster.aggro
+						# print "Seen:", monster.seen
 
 
 			if rng.random() < 0.003:
@@ -179,9 +188,14 @@ class Dungeon(object):
 			self.do_post_dialogue_action()
 			self.state = "R"				# resume the game
 			self.text = None				# clear these variables
+<<<<<<< HEAD
 			self.lines = None				#because they take up too much space
 			self.current_convo = None
 			pygame.key.set_repeat(150,150)
+=======
+			self.lines = None				# because they take up too much space
+			pygame.key.set_repeat(200,200)
+>>>>>>> 137b883e58648e06bc52041c78c7a1bae7a33965
 
 	def do_post_dialogue_action(self):
 		if isinstance(self.current_interactee, entities.NPC):
