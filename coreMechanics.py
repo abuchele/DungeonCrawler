@@ -178,7 +178,7 @@ class Dungeon(object):
 			self.state = "R"				# resume the game
 			self.text = None				# clear these variables
 			self.lines = None				# because they take up too much space
-			pygame.key.set_repeat(150,150)
+			pygame.key.set_repeat(200,200)
 
 
 	def currentParagraph(self):				# the surface that represents the current bit of dialogue

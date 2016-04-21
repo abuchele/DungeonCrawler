@@ -42,6 +42,11 @@ class DungeonModelView(object):
         for x in [-1,0,1]:
             for y in [-1,0,1]:
                 self.visible[(x,y)] = True  # keeps track fo which blocks are visible
+
+
+    def update(self):
+        for x1,y1,x2,y2 in self.losLst: # decides what blocks are visible
+            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.player.x+x2, self.model.player.y+y2).transparent
         
 
     def display(self, t):
@@ -49,13 +54,17 @@ class DungeonModelView(object):
         Draws all entities, blocks, minimaps, etc. to the screen and displays
         takes input t, a float between 0 and 1 that represents at what point in the tick we are (0=beginning, 1=end)
         """
-        pSpriteInd = self.model.player.sprite
-        pxr, pyr = (self.model.player.x, self.model.player.y)   # the "real" coordinates
+        pxr, pyr = (self.model.player.x, self.model.player.y)   # the "real" player coordinates
         pxc, pyc = self.model.player.getCoords(t)             # the calculated coordinates that produce smoother motion
 
-        for x1,y1,x2,y2 in self.losLst:
-            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(pxr+x2, pyr+y2).transparent
+        self.drawBlocks(t, pxr, pyr, pxc, pyc)
+        self.drawMonsters(t, pxr, pyr, pxc, pyc)
+        self.drawAttacks(t, pxr, pyr, pxc, pyc)                
+        self.drawHUD(t, pxr, pyr, pxc, pyc)
+        pygame.display.update()
 
+
+    def drawBlocks(self, t, pxr, pyr, pxc, pyc):   # draws all nearby blocks
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
@@ -70,6 +79,8 @@ class DungeonModelView(object):
                 else:                                                           # if we don't know what it looks like
                     self.screen.blit(self.sprites[0], blockCoords)              # put in a placeholder block
 
+
+    def drawMonsters(self, t, pxr, pyr, pxc, pyc): # draws all nearby entites (including the player)
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
@@ -80,11 +91,21 @@ class DungeonModelView(object):
                         mxc, myc = monsters[0].getCoords(t)
                         monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
                         self.screen.blit(self.monsterSprites[monsters[0].sprite],monstCoords)   # just draw it and the monsters on it
-
+        
+        pSpriteInd = self.model.player.sprite
         self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
+
+    def drawAttacks(self, t, pxr, pyr, pxc, pyc):
         direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
-                
+        if self.model.player.hasAttacked == True: # draw player attack sprite!
+            attackSprite = pygame.transform.rotate(self.sprites[self.model.player.attackSprite], direction_to_angle[self.model.player.direction])
+            attackCoords = (self.dispSize[0]/2 + self.model.player.directionCoordinates[self.model.player.direction][0]*self.blockSize[0],
+                            self.dispSize[1]/2 + self.model.player.directionCoordinates[self.model.player.direction][1]*self.blockSize[1])
+            self.screen.blit(attackSprite,attackCoords)
+
+
+    def drawHUD(self, t, pxr, pyr, pxc, pyc):
         pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.size[0]-self.size[1], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
             area = ((self.model.player.x/self.rempSz[0]*self.mimpSz[0], self.model.player.y/self.rempSz[1]*self.mimpSz[1]), self.mimpSz))    # draw the minimap
@@ -92,8 +113,6 @@ class DungeonModelView(object):
         self.screen.blit(self.dotSprite, (self.size[1]+int((self.model.player.x+0.5)*self.mimpSz[0]/self.rempSz[0])%self.mimpSz[0]-self.dotSprite.get_width()/2+1,
             int((self.model.player.y+0.5)*self.mimpSz[1]/self.rempSz[1])%self.mimpSz[1]-self.dotSprite.get_height()/2+1))  # draw the dot on the minimap
 
-        if self.model.player.hasAttacked == True: # draw player attack sprite!
-                    self.screen.blit(pygame.transform.rotate(self.sprites[self.model.player.attackSprite], direction_to_angle[self.model.player.direction]),(self.dispSize[0]/2 + self.model.player.directionCoordinates[self.model.player.direction][0]*self.blockSize[0], self.dispSize[1]/2 + self.model.player.directionCoordinates[self.model.player.direction][1]*self.blockSize[1]))
         actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
         self.screen.blit(actionLog, (0, self.size[1]-34))
 
@@ -107,8 +126,6 @@ class DungeonModelView(object):
             paragraph = self.model.currentParagraph()
             for y, line in enumerate(paragraph):
                 self.screen.blit(line, (30,30+30*y))
-
-        pygame.display.update()
 
 
     def compose_LOS_list(self): # does preliminary calculations for line of sight

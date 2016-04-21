@@ -28,7 +28,7 @@ if __name__ == '__main__':
     events = []
 
     running = True
-    view.display(0.0)
+    view.update()
     while running:
 
         start_time = time.time()
@@ -36,6 +36,7 @@ if __name__ == '__main__':
 
         running = controller.handle_all_events(events)
         model.update()
+        view.update()
         
         events = [] # I know what you're thinking: "What is this convoluted events variable? pygame does all that automatically. This variable should be entirely unnecessary to make the game function properly." to which I respond, "Yes, it should."
         while time.time() < end_time:
