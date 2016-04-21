@@ -66,7 +66,7 @@ class DungeonModelView(object):
                     if monsters != 0:
                         mxr, myr = (monsters[0].x, monsters[0].y)
                         mxc, myc = monsters[0].getCoords(t)
-                        monstCoords = (blockCoords[0]+mxc-mxr, blockCoords[1]+myc-myr)
+                        monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
                         self.screen.blit(self.monsterSprites[monsters[0].sprite],monstCoords)   # just draw it and the monsters on it
                     self.minimap.set_at((pxr+dx, pyr+dy), block.color)          # and mark it on the minimap
                     block.explored = True                                       # and remember it for later
