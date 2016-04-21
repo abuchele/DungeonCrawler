@@ -21,7 +21,7 @@ end_0001
 
 id=0002
 Mr.E: Your Driver's ID says @player@, huh?  What kind of name is that?  Hahaha.  Back to protocol.  Do you remember anything besides your name?$$
-pPlayer@: ...  I need to find my friend.$$
+@player@: ...  I need to find my friend.$$
 Mr.E: Son of a gun!  You CAN talk!$$
 @player@: Do you know where my friend could be?$$
 Mr.E: For the low price of $19.99, I could give you what's going on right now.$$
