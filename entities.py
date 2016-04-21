@@ -205,7 +205,7 @@ class Monster(Entity):
             else:
                 if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides and self.monsterCoords.get((self.x,self.y-1),0) == 0:
                     self.direction = "U"
-                if (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides and self.monsterCoords.get((self.x,self.y+1),0) == 0:
+                elif (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides and self.monsterCoords.get((self.x,self.y+1),0) == 0:
                     self.direction = "D"
         else:
             if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y) and self.monsterCoords.get((self.x-1,self.y),0) == 0:
@@ -217,7 +217,7 @@ class Monster(Entity):
             else:
                 if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x) and self.monsterCoords.get((self.x,self.y-1),0) == 0:
                     self.direction = "U"
-                if self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x) and self.monsterCoords.get((self.x,self.y+1),0) == 0:
+                elif self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x) and self.monsterCoords.get((self.x,self.y+1),0) == 0:
                     self.direction = "D"
         # print (self.x,self.y), "Aggressively Moving"
 
