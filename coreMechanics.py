@@ -20,7 +20,7 @@ class Dungeon(object):
 		self.grid = thing[0]
 
 		self.nullBlock = Null()
-		
+
 		self.player = entities.Player(self.grid, *(thing[1][0]))
 		self.player_name = "Ray"
 
@@ -186,14 +186,13 @@ class Dungeon(object):
 			self.do_post_dialogue_action()
 			self.state = "R"				# resume the game
 			self.text = None				# clear these variables
-<<<<<<< HEAD
 			self.lines = None				#because they take up too much space
 			self.current_convo = None
 			pygame.key.set_repeat(150,150)
-=======
+
 			self.lines = None				# because they take up too much space
 			pygame.key.set_repeat(200,200)
->>>>>>> 137b883e58648e06bc52041c78c7a1bae7a33965
+
 
 	def do_post_dialogue_action(self):
 		if isinstance(self.current_interactee, entities.NPC):

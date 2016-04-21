@@ -6,7 +6,7 @@ class Checklist():
 		world = 0 #Current world completed/bosses defeated
 		killcount = 0 #monsters killed
 		self.state = {"player_Named":False,"tutorial_Dialogue002_Finished":False,"tutorial_Dialogue004_Finished":False,
-		"tutorial_Dialogue005_Finished":False,"tutorial_Dialogue006_Finished":False,"tutorial_quest":False,"tutorial_quest_confirm:"False,
+		"tutorial_Dialogue005_Finished":False,"tutorial_Dialogue006_Finished":False,"tutorial_quest":False,"tutorial_quest_confirm":False,
 		"kerberoge_start":False, "kerberoge_defeated":False}
 		#World1
 		# self.player_Named = False #Has the player entered a name? 
@@ -26,6 +26,7 @@ class Checklist():
 		The player can trigger dialogue 6.  Once that is finished, the player can go outside.  
 		Once the player kills enough monsters, the quest will be finished.  If this is true, then 
 		Mr. E will have dialogue 0007, and then mark the quest confirm as true."""  
+	
 	def eventcomplete(eventname): #eventname is string
 		self.state[eventname] = True
 	def checkeventstate(eventname):

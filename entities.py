@@ -311,9 +311,9 @@ class MrE(NPC):
         NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 4)
 
     def interact(self,player):
-        if not self.checklist.player_Named:
+        if not self.checklist.state["player_Named"]:
             return "$D001"
-        elif not self.checklist.tutorial_Dialogue002_Finished:
+        elif not self.checklist.state["tutorial_Dialogue002_Finished"]:
             return "$D002"
         else:
             return "$D003"
@@ -321,8 +321,8 @@ class MrE(NPC):
         print conv_id
         if conv_id == 1:
             name = raw_input("What is your name?")
-            self.player_name = name
-            self.checklist.player_Named = True
+            player_name = name
+            self.checklist.eventcomplete("player_Named")
             return
 
 
