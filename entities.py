@@ -174,6 +174,9 @@ class Monster(Entity):
         self.player = player
         self.distance = 0   # it moves when this reaches 256
 
+    def __str__(self):
+        return self.name
+
     def checkstatus(self):
         self.seen = (abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange)
         # print "seen:", self.seen
@@ -264,8 +267,6 @@ class Zombie(Monster):
             self.sprite = 2
         else:
             self.sprite = 3
-    def __str__(self):
-        return "Zombie"
 
 class Ghost(Monster):
     def __init__(self,x,y, player, grid, monstercoords):
@@ -276,12 +277,37 @@ class Ghost(Monster):
         self.damageRange = 2
         self.flatDamage = 1
         self.armor = 10
-        self.speed = 150
+        self.speed = 100
         self.phasing = True
         self.sprite = 1
-    def __str__(self):
-        return "Ghost"
 
+
+class Demon(Monster):
+    def __init__(self,x,y, player, grid, monstercoords):
+        Monster.__init__(self, x,y, player, grid, monstercoords)
+        self.name = "Demon"
+        self.health = 40
+        self.accuracy = 1
+        self.damageRange = 20
+        self.flatDamage = 2
+        self.armor = 5
+        self.speed = 64
+        self.phasing = False
+        self.sprite = 0
+
+
+class Skeleton(Monster):
+    def __init__(self,x,y, player, grid, monstercoords):
+        Monster.__init__(self, x,y, player, grid, monstercoords)
+        self.name = "Skeleton"
+        self.health = 20
+        self.accuracy = 5
+        self.damageRange = 1
+        self.flatDamage = 4
+        self.armor = 10
+        self.speed = 100
+        self.phasing = False
+        self.sprite = 0
 
 
 """NPC Subclass"""

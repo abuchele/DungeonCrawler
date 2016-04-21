@@ -21,6 +21,7 @@ class Dungeon(object):
 
 		self.nullBlock = Null()
 
+		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
 
 		self.last_action = "You wake up near an underground river."
 		self.current_convo = ""
@@ -33,10 +34,9 @@ class Dungeon(object):
 
 		self.checklist = eventList.Checklist()
 
-		# self.monsterlist = [] #contains all the monster objects
-		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
 		self.player = entities.Player(self.grid, self.monstercoords, *(thing[1][0]))
-		self.generateMonsters()
+
+		self.generateMonsters(monsterFrequency=0.002)
 
 		self.activemonsterlist = []
 		self.activemonstercoords = {}
@@ -53,7 +53,7 @@ class Dungeon(object):
 			output = output+"\n"
 		return output
 
-	def generateMonsters(self, monsterNumber = 1000):
+	def generateMonsters(self, monsterFrequency = 0.1):
 		"""
 		Fills the world with monsters of various kinds
 		"""
@@ -65,24 +65,29 @@ class Dungeon(object):
 		count = 0
 		for y in rng.sample(range(0,self.h-1), self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
 			for x in rng.sample(range(0,self.w-1), self.w-1):
-				if not self.grid[y][x].collides:
-					if rng.randint(0,1) == 0:
-						zombie = entities.Zombie(x,y,self.player,self.grid, self.monstercoords)
-						newlist = self.monstercoords.get((x,y),[])
-						newlist.append(zombie)
-						self.monstercoords[(x,y)] = newlist
-						# self.monsterlist.append(zombie)
-						count +=1
+				block = self.grid[y][x]
+				if not block.collides and rng.random() < monsterFrequency:
+					if block.biome == 0:
+						newMonst = entities.Zombie(x,y,self.player,self.grid,self.monstercoords)
+					elif block.biome == 1:
+						if rng.random() < 0.5:
+							newMonst = entities.Zombie(x,y,self.player,self.grid,self.monstercoords)
+						else:
+							newMonst = entities.Ghost(x,y,self.player,self.grid, self.monstercoords)
+					elif block.biome == 2:
+						if rng.random() < 0.4:
+							newMonst = entities.Zombie(x,y,self.player,self.grid,self.monstercoords)
+						elif rng.random() < 0.1:
+							newMonst = entities.Ghost(x,y,self.player,self.grid, self.monstercoords)
+						else:
+							newMonst = entities.Demon(x,y,self.player,self.grid, self.monstercoords)
 					else:
-						ghost = entities.Ghost(x,y,self.player,self.grid, self.monstercoords)
-						newlist = self.monstercoords.get((x,y),[])
-						newlist.append(ghost)
-						self.monstercoords[(x,y)] = newlist
-						# self.monsterlist.append(ghost)
-						count +=1
+						newMonst = entities.Skeleton(x,y,self.player,self.grid, self.monstercoords)
 
-				if count >= monsterNumber:
-					return
+					newlist = self.monstercoords.get((x,y),[])
+					newlist.append(newMonst)
+					self.monstercoords[(x,y)] = newlist
+					count +=1
 
 	def update(self):
 		if self.state == "R":	# it doesn't update if the game is paused
@@ -186,10 +191,6 @@ class Dungeon(object):
 			self.lines = None				#because they take up too much space
 			self.current_convo = None
 			pygame.key.set_repeat(150,150)
-
-			self.lines = None				# because they take up too much space
-			pygame.key.set_repeat(200,200)
-
 
 	def do_post_dialogue_action(self):
 		if isinstance(self.current_interactee, entities.NPC):

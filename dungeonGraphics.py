@@ -94,9 +94,9 @@ class DungeonModelView(object):
                         mxc, myc = monsters[0].getCoords(t)
                         monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
                         self.screen.blit(self.monsterSprites[monsters[0].sprite],monstCoords)   # just draw it and the monsters on it
-        
-        pSpriteInd = self.model.player.sprite
-        self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
+            if dy == 0:
+                pSpriteInd = self.model.player.sprite
+                self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
 
     def drawAttacks(self, t, pxr, pyr, pxc, pyc):
