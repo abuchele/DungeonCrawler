@@ -20,12 +20,10 @@ class Dungeon(object):
 		self.grid = thing[0]
 
 		self.nullBlock = Null()
-<<<<<<< HEAD
+		
 		self.player = entities.Player(self.grid, *(thing[1][0]))
 		self.player_name = "Ray"
-=======
-		
->>>>>>> 137b883e58648e06bc52041c78c7a1bae7a33965
+
 
 		self.last_action = "You wake up near an underground river."
 		self.current_convo = ""
