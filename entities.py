@@ -11,7 +11,7 @@ It's a bit more of a pain to initialize (more variables required) but we can cha
     value for 'player' and 'grid'.
 """
 
-from random import randint
+from random import randint, choice
 import pygame
 
 
@@ -177,49 +177,47 @@ class Monster(Entity):
         # print "aggro:", self.aggro
             # self.aggro = True
 
-    def passiveMove(self):
-        direction = [(1,0),(0,1),(-1,0),(0,-1)]
+    def passiveMove(self): # decides where to move and sets its variables accordingly
+        direction = ["R","D","L","U"]
         if self.phasing == False:
             if self.grid[self.y][self.x+1].collides:
-                direction.remove((1,0))
+                direction.remove("R")
             if self.grid[self.y+1][self.x].collides:
-                direction.remove((0,1))
+                direction.remove("D")
             if self.grid[self.y][self.x-1].collides:
-                direction.remove((-1,0))
+                direction.remove("L")
             if self.grid[self.y-1][self.x].collides:
-                direction.remove((0,-1))
-        move = direction[randint(0,len(direction)-1)]
-        self.x+=move[0]
-        self.y+=move[1]
+                direction.remove("U")
+        self.direction = choice(direction)
+        self.moving = True
         # print (self.x,self.y), "Passively Moving"
 
-    def aggressiveMove(self): #can't move right or down at the moment
-        print "Self:", (self.x,self.y)
-        print "Player:", (self.player.x,self.player.y) 
+    def aggressiveMove(self): # decides where to move and sets its variables accordingly
+        self.moving = True
         if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
             if (self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x-1].collides:
-                self.x-=1
+                self.direction = "L"
                 # print "i'm to the player's right!"
             elif (self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x+1].collides:
-                self.x+=1
+                self.direction = "R"
                 # print "i'm to the player's left!"
             else:
                 if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides:
-                    self.y-=1
+                    self.direction = "U"
                 if (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides:
-                    self.y+=1
+                    self.direction = "D"
         else:
             if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y):
-                self.x-=1
+                self.direction = "L"
                 # print "i'm to the player's right!"
             elif self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y):
-                self.x+=1
+                self.direction = "R"
                 # print "i'm to the player's left!"
             else:
                 if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x):
-                    self.y-=1
+                    self.direction = "U"
                 if self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x):
-                    self.y+=1
+                    self.direction = "D"
         # print (self.x,self.y), "Aggressively Moving"
 
     def decide(self): #monster checks its own status, then takes either a move or an attack action. We assume monster is melee.
@@ -237,6 +235,7 @@ class Monster(Entity):
         if self.distance >= 256:
             self.distance -= 256
             self.decide()
+        Entity.update(self)
 
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
