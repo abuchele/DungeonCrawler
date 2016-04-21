@@ -189,7 +189,10 @@ class Monster(Entity):
                 direction.remove("L")
             if self.grid[self.y-1][self.x].collides or self.monsterCoords.get((self.x,self.y-1),0) != 0:
                 direction.remove("U")
-        self.direction = choice(direction)
+        try:
+            self.direction = choice(direction)
+        except IndexError:
+            return
         self.moving = True
         # print (self.x,self.y), "Passively Moving"
 
@@ -231,11 +234,12 @@ class Monster(Entity):
         elif self.seen == True:
             self.passiveMove()
 
-    def think(self):
+    def update(self):
         self.distance += self.speed
         if self.distance >= 256:
             self.distance -= 256
             self.decide()
+        Entity.update(self)
 
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
