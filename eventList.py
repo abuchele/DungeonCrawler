@@ -5,8 +5,13 @@ class Checklist():
 		#universal things
 		world = 0 #Current world completed/bosses defeated
 		killcount = 0 #monsters killed
-		self.state = {"player_Named":False,"tutorial_Dialogue002_Finished":False,"tutorial_Dialogue004_Finished":False,
-		"tutorial_Dialogue005_Finished":False,"tutorial_Dialogue006_Finished":False,"tutorial_quest":False,"tutorial_quest_confirm":False,
+		self.state = {"player_Named":False,
+		"tutorial_Dialogue002_Finished":False,
+		"tutorial_Dialogue004_Finished":False,
+		"tutorial_Dialogue005_Finished":False,
+		"tutorial_Dialogue006_Finished":False,
+		"tutorial_quest_finished":False,
+		"tutorial_quest_confirmed_finished":False,
 		"kerberoge_start":False, "kerberoge_defeated":False}
 		#World1
 		# self.player_Named = False #Has the player entered a name? 

@@ -341,15 +341,30 @@ class MrE(NPC):
             return "$D001"
         elif not self.checklist.state["tutorial_Dialogue002_Finished"]:
             return "$D002"
-        else:
+        elif 1==2: #Need to put in a condition if the player tries to open a door.  
             return "$D003"
+        elif not self.checklist.state["tutorial_Dialogue004_Finished"]:
+            return "$D004"
+        elif not self.checklist.state["tutorial_Dialogue005_Finished"]:
+            return "$D005"
+        elif not self.checklist.state["tutorial_Dialogue006_Finished"]:
+            return "$D006"
+        elif not self.checklist.state["tutorial_quest_finished"]:
+            return "$D007"
     def post_dialogue_action(self, conv_id):
-        print conv_id
         if conv_id == 1:
             name = raw_input("What is your name?")
             self.player.name = name
             self.checklist.eventcomplete("player_Named")
             return
+        if conv_id == 2:
+            self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
+        if conv_id == 4:
+            self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
+        if conv_id == 5:
+            self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
+        if conv_id == 6:
+            self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
 
 
 """Entity Related Subclasses that aren't entities"""

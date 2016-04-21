@@ -27,7 +27,7 @@ Mr.E: Son of a gun!  You CAN talk!$$
 Mr.E: For the low price of $19.99, I could give you what's going on right now.$$
 Mr.E: ...$$
 Mr.E: You're flat broke, aren't you?$$
-Mr.E: Tell you what, if you call me the "Great, Magnificent, Better than than his crazy deathbeam building contemporary Mr. E" and ask again, I'll reconsider.$
+Mr.E: Tell you what, if you call me the "Great, Magnificent, Better than than his crazy deathbeam building contemporary Mr. E" and ask again, I'll reconsider.$$
 @player@: ...$$
 Mr.E: The silent treatment, huh?  Well, I'll show you!$$
 The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E: Hahaha.  Thankfully, Mr.E is tightlipped.  He would never let slip such a cliche story like how your friend is in
@@ -61,12 +61,16 @@ Mr.E: Ugh.  I'm so ashamed.  But I couldn't think of anything else.  As much as 
 end_0006
 
 id=0007
-Mr.E:  Well done.  But the shame, oh the shame of sending someone out on a boring grindquest.  But in the time that you took to kill those monsters, I have came up with a master plan!  I will have my
-dog, Kerberoge help you with your quest for your friend!  Just meet me at the end of this dungeon.$$
+Mr.E: What?  You're not done yet.  Don't come back until you finish!$$
 end_0007
 
 id=0008
-Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  I messed that up-- anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$
+Mr.E:  Well done.  But the shame, oh the shame of sending someone out on a boring grindquest.  But in the time that you took to kill those monsters, I have came up with a master plan!  I will have my
+dog, Kerberoge help you with your quest for your friend!  Just meet me at the end of this dungeon.$$
 end_0008
+
+id=0009
+Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  I messed that up-- anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$
+end_0009
 
 
