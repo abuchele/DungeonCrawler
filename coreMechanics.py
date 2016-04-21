@@ -20,15 +20,6 @@ class Dungeon(object):
 		self.grid = thing[0]
 
 		self.nullBlock = Null()
-<<<<<<< HEAD
-
-		self.player = entities.Player(self.grid, *(thing[1][0]))
-		self.player_name = "Ray"
-=======
-		
-		
-		
->>>>>>> 968b241781a9cdcdb4ed3aea99dc5de783d20dc3
 
 
 		self.last_action = "You wake up near an underground river."
@@ -45,7 +36,6 @@ class Dungeon(object):
 		# self.monsterlist = [] #contains all the monster objects
 		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
 		self.player = entities.Player(self.grid, self.monstercoords, *(thing[1][0]))
-		self.player_name = "Ray"
 		self.generateMonsters()
 
 		self.activemonsterlist = []
@@ -181,7 +171,7 @@ class Dungeon(object):
 	def start_dialogue(self, conv_id):	# enters dialogue mode
 		self.state = "D"
 		self.current_convo = conv_id
-		self.text = TextUtility()
+		self.text = TextUtility(self.player)
 		self.lines = self.text.text_wrapper(conv_id, (20,20,660,150), (0,0,0))
 		self.lnInd = 0
 		pygame.key.set_repeat()

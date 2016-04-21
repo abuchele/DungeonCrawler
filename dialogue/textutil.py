@@ -2,12 +2,14 @@ import pygame
 
 class TextUtility(object):
 
-	def __init__(self):
+	def __init__(self, player):
+		self.player = player
 
 		if pygame.font.get_init() != True: #Initialize the font module.  
 			pygame.font.init()
 
 		self.myFont = pygame.font.SysFont("serif",24) #Default Font
+
 
 		text = open("dialogue/conversation.txt", "r") #Import the Conversation File.  
 		self.conversation = text.read()
@@ -33,9 +35,10 @@ class TextUtility(object):
 		start = self.conversation.index("id={:04d}".format(convo_id)) + 7 #Finds start of dialogue
 		end = self.conversation.index("end_{:04d}".format(convo_id)) - 1 #Finds end of dialogue
 		convo = self.conversation[start:end]
-		player_name = self.player_name
-		convo.replace("@player@", player_name)
-		
+
+		# player_name = self.player.name
+		convo = convo.replace("@player@", self.player.name)
+
 		while len(convo) > 0:
 			line = convo[1:convo.index("$$")]
 			dialogue_list.append(line)

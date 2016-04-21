@@ -321,7 +321,7 @@ class MrE(NPC):
         print conv_id
         if conv_id == 1:
             name = raw_input("What is your name?")
-            player_name = name
+            self.player.name = name
             self.checklist.eventcomplete("player_Named")
             return
 

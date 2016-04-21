@@ -27,7 +27,7 @@ class Checklist():
 		Once the player kills enough monsters, the quest will be finished.  If this is true, then 
 		Mr. E will have dialogue 0007, and then mark the quest confirm as true."""  
 	
-	def eventcomplete(eventname): #eventname is string
+	def eventcomplete(self, eventname): #eventname is string
 		self.state[eventname] = True
-	def checkeventstate(eventname):
+	def checkeventstate(self, eventname):
 		return self.state[eventname]
