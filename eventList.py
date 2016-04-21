@@ -23,4 +23,5 @@ class Checklist():
 		#to kill monsters.  Once it is true, it triggers Dialogue 005.  Once dialogue 5 is finished, 
 		#The player can trigger dialogue 6.  Once that is finished, the player can go outside.  
 		#Once the player kills enough monsters, the quest will be finished.  If this is true, then 
-		#Mr. E will have dialogue 0007, and then mark the quest confirm as true.  
+		#Mr. E will have dialogue 0007, and then mark the quest confirm as true.
+

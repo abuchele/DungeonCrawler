@@ -33,7 +33,7 @@ class TextUtility(object):
 		start = self.conversation.index("id={:04d}".format(convo_id)) + 7 #Finds start of dialogue
 		end = self.conversation.index("end_{:04d}".format(convo_id)) - 1 #Finds end of dialogue
 		convo = self.conversation[start:end]
-		player_name = "Ray" #TODO: Set Player Name.  
+		player_name = self.player_name
 		convo.replace("@player@", player_name)
 		
 		while len(convo) > 0:
