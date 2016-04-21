@@ -59,17 +59,21 @@ class PyGameKeyboardController(object):
                 self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
 
             elif event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                if self.model.player.direction == "L":
+                    self.model.player.moving = True
                 self.model.player.direction = "L"
-                self.model.player.moving = True
             elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                if self.model.player.direction == "R":
+                    self.model.player.moving = True
                 self.model.player.direction = "R"
-                self.model.player.moving = True
             elif event.key == pygame.K_UP or event.key == pygame.K_w:
+                if self.model.player.direction == "U":
+                    self.model.player.moving = True
                 self.model.player.direction = "U"
-                self.model.player.moving = True
             elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                if self.model.player.direction == "D":
+                    self.model.player.moving = True
                 self.model.player.direction = "D"
-                self.model.player.moving = True
 
         pygame.event.clear()
         return True
