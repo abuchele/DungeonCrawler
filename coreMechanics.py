@@ -21,8 +21,8 @@ class Dungeon(object):
 
 		self.nullBlock = Null()
 		
-		self.player = entities.Player(self.grid, *(thing[1][0]))
-		self.player_name = "Ray"
+		
+		
 
 
 		self.last_action = "You wake up near an underground river."
@@ -39,6 +39,7 @@ class Dungeon(object):
 		# self.monsterlist = [] #contains all the monster objects
 		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
 		self.player = entities.Player(self.grid, self.monstercoords, *(thing[1][0]))
+		self.player_name = "Ray"
 		self.generateMonsters()
 
 		self.activemonsterlist = []
