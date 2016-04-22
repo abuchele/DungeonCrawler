@@ -190,7 +190,7 @@ class Dungeon(object):
 			self.text = None				# clear these variables
 			self.lines = None				#because they take up too much space
 			self.current_convo = None
-			pygame.key.set_repeat(150,150)
+			pygame.key.set_repeat(100,100)
 
 	def do_post_dialogue_action(self):
 		if isinstance(self.current_interactee, entities.NPC):

@@ -15,7 +15,7 @@ if __name__ == '__main__':
     screenX = 1080
     screenY = 720
     size = (screenX, screenY)
-    delay = 0.2
+    delay = 0.15
     
     if raw_input("Would you like to start where you left off? [y/n]") == "y":
         model = coreMechanics.load("saves/last_save.dun")

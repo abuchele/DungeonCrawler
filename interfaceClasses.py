@@ -8,7 +8,7 @@ class PyGameKeyboardController(object):
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
             pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1}
-        pygame.key.set_repeat(150,150)
+        pygame.key.set_repeat(100,100)
         self.controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
 
 
@@ -23,8 +23,7 @@ class PyGameKeyboardController(object):
                         return True
                 elif self.model.state == "R":
                     if event.type == KEYDOWN and event.key in self.controls:
-                        running = self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
-                        return True
+                        return self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
                     if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
                         self.model.pause()
                         return True
@@ -33,6 +32,12 @@ class PyGameKeyboardController(object):
                         self.model.advance_dialogue()
                         return True
             pygame.event.clear()  #empties queue
+
+        held = pygame.key.get_pressed()  # if there are no key presses, check for keys being held down
+        for key in self.controls:
+            if held[key]:
+                return self.handle_event(pygame.event.Event(KEYDOWN, key=key))
+
         return True
 
 
