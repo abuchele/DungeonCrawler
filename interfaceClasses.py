@@ -49,19 +49,19 @@ class PyGameKeyboardController(object):
         if event.type == KEYDOWN:
             if event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
-                monsters = self.model.monstercoords.get(blockcoords, 0)
-                if monsters != 0:                           # if there is a mob,
-                    self.model.current_interactee = monsters[0]
-                    self.model.interp_action(monsters[0].interact(self.model.player))   # interact with the mob
+                monster = self.model.monstercoords.get(blockcoords, 0)
+                if monster != 0:                           # if there is a mob,
+                    self.model.current_interactee = monster
+                    self.model.interp_action(monster.interact(self.model.player))   # interact with the mob
                 else:                                                   # otherwise
                     block_to_interact_with = self.model.getBlock(*blockcoords)
                     self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
             if event.key == pygame.K_r:
                 blockcoords = self.model.player.facingCoordinates() #this gives the (x,y) coordinate which you are facing!
                 """If we have a monster list with coordinates, we iterate over the list to see if there's a monster on blockcoords."""
-                monsters = self.model.monstercoords.get(blockcoords,0)
-                if monsters != 0:
-                    target_to_attack = monsters[0]
+                monster = self.model.monstercoords.get(blockcoords,0)
+                if monster != 0:
+                    target_to_attack = monster
                     # print "Attempting to attack entity!" + str(target_to_attack.__repr__)
                 else:
                     target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]] #if we find no monster, this attacks a grid square or a block!
