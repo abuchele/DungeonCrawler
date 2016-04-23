@@ -53,7 +53,7 @@ class Dungeon(object):
 			output = output+"\n"
 		return output
 
-	def generateMonsters(self, monsterFrequency = 0.1):
+	def generateMonsters(self, monsterFrequency = 0.01):
 		"""
 		Fills the world with monsters of various kinds
 		"""
