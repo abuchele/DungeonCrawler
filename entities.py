@@ -251,7 +251,7 @@ class Ghost(Monster):
         self.damageRange = 2
         self.flatDamage = 1
         self.armor = 10
-        self.speed = 100
+        self.speed = 150
         self.sprite = 1
 
     def aggressiveMove(self):

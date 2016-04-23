@@ -37,7 +37,7 @@ class DungeonModelView(object):
         self.monsterSprites = loadSprites(monsterSpriteNames)
         self.attackSprites = loadSprites(attackSpriteNames)
 
-        self.steps = 0
+        self.t = 0
 
         self.compose_LOS_list()  # do some preliminary calculations for Line of Sight
 
@@ -57,13 +57,15 @@ class DungeonModelView(object):
         Draws all entities, blocks, minimaps, etc. to the screen and displays
         takes input t, a float between 0 and 1 that represents at what point in the tick we are (0=beginning, 1=end)
         """
+        if self.model.state == "R":
+            self.t = t
         pxr, pyr = (self.model.player.x, self.model.player.y)   # the "real" player coordinates
-        pxc, pyc = self.model.player.getCoords(t)             # the calculated coordinates that produce smoother motion
+        pxc, pyc = self.model.player.getCoords(self.t)             # the calculated coordinates that produce smoother motion
 
-        self.drawBlocks(t, pxr, pyr, pxc, pyc)
-        self.drawMonsters(t, pxr, pyr, pxc, pyc)
-        self.drawAttacks(t, pxr, pyr, pxc, pyc)                
-        self.drawHUD(t, pxr, pyr, pxc, pyc)
+        self.drawBlocks(self.t, pxr, pyr, pxc, pyc)
+        self.drawMonsters(self.t, pxr, pyr, pxc, pyc)
+        self.drawAttacks(self.t, pxr, pyr, pxc, pyc)                
+        self.drawHUD(self.t, pxr, pyr, pxc, pyc)
         pygame.display.update()
 
 
