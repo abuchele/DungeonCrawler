@@ -8,7 +8,7 @@ class PyGameKeyboardController(object):
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
             pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1}
-        pygame.key.set_repeat(150,150)
+        pygame.key.set_repeat(100,100)
         self.controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
 
 
@@ -23,8 +23,7 @@ class PyGameKeyboardController(object):
                         return True
                 elif self.model.state == "R":
                     if event.type == KEYDOWN and event.key in self.controls:
-                        running = self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
-                        return True
+                        return self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
                     if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
                         self.model.pause()
                         return True
@@ -33,6 +32,12 @@ class PyGameKeyboardController(object):
                         self.model.advance_dialogue()
                         return True
             pygame.event.clear()  #empties queue
+
+        held = pygame.key.get_pressed()  # if there are no key presses, check for keys being held down
+        for key in self.controls:
+            if held[key]:
+                return self.handle_event(pygame.event.Event(KEYDOWN, key=key))
+
         return True
 
 
@@ -44,19 +49,19 @@ class PyGameKeyboardController(object):
         if event.type == KEYDOWN:
             if event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
-                monsters = self.model.monstercoords.get(blockcoords, 0)
-                if monsters != 0:                           # if there is a mob,
-                    self.model.current_interactee = monsters[0]
-                    self.model.interp_action(monsters[0].interact(self.model.player))   # interact with the mob
+                monster = self.model.monstercoords.get(blockcoords, 0)
+                if monster != 0:                           # if there is a mob,
+                    self.model.current_interactee = monster
+                    self.model.interp_action(monster.interact(self.model.player))   # interact with the mob
                 else:                                                   # otherwise
                     block_to_interact_with = self.model.getBlock(*blockcoords)
                     self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
             if event.key == pygame.K_r:
                 blockcoords = self.model.player.facingCoordinates() #this gives the (x,y) coordinate which you are facing!
                 """If we have a monster list with coordinates, we iterate over the list to see if there's a monster on blockcoords."""
-                monsters = self.model.monstercoords.get(blockcoords,0)
-                if monsters != 0:
-                    target_to_attack = monsters[0]
+                monster = self.model.monstercoords.get(blockcoords,0)
+                if monster != 0:
+                    target_to_attack = monster
                     # print "Attempting to attack entity!" + str(target_to_attack.__repr__)
                 else:
                     target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]] #if we find no monster, this attacks a grid square or a block!

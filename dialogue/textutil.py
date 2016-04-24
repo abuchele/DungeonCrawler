@@ -87,7 +87,8 @@ class TextUtility(object):
 				if len(textBlock) >= n:					# if the block is big enough
 					final_chat_list.append(textBlock)	# set it aside
 					textBlock = []						# and start making a new block
-			final_chat_list.append(textBlock)
+			if len(textBlock) > 0:
+				final_chat_list.append(textBlock)
 
 		return final_chat_list
 

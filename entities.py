@@ -13,6 +13,7 @@ It's a bit more of a pain to initialize (more variables required) but we can cha
 
 from random import randint, choice
 import pygame
+import math
 
 
 """Changes:"""
@@ -32,12 +33,11 @@ import pygame
 """General Classes"""
 
 class Entity(object):
-    def __init__(self, grid, x=0, y=0, monstercoords = 0, direction="U", speed=1, phasing = False, name = None, effect = dict(), hasAttacked = False):
+    def __init__(self, grid, x=0, y=0, monstercoords = 0, direction="U", speed=1, name = None, effect = dict(), hasAttacked = False):
         self.grid = grid       
         self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
         self.effect = effect
-        self.phasing = phasing
         self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
         self.moving = False
         self.x = x
@@ -92,14 +92,14 @@ class Entity(object):
         return (self.x+self.directionCoordinates[self.direction][0], self.y+self.directionCoordinates[self.direction][1])
 
     def getCoords(self, t):   # calculates coordinates based on current x,y, previous x,y, and time t
-        return (self.x*t + self.prex*(1-t), self.y*t + self.prey*(1-t))
+        if self.x != self.prex or self.y != self.prey:
+            return (self.x*t + self.prex*(1-t), self.y*t + self.prey*(1-t))
+        else:
+            return (self.x, self.y)
 
     def update(self):
         self.prex, self.prey = (self.x, self.y)
-        if self.phasing:
-            if self.moving and self.monstercoords.get((self.facingCoordinates()),0) == 0:
-                self.x,self.y = self.facingCoordinates()
-        elif self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and self.monstercoords.get((self.facingCoordinates()),0) == 0:
+        if self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and not self.monstercoords.has_key(self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
 
@@ -187,49 +187,23 @@ class Monster(Entity):
 
     def passiveMove(self): # decides where to move and sets its variables accordingly
         direction = ["R","D","L","U"]
-        if self.phasing == False:
-            if self.grid[self.y][self.x+1].collides or self.monstercoords.get((self.x+1,self.y),0) != 0:
-                direction.remove("R")
-            if self.grid[self.y+1][self.x].collides or self.monstercoords.get((self.x,self.y+1),0) != 0:
-                direction.remove("D")
-            if self.grid[self.y][self.x-1].collides or self.monstercoords.get((self.x-1,self.y),0) != 0:
-                direction.remove("L")
-            if self.grid[self.y-1][self.x].collides or self.monstercoords.get((self.x,self.y-1),0) != 0:
-                direction.remove("U")
-        try:
-            self.direction = choice(direction)
-        except IndexError:
-            return
-        self.moving = True
+        self.direction = choice(direction)
         # print (self.x,self.y), "Passively Moving"
 
     def aggressiveMove(self): # decides where to move and sets its variables accordingly
-        self.moving = True
-        if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
-            if (self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x-1].collides and self.monstercoords.get((self.x-1,self.y),0) == 0:
-                self.direction = "L"
-                # print "i'm to the player's right!"
-            elif (self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x+1].collides and self.monstercoords.get((self.x+1,self.y),0) == 0:
-                self.direction = "R"
-                # print "i'm to the player's left!"
-            else:
-                if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides and self.monstercoords.get((self.x,self.y-1),0) == 0:
-                    self.direction = "U"
-                elif (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides and self.monstercoords.get((self.x,self.y+1),0) == 0:
-                    self.direction = "D"
-        else:
-            if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y) and self.monstercoords.get((self.x-1,self.y),0) == 0:
-                self.direction = "L"
-                # print "i'm to the player's right!"
-            elif self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y) and self.monstercoords.get((self.x+1,self.y),0) == 0:
-                self.direction = "R"
-                # print "i'm to the player's left!"
-            else:
-                if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x) and self.monstercoords.get((self.x,self.y-1),0) == 0:
-                    self.direction = "U"
-                elif self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x) and self.monstercoords.get((self.x,self.y+1),0) == 0:
-                    self.direction = "D"
-        # print (self.x,self.y), "Aggressively Moving"
+        self.moving = True    # the monster will greedy-first search the player
+        delX, delY = (self.x-self.player.x, self.y-self.player.y)
+        matchX = (self.x-int(math.copysign(1,delX)), self.y) # where it will go if it wants to match X
+        matchY = (self.x, int(self.y-math.copysign(1,delY))) # where it will go if it wants to match Y
+        if self.monstercoords.has_key(matchX) or self.grid[matchX[1]][matchX[0]].collides:      # matching X is no good
+            self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]                              # so go vertical
+        elif self.monstercoords.has_key(matchY) or self.grid[matchY[1]][matchY[0]].collides:    # matching Y is no good
+            self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]                              # so go horizontal
+        elif abs(delX) < abs(delY):                                                             # both are open, but the vertical distance is greater
+            self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]                              # so go vertical
+        else:                                                                                   # vice versa
+            self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]                              # so go horizontal
+
 
     def decide(self): #monster checks its own status, then takes either a move or an attack action. We assume monster is melee.
         self.checkstatus()
@@ -277,9 +251,32 @@ class Ghost(Monster):
         self.damageRange = 2
         self.flatDamage = 1
         self.armor = 10
-        self.speed = 100
-        self.phasing = True
+        self.speed = 150
         self.sprite = 1
+
+    def aggressiveMove(self):
+        self.moving = True    # the monster will greedy-first search the player
+        delX, delY = (self.x-self.player.x, self.y-self.player.y)
+        matchX = (self.x-int(math.copysign(1,delX)), self.y) # where it will go if it wants to match X
+        matchY = (self.x, int(self.y-math.copysign(1,delY))) # where it will go if it wants to match Y
+        if self.monstercoords.has_key(matchX):                      # matching X is no good
+            self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]  # so go vertical
+        elif self.monstercoords.has_key(matchY):                    # matching Y is no good
+            self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]  # so go horizontal
+        elif abs(delX) < abs(delY):                                 # both are open, but the vertical distance is greater
+            self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]  # so go vertical
+        else:                                                       # vice versa
+            self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]  # so go horizontal
+
+    def update(self):
+        self.distance += self.speed
+        if self.distance >= 256:
+            self.distance -= 256
+            self.decide()
+        self.prex, self.prey = (self.x, self.y)
+        if self.moving and not self.monstercoords.has_key(self.facingCoordinates()):
+            self.x, self.y = self.facingCoordinates()
+        self.moving = False
 
 
 class Demon(Monster):
@@ -292,7 +289,6 @@ class Demon(Monster):
         self.flatDamage = 2
         self.armor = 5
         self.speed = 64
-        self.phasing = False
         self.sprite = 0
 
 
@@ -306,7 +302,6 @@ class Skeleton(Monster):
         self.flatDamage = 4
         self.armor = 10
         self.speed = 100
-        self.phasing = False
         self.sprite = 0
 
 

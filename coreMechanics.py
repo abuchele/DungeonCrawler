@@ -6,6 +6,7 @@ import random as rng
 from dialogue.textutil import TextUtility
 import pygame
 import eventList
+import copy
 
 
 
@@ -21,7 +22,7 @@ class Dungeon(object):
 
 		self.nullBlock = Null()
 
-		self.monstercoords = {} #contains key/value pair of (x,y) and list of monsters at those coordinates
+		self.monstercoords = {} #contains key/value pair of (x,y) and monster at those coordinates
 
 		self.last_action = "You wake up near an underground river."
 		self.current_convo = ""
@@ -36,10 +37,9 @@ class Dungeon(object):
 
 		self.player = entities.Player(self.grid, self.monstercoords, *(thing[1][0]))
 
-		self.generateMonsters(monsterFrequency=0.002)
+		self.generateMonsters()
+		#self.generateMonsters(monsterFrequency=0.002)
 
-		self.activemonsterlist = []
-		self.activemonstercoords = {}
 		self.text = None	# the class that will help to organize the dialogue
 		self.lnInd = 0		# the line number in this conversation
 		self.lines = None	# the list of surfaces that represent this conversation
@@ -53,20 +53,20 @@ class Dungeon(object):
 			output = output+"\n"
 		return output
 
-	def generateMonsters(self, monsterFrequency = 0.1):
+	def generateMonsters(self, monsterFrequency = 0.01):
 		"""
 		Fills the world with monsters of various kinds
 		"""
 		mr_E = entities.MrE(self.grid, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
 		
-		self.monstercoords[(mr_E.x, mr_E.y)] = [mr_E]	# the first npc
+		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
 		# self.monsterlist.append(mr_E)
 
 		count = 0
 		for y in rng.sample(range(0,self.h-1), self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
 			for x in rng.sample(range(0,self.w-1), self.w-1):
 				block = self.grid[y][x]
-				if not block.collides and rng.random() < monsterFrequency:
+				if not block.collides and not self.monstercoords.has_key((x,y)) and rng.random() < monsterFrequency:
 					if block.biome == 0:
 						newMonst = entities.Zombie(x,y,self.player,self.grid,self.monstercoords)
 					elif block.biome == 1:
@@ -84,9 +84,7 @@ class Dungeon(object):
 					else:
 						newMonst = entities.Skeleton(x,y,self.player,self.grid, self.monstercoords)
 
-					newlist = self.monstercoords.get((x,y),[])
-					newlist.append(newMonst)
-					self.monstercoords[(x,y)] = newlist
+					self.monstercoords[(x,y)] = newMonst
 					count +=1
 
 	def update(self):
@@ -105,32 +103,14 @@ class Dungeon(object):
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
 						print self.player.effected("killed")
 
-			for dy in range(-8,9):
+			old_monstercoords = copy.copy(self.monstercoords)
+			for dy in range(-8,9):			# move all the monsters
 				for dx in range(-8,9):
-					monsters = self.monstercoords.get((self.player.x+dx,self.player.y+dy),[])
-					for monster in monsters:
+					monster = old_monstercoords.pop((self.player.x+dx,self.player.y+dy), None)
+					if monster != None:
+						self.monstercoords.pop((monster.x,monster.y))
 						monster.update()
-
-			for dy in range(-8,9):
-				for dx in range(-8,9):
-					monsters = self.monstercoords.pop((self.player.x+dx,self.player.y+dy),[]) #this is a list of monsters
-					# self.activemonsterlist += monsters
-					for monster in monsters:
-						# self.activemonsterlist.append(monster)
-						try:
-							newlist = self.monstercoords[(monster.x,monster.y)]
-						except KeyError:
-							newlist = []
-						newlist.append(monster)
-						self.monstercoords[(monster.x,monster.y)] = newlist
-						# if not monster.seen:
-						# 	newlist1 = self.activemonstercoords[(monster.x,monster.y)]
-						# 	newlist1.remove(monster)
-						# 	self.activemonstercoords[(monster.x,monster.y)] = newlist1
-							 #this changes monster.x and monster.y but monstercoords still has the original position as key.
-							
-						# print "Aggro:", monster.aggro
-						# print "Seen:", monster.seen
+						self.monstercoords[(monster.x,monster.y)] = monster
 
 
 			if rng.random() < 0.003:
@@ -190,7 +170,7 @@ class Dungeon(object):
 			self.text = None				# clear these variables
 			self.lines = None				#because they take up too much space
 			self.current_convo = None
-			pygame.key.set_repeat(150,150)
+			pygame.key.set_repeat(100,100)
 
 	def do_post_dialogue_action(self):
 		if isinstance(self.current_interactee, entities.NPC):
