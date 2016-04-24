@@ -359,11 +359,11 @@ class MrE(NPC):
             return
         if conv_id == 2:
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
-        if conv_id == 4:
+        elif conv_id == 4:
             self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
-        if conv_id == 5:
+        elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
-        if conv_id == 6:
+        elif conv_id == 6:
             self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
 
 

@@ -64,13 +64,13 @@ id=0007
 Mr.E: What?  You're not done yet.  Don't come back until you finish!$$
 end_0007
 
-id=0007
+id=0008
 Mr.E:  Well done.  But the shame, oh the shame of sending someone out on a boring grindquest.  But in the time that you took to kill those monsters, I have came up with a master plan!  I will have my
 dog, Kerberoge help you with your quest for your friend!  Just meet me at the end of this dungeon.$$
-end_0007
-
-id=0008
-Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  I messed that up-- anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$
 end_0008
+
+id=0009
+Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  I messed that up-- anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$
+end_0009
 
 
