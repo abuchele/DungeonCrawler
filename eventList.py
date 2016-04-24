@@ -6,8 +6,9 @@ class Checklist():
 		
 		
 		self.state = {
-		world = 0 #Current world completed/bosses defeated
-		killcount = 0 #monsters killed
+		"world":0, #Current world completed/bosses defeated
+		"killcount":0, #monsters killed
+		
 		#World1
 		"player_Named":False, #Has the player entered a name? 
 		"tutorial_Dialogue002_Finished":False,
