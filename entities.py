@@ -118,6 +118,7 @@ class Player(Entity):
         self.steps = 0
         self.attackSprite = 0 #attackSprites is a list of .png images, so this calls attackSprites[self.attackSprite]
         self.hasAttacked = False
+        self.listening = False
         
     def __str__(self):
         return self.name
@@ -182,7 +183,7 @@ class Monster(Entity):
         direction = ["R","D","L","U"]
         self.direction = choice(direction)
         self.moving = True
-        print (self.x,self.y), (self.player.x,self.player.y), "Passively Moving"
+        # print (self.x,self.y), (self.player.x,self.player.y), "Passively Moving"
 
     def aggressiveMove(self): # decides where to move and sets its variables accordingly
         self.moving = True    # the monster will greedy-first search the player
