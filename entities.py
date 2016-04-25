@@ -180,9 +180,10 @@ class Monster(Entity):
             # self.aggro = True
 
     def passiveMove(self): # decides where to move and sets its variables accordingly
-        direction = ["R","D","L","U"]
-        self.direction = choice(direction)
-        self.moving = True
+        if randint(1,2) == 1:
+            direction = ["R","D","L","U"]
+            self.direction = choice(direction)
+            self.moving = True
         # print (self.x,self.y), (self.player.x,self.player.y), "Passively Moving"
 
     def aggressiveMove(self): # decides where to move and sets its variables accordingly
