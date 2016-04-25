@@ -341,10 +341,10 @@ class MrE(NPC):
             return "$D005"
         elif not self.checklist.state["tutorial_Dialogue006_Finished"]:
             return "$D006"
-        elif not self.checklist.state["tutorial_quest_finished"]:
-            return "$D007"
         elif (self.checklist.state["killcount"] >= 3) and not self.checklist.state["tutorial_quest_finished"]:
             return "$D008"
+        elif not self.checklist.state["tutorial_quest_finished"]:
+            return "$D007"
         elif not self.checklist.state["kerberoge_start"]:
             return "$D009"
     def post_dialogue_action(self, conv_id):
