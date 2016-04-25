@@ -343,6 +343,10 @@ class MrE(NPC):
             return "$D006"
         elif not self.checklist.state["tutorial_quest_finished"]:
             return "$D007"
+        elif (self.checklist.state["killcount"] >= 3) and not self.checklist.state["tutorial_quest_finished"]:
+            return "$D008"
+        elif not self.checklist.state["kerberoge_start"]:
+            return "$D009"
     def post_dialogue_action(self, conv_id):
         if conv_id == 1:
             name = raw_input("What is your name?")
@@ -357,6 +361,8 @@ class MrE(NPC):
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
         elif conv_id == 6:
             self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
+        elif conv_id == 8:
+            self.checklist.eventcomplete("tutorial_quest_finished")
 
 
 """Entity Related Subclasses that aren't entities"""
