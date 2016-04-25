@@ -35,7 +35,7 @@ class Dungeon(object):
 
 		self.checklist = eventList.Checklist()
 
-		self.player = entities.Player(self.grid, self.monstercoords, *(thing[1][0]))
+		self.player = entities.Player(self, self.monstercoords, *(thing[1][0]))
 
 		self.generateMonsters()
 		#self.generateMonsters(monsterFrequency=0.002)
@@ -53,11 +53,11 @@ class Dungeon(object):
 			output = output+"\n"
 		return output
 
-	def generateMonsters(self, monsterFrequency = 0.01):
+	def generateMonsters(self, monsterFrequency = 0.05):
 		"""
 		Fills the world with monsters of various kinds
 		"""
-		mr_E = entities.MrE(self.grid, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
+		mr_E = entities.MrE(self, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
 		
 		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
 		# self.monsterlist.append(mr_E)
@@ -68,21 +68,21 @@ class Dungeon(object):
 				block = self.grid[y][x]
 				if not block.collides and not self.monstercoords.has_key((x,y)) and rng.random() < monsterFrequency:
 					if block.biome == 0:
-						newMonst = entities.Zombie(x,y,self.player,self.grid,self.monstercoords)
+						newMonst = entities.Zombie(x,y,self.player,self,self.monstercoords)
 					elif block.biome == 1:
 						if rng.random() < 0.5:
-							newMonst = entities.Zombie(x,y,self.player,self.grid,self.monstercoords)
+							newMonst = entities.Zombie(x,y,self.player,self,self.monstercoords)
 						else:
-							newMonst = entities.Ghost(x,y,self.player,self.grid, self.monstercoords)
+							newMonst = entities.Ghost(x,y,self.player,self, self.monstercoords)
 					elif block.biome == 2:
 						if rng.random() < 0.4:
-							newMonst = entities.Zombie(x,y,self.player,self.grid,self.monstercoords)
+							newMonst = entities.Zombie(x,y,self.player,self,self.monstercoords)
 						elif rng.random() < 0.1:
-							newMonst = entities.Ghost(x,y,self.player,self.grid, self.monstercoords)
+							newMonst = entities.Ghost(x,y,self.player,self, self.monstercoords)
 						else:
-							newMonst = entities.Demon(x,y,self.player,self.grid, self.monstercoords)
+							newMonst = entities.Demon(x,y,self.player,self, self.monstercoords)
 					else:
-						newMonst = entities.Skeleton(x,y,self.player,self.grid, self.monstercoords)
+						newMonst = entities.Skeleton(x,y,self.player,self, self.monstercoords)
 
 					self.monstercoords[(x,y)] = newMonst
 					count +=1
@@ -110,7 +110,8 @@ class Dungeon(object):
 					if monster != None:
 						self.monstercoords.pop((monster.x,monster.y))
 						monster.update()
-						self.monstercoords[(monster.x,monster.y)] = monster
+						if monster.health > 0:
+							self.monstercoords[(monster.x,monster.y)] = monster
 
 
 			if rng.random() < 0.003:
