@@ -310,7 +310,6 @@ class NPC(Monster): # people who do not take damage, and have dialogue
         self.sprite = sprite
         self.convID = convID
         self.checklist = checklist
-        self.health = 300000
 
     def interact(self,player):
         return "$D{}".format(self.convID)
