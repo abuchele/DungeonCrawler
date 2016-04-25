@@ -33,8 +33,8 @@ import math
 """General Classes"""
 
 class Entity(object):
-    def __init__(self, grid, x=0, y=0, monstercoords = 0, direction="U", speed=1, name = None, effect = dict(), hasAttacked = False):
-        self.grid = grid       
+    def __init__(self, model, x=0, y=0, monstercoords = 0, direction="U", speed=1, name = None, effect = dict(), hasAttacked = False):
+        self.model = model       
         self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
         self.effect = effect
@@ -53,27 +53,20 @@ class Entity(object):
     def damage(self):
         return randint(1,self.damageRange)+self.flatDamage #roll a damageRange-sided dice and add flatDamage to the roll
 
-    def attack(this,that):
+    def attack(self,that):
         try:
-            if this.attackRoll() >= that.armor:
-                damage = this.damage()
+            if self.attackRoll() >= that.armor:
+                damage = self.damage()
                 that.health -= damage
-                if this.name!="You":
-                    print "{} hits {} for {} damage!".format(str(this),str(that),damage)
-                
-                
-                """Pseudocode"""
-                # DISPLAY pygame.rotate(this.attackSprite, direction_to_angle[this.direction]) AT (this.x+this.directionCoordinates[0],this.y+this.directionCoordinates[1])
-                print "{} hit {} for {} damage!".format(str(this),str(that),damage)
-
-            if this.name!="You":
-                print "{} misses {}!".format(str(this),str(that))
+                self.model.interp_action("{} hits {} for {} damage!".format(str(self),str(that),damage))
+            # if this.name!="You":
+            #     print "{} misses {}!".format(str(this),str(that))
             else:
-                print "{} miss {}!".format(str(this),str(that))
-            this.hasAttacked = True
+                self.model.interp_action("{} misses {}!".format(str(self),str(that)))
+            self.hasAttacked = True
             # print "Attacked entity!"
         except AttributeError:
-            this.hasAttacked = True
+            self.hasAttacked = True
             # print "Attacked tile!"
 
     def effected(self,effect_specific):
@@ -99,7 +92,7 @@ class Entity(object):
 
     def update(self):
         self.prex, self.prey = (self.x, self.y)
-        if self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and not self.monstercoords.has_key(self.facingCoordinates()):
+        if self.moving and not self.model.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and not self.monstercoords.has_key(self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
 
@@ -110,14 +103,14 @@ class Entity(object):
 
 # I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self,grid,monstercoords,x,y, name = "Ray"):
-        Entity.__init__(self,grid,x,y, monstercoords) #grid is a global variable which needs to be defined before initializing any entities.
+    def __init__(self,model,monstercoords,x,y, name = "Ray"):
+        Entity.__init__(self,model,x,y, monstercoords) #grid is a global variable which needs to be defined before initializing any entities.
         self.health = 100
         self.maxhealth = 100
         self.armor= 10
-        self.accuracy = 2
+        self.accuracy = 20
         self.flatDamage = 2
-        self.damageRange = 2
+        self.damageRange = 5
         self.damageMod = 2
         self.inventory = dict()
         self.name = name
@@ -164,13 +157,13 @@ class Player(Entity):
 """Monster Subclass"""
 
 class Monster(Entity):
-    def __init__(self, x, y, player, grid, monstercoords): #speed =256,  flatDamage=0, armor=0):
-        Entity.__init__(self,grid,x,y, monstercoords)
+    def __init__(self, x, y, player, model, monstercoords): #speed =256,  flatDamage=0, armor=0):
+        Entity.__init__(self,model,x,y, monstercoords)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
         self.name = None
         self.seenrange = 8
-        self.aggrorange = 5
+        self.aggrorange = 2
         self.player = player
         self.distance = 0   # it moves when this reaches 256
 
@@ -188,16 +181,16 @@ class Monster(Entity):
     def passiveMove(self): # decides where to move and sets its variables accordingly
         direction = ["R","D","L","U"]
         self.direction = choice(direction)
-        # print (self.x,self.y), "Passively Moving"
+        print (self.x,self.y), (self.player.x,self.player.y), "Passively Moving"
 
     def aggressiveMove(self): # decides where to move and sets its variables accordingly
         self.moving = True    # the monster will greedy-first search the player
         delX, delY = (self.x-self.player.x, self.y-self.player.y)
         matchX = (self.x-int(math.copysign(1,delX)), self.y) # where it will go if it wants to match X
         matchY = (self.x, int(self.y-math.copysign(1,delY))) # where it will go if it wants to match Y
-        if self.monstercoords.has_key(matchX) or self.grid[matchX[1]][matchX[0]].collides:      # matching X is no good
+        if self.monstercoords.has_key(matchX) or self.model.grid[matchX[1]][matchX[0]].collides:      # matching X is no good
             self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]                              # so go vertical
-        elif self.monstercoords.has_key(matchY) or self.grid[matchY[1]][matchY[0]].collides:    # matching Y is no good
+        elif self.monstercoords.has_key(matchY) or self.model.grid[matchY[1]][matchY[0]].collides:    # matching Y is no good
             self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]                              # so go horizontal
         elif abs(delX) < abs(delY):                                                             # both are open, but the vertical distance is greater
             self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]                              # so go vertical
@@ -231,7 +224,7 @@ class Zombie(Monster):
     def __init__(self,x,y, player, grid, monstercoords):
         Monster.__init__(self, x,y, player, grid, monstercoords)
         self.name = "Zombie"
-        self.health = 30
+        self.health = 10
         self.accuracy = 3
         self.damageRange = 3
         self.flatDamage = 2
@@ -246,7 +239,7 @@ class Ghost(Monster):
     def __init__(self,x,y, player, grid, monstercoords):
         Monster.__init__(self, x,y, player, grid, monstercoords)
         self.name = "Ghost"
-        self.health = 20
+        self.health = 6
         self.accuracy = 4
         self.damageRange = 2
         self.flatDamage = 1
@@ -280,12 +273,12 @@ class Ghost(Monster):
 
 
 class Demon(Monster):
-    def __init__(self,x,y, player, grid, monstercoords):
-        Monster.__init__(self, x,y, player, grid, monstercoords)
+    def __init__(self,x,y, player, model, monstercoords):
+        Monster.__init__(self, x,y, player, model, monstercoords)
         self.name = "Demon"
-        self.health = 40
+        self.health = 15
         self.accuracy = 1
-        self.damageRange = 20
+        self.damageRange = 6
         self.flatDamage = 2
         self.armor = 5
         self.speed = 64
@@ -293,8 +286,8 @@ class Demon(Monster):
 
 
 class Skeleton(Monster):
-    def __init__(self,x,y, player, grid, monstercoords):
-        Monster.__init__(self, x,y, player, grid, monstercoords)
+    def __init__(self,x,y, player, model, monstercoords):
+        Monster.__init__(self, x,y, player, model, monstercoords)
         self.name = "Skeleton"
         self.health = 20
         self.accuracy = 5
@@ -308,12 +301,13 @@ class Skeleton(Monster):
 """NPC Subclass"""
 
 class NPC(Monster): # people who do not take damage, and have dialogue
-    def __init__(self,grid,x,y,player,checklist,name,sprite,convID=0):
-        Monster.__init__(self,x,y,player,grid, 0)
+    def __init__(self,model,x,y,player,checklist,name,sprite,convID=0):
+        Monster.__init__(self,x,y,player,model, 0)
         self.name = name
         self.sprite = sprite
         self.convID = convID
         self.checklist = checklist
+        self.health = 300000
 
     def interact(self,player):
         return "$D{}".format(self.convID)
@@ -328,8 +322,8 @@ class NPC(Monster): # people who do not take damage, and have dialogue
 #The group of NPCs is in another, and then the monsters and such are in a third.  
 
 class MrE(NPC):
-    def __init__(self, grid, x, y, player, checklist):
-        NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 4)
+    def __init__(self, model, x, y, player, checklist):
+        NPC.__init__(self, model, x, y, player, checklist, "Mr. E", 4)
 
     def interact(self,player):
         if not self.checklist.state["player_Named"]:
@@ -465,16 +459,16 @@ class Potion(Item):
 		self = Item(self,self.name,self.description,self.use_description,self.effect)
 
 if __name__ == "__main__":
-    player = Player("grid", 0,0)
+    player = Player("model", 0,0)
     d = []
     for i in range (5):
-        zombie = Zombie(randint(1,20),randint(1,20), player, "grid")
+        zombie = Zombie(randint(1,20),randint(1,20), player, "model")
         d.append(zombie)
     for monster in d:
         monster.checkstatus()
         print (monster.x,monster.y),monster.seen,monster.aggro
 
-    c = Ghost(2,2, player, "grid")
+    c = Ghost(2,2, player, "model")
     # print b.attack(a)
     print player.attack(c)
     print c.attack(player)
