@@ -91,18 +91,18 @@ class DungeonModelView(object):
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
                 monster = self.model.monstercoords.get((pxr+dx,pyr+dy),0) #this is a Monster
-                if self.model.player.listening: #draws "listen sprites" on all monsters within range
-                    if monster != 0:
-                        mxr, myr = (monster.x, monster.y)
-                        mxc, myc = monster.getCoords(t)
-                        monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
-                        self.screen.blit(self.soundSprite,monstCoords)
                 if self.visible[(dx,dy)]:                                       # if it is visible,
                     if monster != 0:
                         mxr, myr = (monster.x, monster.y)
                         mxc, myc = monster.getCoords(t)
                         monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
                         self.screen.blit(self.monsterSprites[monster.sprite],monstCoords)   # just draw it and the monster on it
+                elif self.model.player.listening: #draws "listen sprites" on all monsters within range
+                    if monster != 0:
+                        mxr, myr = (monster.x, monster.y)
+                        mxc, myc = monster.getCoords(t)
+                        monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
+                        self.screen.blit(self.soundSprite,monstCoords)
             if dy == 0:
                 pSpriteInd = self.model.player.sprite
                 self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
