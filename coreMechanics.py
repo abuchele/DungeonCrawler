@@ -81,8 +81,10 @@ class Dungeon(object):
 							newMonst = entities.Ghost(x,y,self.player,self, self.monstercoords)
 						else:
 							newMonst = entities.Demon(x,y,self.player,self, self.monstercoords)
-					else:
+					elif block.biome == 3:
 						newMonst = entities.Skeleton(x,y,self.player,self, self.monstercoords)
+					else:
+						continue
 
 					self.monstercoords[(x,y)] = newMonst
 					count +=1

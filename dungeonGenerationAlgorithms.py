@@ -73,29 +73,6 @@ def generatePanel(w,h):
 	return [grid, [(w/2,h/2)]]
 
 
-def generateRBFSM(w,h):
-	"""
-	A true labyrinth, it produces a maze of twisty corridors and dead ends
-	"""
-	grid = []
-	for y in range(0,h+1):
-		row = []
-		for x in range(0,w+1):
-			if x <= 0 or x >= w or y <= 0 or y >= h or rng.random() < 0.9:
-				row.append(Metal())
-			else:
-				row.append(Glass())
-		grid.append(row)
-
-	randomQueueFlood(w/2+1,h/2+1,grid)
-
-	for x in range(w*3/8, w*5/8):
-		for y in range(h*3/8, h*5/8):
-			grid[y][x] = Floor()
-
-	return [grid, [(w/2,h/2)]]
-
-
 def generatePiece(w, h, n):
 	"""
 	constructs a piecemeal dungeon by using preset features
@@ -108,9 +85,9 @@ def generatePiece(w, h, n):
 		for x in range(w+1):
 			row.append(Brick(biome=0))
 		grid.append(row)
-	for y in range(h/2-2, h/2+3):
-		for x in range(w/2-2, w/2+3):
-			grid[y][x] = Floor(biome=0)
+	for y in range(h/2-3, h/2+4):
+		for x in range(w/2-3, w/2+4):
+			grid[y][x] = Floor(biome=-1)
 
 	corridoring = False	# whether we just made a corridor. If not, we are free to put rooms wherever we want
 	for i in range(n):
