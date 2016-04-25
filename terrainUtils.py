@@ -95,13 +95,21 @@ class Door(Block):
 		self.color = (160,160,160)
 		self.collides = False
 		self.sprite = 4
+		self.transparent = True
+
+	def close(self):
+		self.color = (120,120,120)
+		self.collides = True
+		self.sprite = 5
+		self.transparent = False
 
 	def interact(self, player):
 		if self.collides:
 			self.open()
-			return rng.choice(["You push the door open."," The door slides into the ground.","The door creaks as it moves out of the way."])
+			return rng.choice(["You push the door open.","The door slides into the ground.","The door creaks as it moves out of the way."])
 		else:
-			return "This door is already open."
+			self.close()
+			return rng.choice(["You close the door behind you.","The door slides out of the ground.","With a great heft, you pull the door up."])
 
 
 class Lava(Block):

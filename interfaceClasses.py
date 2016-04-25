@@ -7,12 +7,13 @@ class PyGameKeyboardController(object):
     def __init__(self, model):
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
-            pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1}
+            pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_f:1}
         pygame.key.set_repeat(100,100)
         self.controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
 
 
     def handle_all_events(self, events):
+        self.model.player.listening = False
         if len(events) > 0:
             for event in reversed(events):
                 if event.type == QUIT:
@@ -37,7 +38,8 @@ class PyGameKeyboardController(object):
         for key in self.controls:
             if held[key]:
                 return self.handle_event(pygame.event.Event(KEYDOWN, key=key))
-
+            else:
+                self.model.player.listening = True
         return True
 
 
@@ -46,7 +48,10 @@ class PyGameKeyboardController(object):
         takes a pygame event and executes on it. Returns True if the program should continue running
         """
         self.model.player.hasAttacked = False
+        self.model.player.listening = False
         if event.type == KEYDOWN:
+            # if event.key == pygame.K_f:
+            #     self.model.player.listening = True
             if event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
                 monster = self.model.monstercoords.get(blockcoords, 0)
