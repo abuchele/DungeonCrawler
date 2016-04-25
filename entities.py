@@ -321,7 +321,7 @@ class NPC(Monster): # people who do not take damage, and have dialogue
         self.sprite = sprite
         self.convID = convID
         self.checklist = checklist
-        self.health = 300000
+        self.health = 9001
 
     def interact(self,player):
         return "$D{}".format(self.convID)
@@ -352,8 +352,12 @@ class MrE(NPC):
             return "$D005"
         elif not self.checklist.state["tutorial_Dialogue006_Finished"]:
             return "$D006"
+        elif (self.checklist.state["killcount"] >= 3) and not self.checklist.state["tutorial_quest_finished"]:
+            return "$D008"
         elif not self.checklist.state["tutorial_quest_finished"]:
             return "$D007"
+        elif not self.checklist.state["kerberoge_start"]:
+            return "$D009"
     def post_dialogue_action(self, conv_id):
         if conv_id == 1:
             name = raw_input("What is your name?")
@@ -368,6 +372,8 @@ class MrE(NPC):
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
         elif conv_id == 6:
             self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
+        elif conv_id == 8:
+            self.checklist.eventcomplete("tutorial_quest_finished")
 
 
 """Entity Related Subclasses that aren't entities"""
