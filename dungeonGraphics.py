@@ -130,7 +130,7 @@ class DungeonModelView(object):
         actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
         self.screen.blit(actionLog, (0, self.size[1]-34))
 
-        hp = 3*100
+        hp = 3*self.model.player.health
         pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
 
         if self.model.state == "P":
