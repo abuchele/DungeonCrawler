@@ -27,6 +27,7 @@ class DungeonModelView(object):
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
         self.pauseScreen = pygame.image.load("sprites/Paused.png")
         self.dialogueBox = pygame.image.load("sprites/Dialogue_GUI.png")
+        self.soundSprite = pygame.image.load("sprites/Sound.png")
         self.playerSprite = self.playerSprites[0][0]
 
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
@@ -95,7 +96,7 @@ class DungeonModelView(object):
                         mxr, myr = (monster.x, monster.y)
                         mxc, myc = monster.getCoords(t)
                         monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
-                        self.screen.blit(self.monsterSprites[1],monstCoords)
+                        self.screen.blit(self.soundSprite,monstCoords)
                 if self.visible[(dx,dy)]:                                       # if it is visible,
                     if monster != 0:
                         mxr, myr = (monster.x, monster.y)
