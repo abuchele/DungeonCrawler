@@ -112,6 +112,9 @@ class Dungeon(object):
 						monster.update()
 						if monster.health > 0:
 							self.monstercoords[(monster.x,monster.y)] = monster
+						else:
+							self.checklist.state["killcount"] = self.checklist.state.get("killcount",0) + 1
+							# print self.checklist.state.get("killcount",0)
 
 
 			if rng.random() < 0.003:
