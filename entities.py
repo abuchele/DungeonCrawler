@@ -171,16 +171,17 @@ class Monster(Entity):
         return self.name
 
     def checkstatus(self):
-        self.seen = (abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange)
+        self.seen = (abs(self.x - self.player.x)<=self.seenrange and abs(self.y - self.player.y)<=self.seenrange)
         # print "seen:", self.seen
             # self.seen = True
-        self.aggro = (abs(self.x - self.player.x)<=self.aggrorange or abs(self.y - self.player.y)<=self.aggrorange)
+        self.aggro = (abs(self.x - self.player.x)<=self.aggrorange and abs(self.y - self.player.y)<=self.aggrorange)
         # print "aggro:", self.aggro
             # self.aggro = True
 
     def passiveMove(self): # decides where to move and sets its variables accordingly
         direction = ["R","D","L","U"]
         self.direction = choice(direction)
+        self.moving = True
         print (self.x,self.y), (self.player.x,self.player.y), "Passively Moving"
 
     def aggressiveMove(self): # decides where to move and sets its variables accordingly
