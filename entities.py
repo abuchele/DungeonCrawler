@@ -33,7 +33,7 @@ import math
 """General Classes"""
 
 class Entity(object):
-    def __init__(self, model, x=0, y=0, monstercoords = 0, direction="U", speed=1, name = None, effect = dict(), hasAttacked = False):
+    def __init__(self, model, x=0, y=0, monstercoords = 0, direction="U", speed=1, name = None, effect = dict()):
         self.model = model       
         self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
@@ -44,7 +44,7 @@ class Entity(object):
         self.y = y
         self.prex = x
         self.prey = y
-        self.hasAttacked = hasAttacked
+        self.attackCooldown = 0
         self.monstercoords = monstercoords
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
@@ -63,16 +63,16 @@ class Entity(object):
             #     print "{} misses {}!".format(str(this),str(that))
             else:
                 self.model.interp_action("{} misses {}!".format(str(self),str(that)))
-            self.hasAttacked = True
+            self.attackCooldown = 3
             # print "Attacked entity!"
         except AttributeError:
-            self.hasAttacked = True
+            self.attackCooldown = 3
             # print "Attacked tile!"
 
     def effected(self,effect_specific):
     	self.effect[effect_specific] = True
     	p = ''
-    	return p.join(["You've been ",effect_specific,'!'])
+    	return p.join([self.name," has been ",effect_specific,'!'])
 
     def active_effects(self):
     	effect_list=list()
@@ -95,6 +95,8 @@ class Entity(object):
         if self.moving and not self.model.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and not self.monstercoords.has_key(self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
+        if self.attackCooldown>0:
+            self.attackCooldown -= 1
 
     def interact(self,player):
         return "You poke the thing."
@@ -116,8 +118,9 @@ class Player(Entity):
         self.name = name
         self.sprite = (0,0)
         self.steps = 0
-        self.hasAttacked = False
+        self.attackCooldown = 0
         self.listening = False
+        self.earshot = [] # the area currently being attacked
         self.song = 0   # the selected attack song
         self.availableSong = [True,True,True,True,True,True,True,True]  # which songs you can play
         
@@ -143,6 +146,48 @@ class Player(Entity):
         self.song = (self.song-1)%len(self.availableSong)
         while not self.availableSong[self.song]:
             self.song = (self.song-1)%len(self.availableSong)
+
+    def playSong(self):
+        if self.song == 0:      # basic attack
+            self.earshot = [self.facingCoordinates()]   # you attack the block in front of you
+            self.attackCooldown = 2
+            self.flatDamage, self.damageRange = (2,3)
+            if self.model.monstercoords.has_key(self.earshot[0]):
+                self.attack(self.model.monstercoords[self.earshot[0]])
+        elif self.song == 1:    # spread attack
+            self.earshot = []
+            for dx in [-1,0,1]:
+                for dy in [-1,0,1]:
+                    self.earshot.append((self.x+dx, self.y+dy)) # you attack all adjacent blocks
+            self.attackCooldown = 2
+            self.flatDamage, self.damageRange = (0,5)
+            for place_to_attack in self.earshot:
+                if self.model.monstercoords.has_key(place_to_attack):
+                    self.attack(self.model.monstercoords[place_to_attack])
+        elif self.song == 2:    # range attack
+            self.attackCooldown = 2
+            self.flatDamage, self.damageRange = (1,2)
+            self.earshot = []
+            coords = (self.x, self.y)
+            direc = self.directionCoordinates[self.direction]
+            for i in range(6):
+                coords = (coords[0]+direc[0], coords[1]+direc[1])
+                self.earshot.append(coords)
+                if self.model.monstercoords.has_key(coords):
+                    self.attack(self.model.monstercoords[coords])
+                    break
+                elif self.model.getBlock(*coords).collides:
+                    break
+        else:                   # stun attack
+            self.attackCooldown = 4
+            self.earshot = []
+            for dx in range(-2,3):
+                for dy in range(-2,3):
+                    if (dx+dy)%2 == 1:
+                        self.earshot.append((self.x+dx, self.y+dy))
+            for place_to_stun in self.earshot:
+                if self.model.monstercoords.has_key(place_to_stun):
+                    self.model.interp_action(self.model.monstercoords[place_to_stun].effected("stunned"))
 
     def getCurrentSprite(self):   # figures out which sprite to use for the entity
         if not self.moving:   # if the player has not moved

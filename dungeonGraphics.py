@@ -111,11 +111,12 @@ class DungeonModelView(object):
 
     def drawAttacks(self, t, pxr, pyr, pxc, pyc):
         direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
-        if self.model.player.hasAttacked == True: # draw player attack sprite!
+        if self.model.player.attackCooldown > 0: # draw player attack sprite!
             attackSprite = self.attackSprites[self.model.player.song]
-            attackCoords = (self.dispSize[0]/2 + self.model.player.directionCoordinates[self.model.player.direction][0]*self.blockSize[0],
-                            self.dispSize[1]/2 + self.model.player.directionCoordinates[self.model.player.direction][1]*self.blockSize[1])
-            self.screen.blit(attackSprite,attackCoords)
+            for atX, atY in self.model.player.earshot:
+                attackCoords = ((atX-pxc)*self.blockSize[0]+self.dispSize[0]/2,
+                                (atY-pyc)*self.blockSize[1]+self.dispSize[1]/2 + self.model.player.attackCooldown*10 - int(t*10) - 15)
+                self.screen.blit(attackSprite,attackCoords)
 
 
     def drawHUD(self, t, pxr, pyr, pxc, pyc):

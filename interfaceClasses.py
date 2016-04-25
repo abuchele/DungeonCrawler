@@ -47,7 +47,6 @@ class PyGameKeyboardController(object):
         """
         takes a pygame event and executes on it. Returns True if the program should continue running
         """
-        self.model.player.hasAttacked = False
         self.model.player.listening = False
         if event.type == KEYDOWN:
             # if event.key == pygame.K_f:
@@ -62,15 +61,7 @@ class PyGameKeyboardController(object):
                     block_to_interact_with = self.model.getBlock(*blockcoords)
                     self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
             elif event.key == pygame.K_r:
-                blockcoords = self.model.player.facingCoordinates() #this gives the (x,y) coordinate which you are facing!
-                """If we have a monster list with coordinates, we iterate over the list to see if there's a monster on blockcoords."""
-                monster = self.model.monstercoords.get(blockcoords,0)
-                if monster != 0:
-                    target_to_attack = monster
-                    # print "Attempting to attack entity!" + str(target_to_attack.__repr__)
-                else:
-                    target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]] #if we find no monster, this attacks a grid square or a block!
-                self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT  
+                self.model.player.playSong()
             elif event.key == pygame.K_z:
                 self.model.player.decrementSong()
             elif event.key == pygame.K_x:
