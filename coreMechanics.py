@@ -160,7 +160,7 @@ class Dungeon(object):
 		self.text = TextUtility(self.player)
 		self.lines = self.text.text_wrapper(conv_id, (20,20,660,150), (0,0,0))
 		self.lnInd = 0
-		pygame.key.set_repeat()
+		#pygame.key.set_repeat()
 
 
 	def advance_dialogue(self):	# moves to the next line
@@ -171,7 +171,7 @@ class Dungeon(object):
 			self.text = None				# clear these variables
 			self.lines = None				#because they take up too much space
 			self.current_convo = None
-			pygame.key.set_repeat(100,100)
+			#pygame.key.set_repeat(100,100)
 
 	def do_post_dialogue_action(self):
 		if isinstance(self.current_interactee, entities.NPC):

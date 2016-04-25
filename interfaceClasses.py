@@ -7,8 +7,8 @@ class PyGameKeyboardController(object):
     def __init__(self, model):
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
-            pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_f:1}
-        pygame.key.set_repeat(100,100)
+            pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_f:1,pygame.K_z:1,pygame.K_x:1}
+        pygame.key.set_repeat()
         self.controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
 
 
@@ -61,7 +61,7 @@ class PyGameKeyboardController(object):
                 else:                                                   # otherwise
                     block_to_interact_with = self.model.getBlock(*blockcoords)
                     self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
-            if event.key == pygame.K_r:
+            elif event.key == pygame.K_r:
                 blockcoords = self.model.player.facingCoordinates() #this gives the (x,y) coordinate which you are facing!
                 """If we have a monster list with coordinates, we iterate over the list to see if there's a monster on blockcoords."""
                 monster = self.model.monstercoords.get(blockcoords,0)
@@ -70,7 +70,11 @@ class PyGameKeyboardController(object):
                     # print "Attempting to attack entity!" + str(target_to_attack.__repr__)
                 else:
                     target_to_attack = self.model.grid[blockcoords[1]][blockcoords[0]] #if we find no monster, this attacks a grid square or a block!
-                self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT                
+                self.model.player.attack(target_to_attack) #FEATURE UNDER DEVELOPMENT  
+            elif event.key == pygame.K_z:
+                self.model.player.decrementSong()
+            elif event.key == pygame.K_x:
+                self.model.player.incrementSong()
 
             elif event.key == pygame.K_LEFT:
                 if self.model.player.direction == "L":

@@ -31,10 +31,11 @@ class DungeonModelView(object):
         self.playerSprite = self.playerSprites[0][0]
 
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+        shadowNames = [name+"_Shadow" for name in spriteNames]
         monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC"]
-        attackSpriteNames = ["SwordSprite"]
+        attackSpriteNames = ["attack"+str(i) for i in range(0,8)]
         self.sprites = loadSprites(spriteNames)
-        self.shadows = loadShadowSprites(spriteNames)
+        self.shadows = loadSprites(shadowNames)
         self.monsterSprites = loadSprites(monsterSpriteNames)
         self.attackSprites = loadSprites(attackSpriteNames)
 
@@ -111,7 +112,7 @@ class DungeonModelView(object):
     def drawAttacks(self, t, pxr, pyr, pxc, pyc):
         direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
         if self.model.player.hasAttacked == True: # draw player attack sprite!
-            attackSprite = pygame.transform.rotate(self.attackSprites[self.model.player.attackSprite], direction_to_angle[self.model.player.direction])
+            attackSprite = self.attackSprites[self.model.player.song]
             attackCoords = (self.dispSize[0]/2 + self.model.player.directionCoordinates[self.model.player.direction][0]*self.blockSize[0],
                             self.dispSize[1]/2 + self.model.player.directionCoordinates[self.model.player.direction][1]*self.blockSize[1])
             self.screen.blit(attackSprite,attackCoords)
@@ -165,10 +166,6 @@ def loadMinimap(grid):  # creates a minimap for the given block list-list
 
 def loadSprites(filenames):
     return [pygame.image.load("sprites/{}.png".format(name)) for name in filenames]
-
-
-def loadShadowSprites(filenames):
-    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in filenames]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)

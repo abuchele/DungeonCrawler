@@ -116,9 +116,10 @@ class Player(Entity):
         self.name = name
         self.sprite = (0,0)
         self.steps = 0
-        self.attackSprite = 0 #attackSprites is a list of .png images, so this calls attackSprites[self.attackSprite]
         self.hasAttacked = False
         self.listening = False
+        self.song = 0   # the selected attack song
+        self.availableSong = [True,True,True,True,True,True,True,True]  # which songs you can play
         
     def __str__(self):
         return self.name
@@ -132,6 +133,16 @@ class Player(Entity):
     	self.inventory[Item] = quantity
     	if quantity == 0:
     		del self.inventory[Item]
+
+    def incrementSong(self):    # switches to the next song
+        self.song = (self.song+1)%len(self.availableSong)
+        while not self.availableSong[self.song]:
+            self.song = (self.song+1)%len(self.availableSong)
+
+    def decrementSong(self):
+        self.song = (self.song-1)%len(self.availableSong)
+        while not self.availableSong[self.song]:
+            self.song = (self.song-1)%len(self.availableSong)
 
     def getCurrentSprite(self):   # figures out which sprite to use for the entity
         if not self.moving:   # if the player has not moved
