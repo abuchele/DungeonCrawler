@@ -33,10 +33,12 @@ class DungeonModelView(object):
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
         shadowNames = [name+"_Shadow" for name in spriteNames]
         monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC"]
+        effectNames = ["Stunned","OnFire"]
         attackSpriteNames = ["attack"+str(i) for i in range(0,8)]
         self.sprites = loadSprites(spriteNames)
         self.shadows = loadSprites(shadowNames)
         self.monsterSprites = loadSprites(monsterSpriteNames)
+        self.effectSprites = loadSprites(effectNames)
         self.attackSprites = loadSprites(attackSpriteNames)
 
         self.t = 0
@@ -98,6 +100,10 @@ class DungeonModelView(object):
                         mxc, myc = monster.getCoords(t)
                         monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
                         self.screen.blit(self.monsterSprites[monster.sprite],monstCoords)   # just draw it and the monster on it
+                        if monster.effect.get("ignited",0):
+                            self.screen.blit(self.effectSprites[1], monstCoords)
+                        if monster.effect.get("stunned",0):
+                            self.screen.blit(self.effectSprites[0], monstCoords)
                 elif self.model.player.listening: #draws "listen sprites" on all monsters within range
                     if monster != 0:
                         mxr, myr = (monster.x, monster.y)

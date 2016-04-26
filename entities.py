@@ -33,11 +33,11 @@ import math
 """General Classes"""
 
 class Entity(object):
-    def __init__(self, model, x=0, y=0, monstercoords = 0, direction="U", speed=1, name = None, effect = dict()):
+    def __init__(self, model, x=0, y=0, monstercoords = 0, direction="U", speed=1, name = None):
         self.model = model       
         self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
-        self.effect = effect
+        self.effect = dict()
         self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
         self.moving = False
         self.x = x
@@ -57,7 +57,7 @@ class Entity(object):
         try:
             if self.attackRoll() >= that.armor:
                 damage = self.damage()
-                that.health -= damage
+                that.damaged(damage)
                 self.model.interp_action("{} hits {} for {} damage!".format(str(self),str(that),damage))
             # if this.name!="You":
             #     print "{} misses {}!".format(str(this),str(that))
@@ -67,6 +67,9 @@ class Entity(object):
         except AttributeError:
             pass
             # print "Attacked tile!"
+
+    def damaged(self, damage):
+        self.health -= damage
 
     def effected(self,effect_specific):
     	self.effect[effect_specific] = True
@@ -118,6 +121,7 @@ class Player(Entity):
         self.sprite = (0,0)
         self.steps = 0
         self.attackCooldown = 0
+        self.healCooldown = 0
         self.listening = False
         self.earshot = [] # the area currently being attacked
         self.song = 0   # the selected attack song
@@ -179,8 +183,16 @@ class Player(Entity):
         elif self.direction == "R":
             return (3,self.steps)
 
+    def damaged(self,damage):
+        self.healCooldown = 10
+        Entity.damaged(self,damage)
+
     def update(self):   # just kind of moves you around
         self.sprite = self.getCurrentSprite()
+        if self.healCooldown > 0:
+            self.healCooldown -= 1
+        elif self.health < 100:
+            self.health += 1
         Entity.update(self)
 
     def playSong0(self):    # basic attack
@@ -216,7 +228,6 @@ class Player(Entity):
                 break
             elif self.model.getBlock(*coords).collides:
                 break
-        self.attack(self)
 
     def playSong3(self):    # stun attack
         self.attackCooldown = 4
@@ -226,8 +237,8 @@ class Player(Entity):
                 if (dx+dy)%2 == 1:
                     self.earshot.append((self.x+dx, self.y+dy))
         for place_to_stun in self.earshot:
-            if self.model.monstercoords.has_key(place_to_stun):
-                self.model.interp_action(self.model.monstercoords[place_to_stun].effected("stunned"))
+            if self.monstercoords.has_key(place_to_stun):
+                self.model.interp_action(self.monstercoords[place_to_stun].effected("stunned"))
 
     def playSong4(self):    # grenade attack
         self.attackCooldown = 2
@@ -248,6 +259,8 @@ class Player(Entity):
         for place_to_attack in self.earshot:
             if self.monstercoords.has_key(place_to_attack):
                 self.attack(self.monstercoords[place_to_attack])
+            elif place_to_attack == (self.x,self.y):
+                self.attack(self)
 
     def playSong5(self):    # flamethrower attack
         self.attackCooldown = 2
@@ -266,7 +279,7 @@ class Player(Entity):
                     self.earshot.append(newCoords)
         for place_to_burn in self.earshot:
             if self.monstercoords.has_key(place_to_burn):
-                self.monstercoords[place_to_burn].effected("ignited")
+                self.model.interp_action(self.monstercoords[place_to_burn].effected("ignited"))
 
     def playSong6(self):    # octothorpe attack
         self.attackCooldown = 6
@@ -340,10 +353,18 @@ class Monster(Entity):
             self.passiveMove()
 
     def update(self):
-        self.distance += self.speed
-        if self.distance >= 256:
-            self.distance -= 256
-            self.decide()
+        if self.effect.get("stunned",False):    # if you are stunned
+            if randint(1,50) == 1:             # you cannot move
+                self.effect["stunned"] = False
+        else:
+            self.distance += self.speed
+            if self.distance >= 256:
+                self.distance -= 256
+                self.decide()
+        if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
+            self.health -= 1                                        # you might take damage
+            if randint(1,40) == 1:
+                self.effect["ignited"] = False
         Entity.update(self)
 
     def interact(self,player):
