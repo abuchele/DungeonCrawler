@@ -35,11 +35,13 @@ class DungeonModelView(object):
         monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC"]
         effectNames = ["Stunned","OnFire"]
         attackSpriteNames = ["attack"+str(i) for i in range(0,8)]
+        songSpriteNames = ["song"+str(i) for i in range(0,8)]
         self.sprites = loadSprites(spriteNames)
         self.shadows = loadSprites(shadowNames)
         self.monsterSprites = loadSprites(monsterSpriteNames)
         self.effectSprites = loadSprites(effectNames)
         self.attackSprites = loadSprites(attackSpriteNames)
+        self.sheetSprites = loadSprites(songSpriteNames, directory="HUD_sprites")
 
         self.t = 0
 
@@ -139,6 +141,10 @@ class DungeonModelView(object):
         hp = 3*self.model.player.health
         pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
 
+        self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.song],(75,75)), (self.size[1]+25, self.mimpSz[0]))
+        self.screen.blit(self.sheetSprites[self.model.player.song], (self.size[1], self.mimpSz[0]+75))
+        self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.song],(75,75)), (self.size[1]+25, self.mimpSz[0]+225))
+
         if self.model.state == "P":
             self.screen.blit(self.pauseScreen, (0,0))
         elif self.model.state == "D":
@@ -171,8 +177,8 @@ def loadMinimap(grid):  # creates a minimap for the given block list-list
     return output
 
 
-def loadSprites(filenames):
-    return [pygame.image.load("sprites/{}.png".format(name)) for name in filenames]
+def loadSprites(filenames, directory="sprites"):
+    return [pygame.image.load("{}/{}.png".format(directory,name)) for name in filenames]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)
