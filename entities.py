@@ -125,6 +125,8 @@ class Player(Entity):
         self.listening = False
         self.earshot = [] # the area currently being attacked
         self.song = 0   # the selected attack song
+        self.lastSong = 0
+        self.nextSong = 0
         self.availableSong = [0,1,2,3,4,5,6]  # which songs you can play
         
     def __str__(self):
@@ -141,12 +143,14 @@ class Player(Entity):
     		del self.inventory[Item]
 
     def incrementSong(self):    # switches to the next song
+        self.song, self.lastSong = (self.nextSong, self.song)
         newSongIdx = self.availableSong.index(self.song)+1
-        self.song = self.availableSong[newSongIdx%len(self.availableSong)]
+        self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
 
-    def decrementSong(self):
+    def decrementSong(self):    # switches to the last song
+        self.song, self.nextSong = (self.lastSong, self.song)
         newSongIdx = self.availableSong.index(self.song)-1
-        self.song = self.availableSong[newSongIdx%len(self.availableSong)]
+        self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
 
     def playSong(self):
         if self.song == 0:      # basic attack

@@ -28,6 +28,7 @@ class DungeonModelView(object):
         self.pauseScreen = pygame.image.load("sprites/Paused.png")
         self.dialogueBox = pygame.image.load("sprites/Dialogue_GUI.png")
         self.soundSprite = pygame.image.load("sprites/Sound.png")
+        self.HUD = pygame.image.load("HUD_sprites/Hud.png")
         self.playerSprite = self.playerSprites[0][0]
 
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
@@ -128,7 +129,7 @@ class DungeonModelView(object):
 
 
     def drawHUD(self, t, pxr, pyr, pxc, pyc):
-        pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.size[0]-self.size[1], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
+        pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.mimpSz[0], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
             area = ((self.model.player.x/self.rempSz[0]*self.mimpSz[0], self.model.player.y/self.rempSz[1]*self.mimpSz[1]), self.mimpSz))    # draw the minimap
 
@@ -138,12 +139,13 @@ class DungeonModelView(object):
         actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
         self.screen.blit(actionLog, (0, self.size[1]-34))
 
-        hp = 3*self.model.player.health
-        pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
+        hp = 3.24*self.model.player.health
+        pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-74, self.size[1]-17-hp, 54, hp)) # draw the hp bar
+        self.screen.blit(self.HUD, (self.size[1],self.mimpSz[0]))
 
-        self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.song],(75,75)), (self.size[1]+25, self.mimpSz[0]))
+        self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.nextSong],(75,75)), (self.size[1]+25, self.mimpSz[0]))
         self.screen.blit(self.sheetSprites[self.model.player.song], (self.size[1], self.mimpSz[0]+75))
-        self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.song],(75,75)), (self.size[1]+25, self.mimpSz[0]+225))
+        self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.lastSong],(75,75)), (self.size[1]+25, self.mimpSz[0]+225))
 
         if self.model.state == "P":
             self.screen.blit(self.pauseScreen, (0,0))
