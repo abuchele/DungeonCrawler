@@ -202,7 +202,7 @@ class Player(Entity):
     def playSong0(self):    # basic attack
         self.earshot = [self.facingCoordinates()]   # you attack the block in front of you
         self.attackCooldown = 2
-        self.flatDamage, self.damageRange = (3,5)   #dps = 6
+        self.flatDamage, self.damageRange = (3,5)   #ave dmg = 6
         if self.model.monstercoords.has_key(self.earshot[0]):
             self.attack(self.model.monstercoords[self.earshot[0]])
 
@@ -212,7 +212,7 @@ class Player(Entity):
             for dy in [-1,0,1]:
                 self.earshot.append((self.x+dx, self.y+dy)) # you attack all adjacent blocks
         self.attackCooldown = 2
-        self.flatDamage, self.damageRange = (0,2)   #dps = 1.5
+        self.flatDamage, self.damageRange = (1,3)   #ave dmg = 3
         for place_to_attack in self.earshot:
             if self.model.monstercoords.has_key(place_to_attack):
                 self.attack(self.model.monstercoords[place_to_attack])
@@ -220,7 +220,7 @@ class Player(Entity):
 
     def playSong2(self):    # ranged attack
         self.attackCooldown = 2
-        self.flatDamage, self.damageRange = (1,2)   #dps = 2.5
+        self.flatDamage, self.damageRange = (1,3)   #ave dmg = 3
         self.earshot = []
         coords = (self.x, self.y)
         direc = self.directionCoordinates[self.direction]
@@ -246,7 +246,7 @@ class Player(Entity):
 
     def playSong4(self):    # grenade attack
         self.attackCooldown = 2
-        self.flatDamage, self.damageRange = (0,1)   #dps = 1
+        self.flatDamage, self.damageRange = (0,3)   #ave damage = 2
         epicenter = (self.x,self.y)
         direc = self.directionCoordinates[self.direction]
         for i in range(5):
@@ -358,7 +358,7 @@ class Monster(Entity):
 
     def update(self):
         if self.effect.get("stunned",False):    # if you are stunned
-            if randint(1,50) == 1:             # you cannot move
+            if randint(1,35) == 1:             # you cannot move
                 self.effect["stunned"] = False
         else:
             self.distance += self.speed
@@ -366,7 +366,7 @@ class Monster(Entity):
                 self.distance -= 256
                 self.decide()
         if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
-            self.health -= 1                                        # you might take damage
+            self.health -= 2                                        # you might take damage
             if randint(1,40) == 1:
                 self.effect["ignited"] = False
         Entity.update(self)
