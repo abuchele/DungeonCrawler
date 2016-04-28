@@ -125,7 +125,7 @@ class DungeonModelView(object):
             attackSprite = self.attackSprites[self.model.player.song]
             for atX, atY in self.model.player.earshot:
                 attackCoords = ((atX-pxc)*self.blockSize[0]+self.dispSize[0]/2,
-                                (atY-pyc)*self.blockSize[1]+self.dispSize[1]/2 + self.model.player.attackCooldown*10 - int(t*10) - 15)
+                                (atY-pyc)*self.blockSize[1]+self.dispSize[1]/2 + int((self.model.player.attackCooldown-t)*20/self.model.player.attackSpeed) - 15)
                 self.screen.blit(attackSprite,attackCoords)
 
 
