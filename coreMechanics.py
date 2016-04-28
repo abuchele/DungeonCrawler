@@ -81,8 +81,10 @@ class Dungeon(object):
 							newMonst = entities.Ghost(x,y,self.player,self, self.monstercoords)
 						else:
 							newMonst = entities.Demon(x,y,self.player,self, self.monstercoords)
-					else:
+					elif block.biome == 3:
 						newMonst = entities.Skeleton(x,y,self.player,self, self.monstercoords)
+					else:
+						continue
 
 					self.monstercoords[(x,y)] = newMonst
 					count +=1
@@ -97,11 +99,14 @@ class Dungeon(object):
 
 			if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":	# you can jump over one block of lava
 				if self.getBlock(*self.player.facingCoordinates()).collides:			# if there is no block in front of you
-					print self.player.effected("killed")
+					self.player.health = 0
 				else:
 					self.player.x,self.player.y = self.player.facingCoordinates()		# also please try not to jump into more lava
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
-						print self.player.effected("killed")
+						self.player.health = 0
+
+			if self.player.health <= 0:
+				self.state = "K"
 
 			old_monstercoords = copy.copy(self.monstercoords)
 			for dy in range(-8,9):			# move all the monsters
