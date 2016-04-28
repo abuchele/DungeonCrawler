@@ -106,7 +106,7 @@ class Dungeon(object):
 						self.player.health = 0
 
 			if self.player.health <= 0:
-				self.state = "P"
+				self.state = "K"
 
 			old_monstercoords = copy.copy(self.monstercoords)
 			for dy in range(-8,9):			# move all the monsters

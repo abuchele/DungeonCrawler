@@ -25,8 +25,9 @@ class DungeonModelView(object):
         spriteNames = [["Stand","Walk1","Walk2"], ["Back","Front","Left","Right"]]
         self.playerSprites = [[pygame.image.load("sprites/Player"+direc+movem+".png") for movem in spriteNames[0]] for direc in spriteNames[1]]
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
-        self.pauseScreen = pygame.image.load("sprites/Paused.png")
-        self.dialogueBox = pygame.image.load("sprites/Dialogue_GUI.png")
+        self.pauseScreen = pygame.image.load("HUD_sprites/Paused.png")
+        self.dialogueBox = pygame.image.load("HUD_sprites/Dialogue_GUI.png")
+        self.deathScreen = pygame.image.load("HUD_sprites/Dead.png")
         self.soundSprite = pygame.image.load("sprites/Sound.png")
         self.HUD = pygame.image.load("HUD_sprites/Hud.png")
         self.playerSprite = self.playerSprites[0][0]
@@ -154,6 +155,8 @@ class DungeonModelView(object):
             paragraph = self.model.currentParagraph()
             for y, line in enumerate(paragraph):
                 self.screen.blit(line, (30,30+30*y))
+        elif self.model.state == "K":
+            self.screen.blit(self.deathScreen, (0,0))
 
 
     def compose_LOS_list(self): # does preliminary calculations for line of sight
@@ -168,6 +171,10 @@ class DungeonModelView(object):
                     self.losLst.append(drawLOS(-t,r))
                 if t >= self.screenBounds[0] and t < self.screenBounds[1] and -r >= self.screenBounds[2]:
                     self.losLst.append(drawLOS(t,-r))
+
+
+    def setModel(self, model):
+        self.model = model
 
 
 def loadMinimap(grid):  # creates a minimap for the given block list-list

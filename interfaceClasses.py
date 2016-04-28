@@ -12,7 +12,7 @@ class PyGameKeyboardController(object):
             pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_f:1,pygame.K_TAB:1,pygame.K_LSHIFT:1,
             pygame.K_1:1,pygame.K_2:1,pygame.K_3:1,pygame.K_4:1,pygame.K_5:1,pygame.K_6:1,pygame.K_7:1}
         pygame.key.set_repeat()
-        self.controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
+        self.reset = False
 
 
     def handle_all_events(self, events):
@@ -35,6 +35,9 @@ class PyGameKeyboardController(object):
                     if event.type == KEYDOWN:
                         self.model.advance_dialogue()
                         return True
+                elif self.model.state == "K":
+                    if event.type == KEYDOWN:
+                        self.reset = True
             pygame.event.clear()  #empties queue
 
         held = pygame.key.get_pressed()  # if there are no key presses, check for keys being held down
@@ -110,3 +113,8 @@ class PyGameKeyboardController(object):
 
         pygame.event.clear()
         return True
+
+
+    def setModel(self, model):
+        self.model = model
+        self.reset = False
