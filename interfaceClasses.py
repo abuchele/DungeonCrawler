@@ -1,15 +1,19 @@
 import pygame
 from pygame.locals import QUIT, KEYDOWN, MOUSEMOTION
+import pygame.mixer
 
 
 
 class PyGameKeyboardController(object):
     def __init__(self, model):
+        pygame.mixer.init(frequency=22050)
+        self.attackSongs = [pygame.mixer.Sound('song{}.wav'.format(i)) for i in range(0,8)]
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
-            pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_f:1,pygame.K_z:1,pygame.K_x:1}
+            pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_f:1,pygame.K_TAB:1,pygame.K_LSHIFT:1,
+            pygame.K_1:1,pygame.K_2:1,pygame.K_3:1,pygame.K_4:1,pygame.K_5:1,pygame.K_6:1,pygame.K_7:1}
         pygame.key.set_repeat()
-        self.controllerDirections = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)}
+        self.reset = False
 
 
     def handle_all_events(self, events):
@@ -32,6 +36,9 @@ class PyGameKeyboardController(object):
                     if event.type == KEYDOWN:
                         self.model.advance_dialogue()
                         return True
+                elif self.model.state == "K":
+                    if event.type == KEYDOWN:
+                        self.reset = True
             pygame.event.clear()  #empties queue
 
         held = pygame.key.get_pressed()  # if there are no key presses, check for keys being held down
@@ -61,41 +68,54 @@ class PyGameKeyboardController(object):
                     block_to_interact_with = self.model.getBlock(*blockcoords)
                     self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
             elif event.key == pygame.K_r:
-                self.model.player.playSong()
-            elif event.key == pygame.K_z:
-                self.model.player.decrementSong()
-            elif event.key == pygame.K_x:
-                self.model.player.incrementSong()
+                if self.model.player.attackCooldown <= 0:
+                    self.model.player.playSong()
+                    self.attackSongs[self.model.player.song].play()
+            elif event.key == pygame.K_TAB:
+                if self.model.player.attackCooldown <= 0:
+                    self.model.player.incrementSong()
+            elif event.key == pygame.K_LSHIFT:
+                if self.model.player.attackCooldown <= 0:
+                    self.model.player.decrementSong()
+
+            elif event.key >= 49 and event.key <= 55:   # these are the number keys
+                if event.key-49 in self.model.player.availableSong:
+                    self.model.player.song = event.key-49
 
             elif event.key == pygame.K_a:
                 if self.model.player.direction == "L":
-                    self.model.player.moving = True
+                    self.model.player.moving = self.model.player.attackCooldown <= 0
                 self.model.player.direction = "L"
             elif event.key == pygame.K_d:
                 if self.model.player.direction == "R":
-                    self.model.player.moving = True
+                    self.model.player.moving = self.model.player.attackCooldown <= 0
                 self.model.player.direction = "R"
             elif event.key == pygame.K_w:
                 if self.model.player.direction == "U":
-                    self.model.player.moving = True
+                    self.model.player.moving = self.model.player.attackCooldown <= 0
                 self.model.player.direction = "U"
             elif event.key == pygame.K_s:
                 if self.model.player.direction == "D":
-                    self.model.player.moving = True
+                    self.model.player.moving = self.model.player.attackCooldown <= 0
                 self.model.player.direction = "D"
 
             elif event.key == pygame.K_LEFT:
                 self.model.player.direction = "L"
-                self.model.player.moving = True
+                self.model.player.moving = self.model.player.attackCooldown <= 0
             elif event.key == pygame.K_RIGHT:
                 self.model.player.direction = "R"
-                self.model.player.moving = True
+                self.model.player.moving = self.model.player.attackCooldown <= 0
             elif event.key == pygame.K_UP:
                 self.model.player.direction = "U"
-                self.model.player.moving = True
+                self.model.player.moving = self.model.player.attackCooldown <= 0
             elif event.key == pygame.K_DOWN:
                 self.model.player.direction = "D"
-                self.model.player.moving = True
+                self.model.player.moving = self.model.player.attackCooldown <= 0
 
         pygame.event.clear()
         return True
+
+
+    def setModel(self, model):
+        self.model = model
+        self.reset = False

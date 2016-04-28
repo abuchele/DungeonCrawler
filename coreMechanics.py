@@ -81,8 +81,10 @@ class Dungeon(object):
 							newMonst = entities.Ghost(x,y,self.player,self, self.monstercoords)
 						else:
 							newMonst = entities.Demon(x,y,self.player,self, self.monstercoords)
-					else:
+					elif block.biome == 3:
 						newMonst = entities.Skeleton(x,y,self.player,self, self.monstercoords)
+					else:
+						continue
 
 					self.monstercoords[(x,y)] = newMonst
 					count +=1
@@ -104,7 +106,7 @@ class Dungeon(object):
 						self.player.health = 0
 
 			if self.player.health <= 0:
-				self.state = "P"
+				self.state = "K"
 
 			old_monstercoords = copy.copy(self.monstercoords)
 			for dy in range(-8,9):			# move all the monsters
@@ -117,7 +119,7 @@ class Dungeon(object):
 							self.monstercoords[(monster.x,monster.y)] = monster
 						else:
 							self.checklist.state["killcount"] = self.checklist.state.get("killcount",0) + 1
-							print self.checklist.state.get("killcount",0)
+							# print self.checklist.state.get("killcount",0)
 
 
 			if rng.random() < 0.003:
