@@ -120,6 +120,7 @@ class Player(Entity):
         self.name = name
         self.sprite = (0,0)
         self.steps = 0
+        self.attackSpeed = 2
         self.attackCooldown = 0
         self.healCooldown = 0
         self.listening = False
@@ -202,6 +203,7 @@ class Player(Entity):
     def playSong0(self):    # basic attack
         self.earshot = [self.facingCoordinates()]   # you attack the block in front of you
         self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
         self.flatDamage, self.damageRange = (3,5)   #ave dmg = 6
         if self.model.monstercoords.has_key(self.earshot[0]):
             self.attack(self.model.monstercoords[self.earshot[0]])
@@ -212,6 +214,7 @@ class Player(Entity):
             for dy in [-1,0,1]:
                 self.earshot.append((self.x+dx, self.y+dy)) # you attack all adjacent blocks
         self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
         self.flatDamage, self.damageRange = (1,3)   #ave dmg = 3
         for place_to_attack in self.earshot:
             if self.model.monstercoords.has_key(place_to_attack):
@@ -220,6 +223,7 @@ class Player(Entity):
 
     def playSong2(self):    # ranged attack
         self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
         self.flatDamage, self.damageRange = (1,3)   #ave dmg = 3
         self.earshot = []
         coords = (self.x, self.y)
@@ -235,6 +239,7 @@ class Player(Entity):
 
     def playSong3(self):    # stun attack
         self.attackCooldown = 4
+        self.attackSpeed = self.attackCooldown
         self.earshot = []
         for dx in range(-2,3):
             for dy in range(-2,3):
@@ -246,6 +251,7 @@ class Player(Entity):
 
     def playSong4(self):    # grenade attack
         self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
         self.flatDamage, self.damageRange = (0,3)   #ave damage = 2
         epicenter = (self.x,self.y)
         direc = self.directionCoordinates[self.direction]
@@ -268,6 +274,7 @@ class Player(Entity):
 
     def playSong5(self):    # flamethrower attack
         self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
         self.earshot = []
         coords = (self.x, self.y)
         direc = self.directionCoordinates[self.direction]
@@ -287,6 +294,7 @@ class Player(Entity):
 
     def playSong6(self):    # octothorpe attack
         self.attackCooldown = 6
+        self.attackSpeed = self.attackCooldown
         self.flatDamage, self.damageRange = (3,8)   #dps = 7.5
         self.earshot = []
         for dx in [-2,-1,0,1,2]:

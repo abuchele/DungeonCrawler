@@ -84,33 +84,33 @@ class PyGameKeyboardController(object):
 
             elif event.key == pygame.K_a:
                 if self.model.player.direction == "L":
-                    self.model.player.moving = True
+                    self.model.player.moving = self.model.player.attackCooldown <= 0
                 self.model.player.direction = "L"
             elif event.key == pygame.K_d:
                 if self.model.player.direction == "R":
-                    self.model.player.moving = True
+                    self.model.player.moving = self.model.player.attackCooldown <= 0
                 self.model.player.direction = "R"
             elif event.key == pygame.K_w:
                 if self.model.player.direction == "U":
-                    self.model.player.moving = True
+                    self.model.player.moving = self.model.player.attackCooldown <= 0
                 self.model.player.direction = "U"
             elif event.key == pygame.K_s:
                 if self.model.player.direction == "D":
-                    self.model.player.moving = True
+                    self.model.player.moving = self.model.player.attackCooldown <= 0
                 self.model.player.direction = "D"
 
             elif event.key == pygame.K_LEFT:
                 self.model.player.direction = "L"
-                self.model.player.moving = True
+                self.model.player.moving = self.model.player.attackCooldown <= 0
             elif event.key == pygame.K_RIGHT:
                 self.model.player.direction = "R"
-                self.model.player.moving = True
+                self.model.player.moving = self.model.player.attackCooldown <= 0
             elif event.key == pygame.K_UP:
                 self.model.player.direction = "U"
-                self.model.player.moving = True
+                self.model.player.moving = self.model.player.attackCooldown <= 0
             elif event.key == pygame.K_DOWN:
                 self.model.player.direction = "D"
-                self.model.player.moving = True
+                self.model.player.moving = self.model.player.attackCooldown <= 0
 
         pygame.event.clear()
         return True
