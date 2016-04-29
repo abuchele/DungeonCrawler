@@ -363,7 +363,7 @@ class Monster(Entity):
             # self.aggro = True
 
     def passiveMove(self): # decides where to move and sets its variables accordingly
-        if randint(1,3) == 1 or self.effect["ignited"]:
+        if randint(1,3) == 1 or self.effect.get("ignited", False):
             direction = ["R","D","L","U"]
             self.direction = choice(direction)
             self.moving = True
@@ -550,6 +550,7 @@ class MrE(NPC):
         elif conv_id == 4:
             self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
             self.player.learnSong(0)
+            #self.player.learnSong(5)
         elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
         elif conv_id == 6:
