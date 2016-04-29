@@ -246,7 +246,9 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 	for y in range(0,h+1):
 		row = [Obsidian()]
 		for x in range(1,w):
-			if rng.random() < prob:
+			if math.hypot(x-w/2, y-h/2) < 5:
+				row.append(Floor(biome=2))
+			elif rng.random() < prob:
 				row.append(Obsidian(biome=2))
 			else:
 				row.append(Floor(biome=2))
@@ -276,21 +278,14 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 					newGrid[y][x] = Floor(biome=2)
 		grid = newGrid
 
-	regions = []
-	maxRSize = 0
-	maxRIndx = -1
+	regions = [findRegion(w/2,h/2,grid)]
 	for x in range(1,w):
 		for y in range(1,h):
 			if not grid[y][x].collides and not hasattr(grid[y][x], 'region'):	# if this in an unmarked floor
-				region = findRegion(x,y,grid)									# get all blocks connected to it
-				if len(region) > maxRSize:
-					maxRSize = len(region)
-					maxRIndx = len(regions)
-				regions.append(region)											# and save them as a region
-	for i in range(0,len(regions)):
-		if i != maxRIndx:
-			for x,y in regions[i]:
-				grid[y][x] = Obsidian(biome=2)		# fill in all but the biggest region
+				regions.append(findRegion(x,y,grid))							# get all blocks connected to it
+	for i in range(1,len(regions)):
+		for x,y in regions[i]:
+			grid[y][x] = Obsidian(biome=2)		# fill in all but the center region
 
 	for d in [-1,1]:
 		flowLava(w/2, h/2, grid, 2*(w+h), d)	# creates lava rivers

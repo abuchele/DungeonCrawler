@@ -144,9 +144,12 @@ class DungeonModelView(object):
         pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-74, self.size[1]-17-hp, 54, hp)) # draw the hp bar
         self.screen.blit(self.HUD, (self.size[1],self.mimpSz[0]))
 
-        self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.nextSong],(75,75)), (self.size[1]+25, self.mimpSz[0]))
-        self.screen.blit(self.sheetSprites[self.model.player.song], (self.size[1], self.mimpSz[0]+75))
-        self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.lastSong],(75,75)), (self.size[1]+25, self.mimpSz[0]+225))
+        if len(self.model.player.availableSong) > 1:
+            self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.nextSong],(75,75)), (self.size[1]+25, self.mimpSz[0]))
+        if len(self.model.player.availableSong) > 0:
+            self.screen.blit(self.sheetSprites[self.model.player.song], (self.size[1], self.mimpSz[0]+75))  # draw the songs
+        if len(self.model.player.availableSong) > 1:
+            self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.lastSong],(75,75)), (self.size[1]+25, self.mimpSz[0]+225))
 
         if self.model.state == "P":
             self.screen.blit(self.pauseScreen, (0,0))
