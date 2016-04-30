@@ -6,8 +6,9 @@ import pygame.mixer
 
 class PyGameKeyboardController(object):
     def __init__(self, model):
-        pygame.mixer.init(frequency=22050)
-        self.attackSongs = [pygame.mixer.Sound('song{}.wav'.format(i)) for i in range(0,8)]
+        #pygame.mixer.init(frequency=22050, size=-16, buffer=4096)
+        pygame.mixer.init()
+        self.attackSongs = [pygame.mixer.Sound('songZ{}.wav'.format(i)) for i in range(0,8)]
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
             pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_TAB:1,pygame.K_LSHIFT:1,
@@ -68,7 +69,7 @@ class PyGameKeyboardController(object):
                     block_to_interact_with = self.model.getBlock(*blockcoords)
                     self.model.interp_action(block_to_interact_with.interact(self.model.player)) # interact with the block and print the result
             elif event.key == pygame.K_r:
-                if self.model.player.attackCooldown <= 0:
+                if self.model.player.attackCooldown <= 0 and len(self.model.player.availableSong) > 0:
                     self.model.player.playSong()
                     self.attackSongs[self.model.player.song].play()
             elif event.key == pygame.K_TAB:
@@ -77,6 +78,9 @@ class PyGameKeyboardController(object):
             elif event.key == pygame.K_LSHIFT:
                 if self.model.player.attackCooldown <= 0:
                     self.model.player.decrementSong()
+            elif event.key == pygame.K_g:
+                if self.model.player.hasBullet:
+                    self.model.player.shoot()
 
             elif event.key >= 49 and event.key <= 55:   # these are the number keys
                 if event.key-49 in self.model.player.availableSong:
@@ -111,6 +115,9 @@ class PyGameKeyboardController(object):
             elif event.key == pygame.K_DOWN:
                 self.model.player.direction = "D"
                 self.model.player.moving = self.model.player.attackCooldown <= 0
+
+            else:
+                raise ValueError("{} is not a valid command.".format(event.key))
 
         pygame.event.clear()
         return True
