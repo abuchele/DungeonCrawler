@@ -363,7 +363,7 @@ class Monster(Entity):
             # self.aggro = True
 
     def passiveMove(self): # decides where to move and sets its variables accordingly
-        if randint(1,3) == 1 or self.effect.get("ignited", False):
+        if randint(1,2) == 1 or self.effect.get("ignited", False):
             direction = ["R","D","L","U"]
             self.direction = choice(direction)
             self.moving = True

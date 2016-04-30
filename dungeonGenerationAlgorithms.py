@@ -146,6 +146,7 @@ def generatePiece(w, h, n):
 		x = x+1
 
 	placeTreasure(0.007, grid)
+	placeFurniture(0.01, grid)
 	return [grid, [(w/2,h/2)]]
 
 
@@ -231,6 +232,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 		x = x+1
 
 	placeTreasure(0.005, grid)
+	placeFurniture(0.01, grid)
 	return [grid, [(w/2,h/2)]]
 
 
@@ -737,3 +739,27 @@ def placeTreasure(dens, grid):	# scatters treasure blocks across the map
 
 			if wallsHit < 2 and rng.random() < dens*(wallCount):
 				grid[y][x] = Loot(5)
+
+
+def placeFurniture(dens, grid):	# scatters treasure blocks across the map
+	for y in range(1,len(grid)-1):
+		for x in range(1,len(grid[y])-1):
+			if grid[y][x].collides:
+				continue
+
+			neighbors = [grid[y+p[1]][x+p[0]] for p in [(1,1),(1,0),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1),(0,1)]]
+			wallCount = 1
+
+			wallsHit = 0
+			for i in range(len(neighbors)):
+				if neighbors[i].collides:
+					wallCount = wallCount + 1
+				if neighbors[i].passable() and neighbors[(i+1)%len(neighbors)].collides:	# this may only be triggered once
+					if wallsHit >= 1:
+						wallsHit = 2														# multiple triggerings means this chest may block off a room
+						break
+					else:
+						wallsHit = 1
+
+			if wallsHit < 2 and rng.random() < dens*(wallCount):
+				grid[y][x] = Furniture()

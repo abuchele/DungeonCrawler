@@ -6,7 +6,7 @@ import entities
 
 
 class Block(object):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		self.explored = False
 		self.biome = biome
 
@@ -18,7 +18,7 @@ class Block(object):
 
 
 class Null(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (0,0,0)
 		self.collides = False
@@ -33,7 +33,7 @@ class Null(Block):
 
 
 class Floor(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (200,200,200)
 		self.collides = False
@@ -48,7 +48,7 @@ class Floor(Block):
 
 
 class Stone(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (80,80,80)
 		self.collides = True
@@ -63,7 +63,7 @@ class Stone(Block):
 
 
 class Brick(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (70,70,70)
 		self.collides = True
@@ -78,7 +78,7 @@ class Brick(Block):
 
 
 class Door(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (120,120,120)
 		self.collides = True
@@ -113,7 +113,7 @@ class Door(Block):
 
 
 class Lava(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (255,20,0)
 		self.collides = False
@@ -128,7 +128,7 @@ class Lava(Block):
 
 
 class Bedrock(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (0,0,0)
 		self.collides = True
@@ -143,7 +143,7 @@ class Bedrock(Block):
 
 
 class Obsidian(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (80,10,100)
 		self.collides = True
@@ -158,7 +158,7 @@ class Obsidian(Block):
 
 
 class Glass(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (240,240,240)
 		self.collides = True
@@ -173,7 +173,7 @@ class Glass(Block):
 
 
 class Metal(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (140,140,140)
 		self.collides = True
@@ -187,8 +187,31 @@ class Metal(Block):
 		return rng.choice(["The walls here are metal and hollow.","You knock on the wall, and hear a resounding clang.","There are no bolts here; the metal is fused together."])
 
 
+class Furniture(Block):
+	def __init__(self, biome=-1):
+		Block.__init__(self, biome)
+		self.color = (200,150,120)
+		self.collides = True
+		self.transparent = True
+		self.sprite = rng.randint(14,17)
+
+	def __str__(self):
+		return "TT"
+
+	def interact(self,player):
+		if self.sprite == 14:
+			return rng.choice(["There is nothing on this table.","You lean on the table, and it wobbles dangerously.","The surface of the table is caked in dust."])
+		elif self.sprite == 15:
+			return rng.choice(["You sit down, and then stand back up.","This chair has a broken leg.","This must be the time-out chair."])
+		elif self.sprite == 16:
+			return "You examine a random book: "+rng.choice(["Death of Pi","To Murder a Mockingbird","The Afterlife for Dummies","Basics of Pomegrante Gardening","Twilight","Bury Potter and the Dead Hallows","Bury Potter and the Non-Copyright Reference","Dealing with Grief","Pictures of Puppies","It's Okay to be Dead"])
+		else:
+			return rng.choice(["What a comfy-looking couch.","You would sit, but it's filled with holes.","You reach under the cusions and find a penny."])
+
+
+
 class Loot(Block):
-	def __init__(self, value, islocked = False, isopen = False, biome=0):
+	def __init__(self, value, islocked = False, isopen = False, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (255,250,0)
 		self.collides = True
