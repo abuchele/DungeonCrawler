@@ -10,7 +10,7 @@ class PyGameKeyboardController(object):
         self.attackSongs = [pygame.mixer.Sound('song{}.wav'.format(i)) for i in range(0,8)]
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
-            pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_f:1,pygame.K_TAB:1,pygame.K_LSHIFT:1,
+            pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_TAB:1,pygame.K_LSHIFT:1,
             pygame.K_1:1,pygame.K_2:1,pygame.K_3:1,pygame.K_4:1,pygame.K_5:1,pygame.K_6:1,pygame.K_7:1}
         pygame.key.set_repeat()
         self.reset = False
