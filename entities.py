@@ -15,6 +15,8 @@ from random import randint, choice
 import pygame
 import math
 
+import terrainUtils
+
 
 """Changes:"""
 
@@ -105,7 +107,6 @@ class Entity(object):
 
 """Player Related"""
 
-# I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
     def __init__(self,model,monstercoords,x,y, name = "Ray"):
         Entity.__init__(self,model,x,y, monstercoords) #grid is a global variable which needs to be defined before initializing any entities.
@@ -128,7 +129,8 @@ class Player(Entity):
         self.song = 0   # the selected attack song
         self.lastSong = 0
         self.nextSong = 0
-        self.availableSong = [0,1,2,3,4,5,6]  # which songs you can play
+        self.availableSong = []  # which songs you can play
+        self.hasBullet = True
         
     def __str__(self):
         return self.name
@@ -144,12 +146,21 @@ class Player(Entity):
     		del self.inventory[Item]
 
     def incrementSong(self):    # switches to the next song
-        self.song, self.lastSong = (self.nextSong, self.song)
-        newSongIdx = self.availableSong.index(self.song)+1
-        self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
+        if len(self.availableSong) > 0:
+            self.song, self.lastSong = (self.nextSong, self.song)
+            newSongIdx = self.availableSong.index(self.song)+1
+            self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
 
     def decrementSong(self):    # switches to the last song
-        self.song, self.nextSong = (self.lastSong, self.song)
+        if len(self.availableSong) > 0:
+            self.song, self.nextSong = (self.lastSong, self.song)
+            newSongIdx = self.availableSong.index(self.song)-1
+            self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
+
+    def learnSong(self, songNum):   # adds a new song to the player's arsenal
+        self.availableSong.append(songNum)
+        newSongIdx = self.availableSong.index(self.song)+1
+        self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
         newSongIdx = self.availableSong.index(self.song)-1
         self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
 
@@ -295,7 +306,7 @@ class Player(Entity):
     def playSong6(self):    # octothorpe attack
         self.attackCooldown = 6
         self.attackSpeed = self.attackCooldown
-        self.flatDamage, self.damageRange = (3,8)   #dps = 7.5
+        self.flatDamage, self.damageRange = (3,8)   #ave damage = 7.5
         self.earshot = []
         for dx in [-2,-1,0,1,2]:
             for dy in [-1,1]:
@@ -306,6 +317,25 @@ class Player(Entity):
         for place_to_attack in self.earshot:
             if self.monstercoords.has_key(place_to_attack):
                 self.attack(self.monstercoords[place_to_attack])
+
+    def shoot(self):    # gun
+        self.flatDamage, self.damageRange = (49,1)  # avg damage = 50
+        coords = (self.x, self.y)
+        direc = self.directionCoordinates[self.direction]
+        self.hasBullet = False
+        for i in range(6):
+            coords = (coords[0]+direc[0], coords[1]+direc[1])
+            if self.model.monstercoords.has_key(coords):
+                self.attack(self.model.monstercoords[coords])
+                self.model.interp_action("You put your singular bullet into the {}.".format(self.model.monstercoords[coords].name))
+                return
+            elif self.model.getBlock(*coords).collides:
+                if type(self.model.getBlock(*coords)).__name__ == "Glass":
+                    self.model.grid[coords[1]][coords[0]] = terrainUtils.Floor()
+                self.model.interp_action("You fire your singular bullet at the wall.")
+                return
+        self.model.interp_action("You fire your only bullet but fail to hit anything.")
+
         
 
 """Monster Subclass"""
@@ -333,7 +363,7 @@ class Monster(Entity):
             # self.aggro = True
 
     def passiveMove(self): # decides where to move and sets its variables accordingly
-        if randint(1,2) == 1:
+        if randint(1,3) == 1 or self.effect.get("ignited", False):
             direction = ["R","D","L","U"]
             self.direction = choice(direction)
             self.moving = True
@@ -375,7 +405,7 @@ class Monster(Entity):
                 self.decide()
         if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
             self.health -= 2                                        # you might take damage
-            if randint(1,40) == 1:
+            if randint(1,35) == 1:
                 self.effect["ignited"] = False
         Entity.update(self)
 
@@ -398,6 +428,7 @@ class Zombie(Monster):
             self.sprite = 2
         else:
             self.sprite = 3
+
 
 class Ghost(Monster):
     def __init__(self,x,y, player, grid, monstercoords):
@@ -518,6 +549,8 @@ class MrE(NPC):
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
         elif conv_id == 4:
             self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
+            self.player.learnSong(0)
+            #self.player.learnSong(5)
         elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
         elif conv_id == 6:
