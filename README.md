@@ -8,13 +8,19 @@ _by Anna Buchele, Justin Kunimune, Leon Lam, and Max Wei_
   `$ sudo apt-get install pygame pickle`
   
 ### To Play:  
-  Simply call  
+  Download the zip of our repo, extract it, and go to the folder "DungeonCrawler-master" within the folder you extracted it to.
+  Then, call
   `$ python driver.py`  
   from the main directory. You will be prompted for a 'y' or an 'n' depending on whether you want to load a save or start over. Respond, and the game window should appear.
   
+  Ex: 
+    '$ cd ~/Downloads/DungeonCrawler-master'
+    '$ python driver.py'
+  
 ### Controls:   
   Move with WASD or the arrow keys.
-  Interact and attack with E or Q.
+  Interact with 'E' (talk to NPCs, open doors, loot chests)
+  Attack with 'Q'.
 
 ### Usage Rights:  
 MIT License

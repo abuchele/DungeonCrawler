@@ -25,16 +25,27 @@ class DungeonModelView(object):
         spriteNames = [["Stand","Walk1","Walk2"], ["Back","Front","Left","Right"]]
         self.playerSprites = [[pygame.image.load("sprites/Player"+direc+movem+".png") for movem in spriteNames[0]] for direc in spriteNames[1]]
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
-        self.pauseScreen = pygame.image.load("sprites/Paused.png")
-        self.dialogueBox = pygame.image.load("sprites/Dialogue_GUI.png")
+        self.pauseScreen = pygame.image.load("HUD_sprites/Paused.png")
+        self.dialogueBox = pygame.image.load("HUD_sprites/Dialogue_GUI.png")
+        self.deathScreen = pygame.image.load("HUD_sprites/Dead.png")
+        self.soundSprite = pygame.image.load("sprites/Sound.png")
+        self.HUD = pygame.image.load("HUD_sprites/Hud.png")
         self.playerSprite = self.playerSprites[0][0]
 
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+        shadowNames = [name+"_Shadow" for name in spriteNames]
         monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC"]
+        effectNames = ["Stunned","OnFire"]
+        attackSpriteNames = ["attack"+str(i) for i in range(0,8)]
+        songSpriteNames = ["song"+str(i) for i in range(0,8)]
         self.sprites = loadSprites(spriteNames)
-        self.shadows = loadShadowSprites(spriteNames)
+        self.shadows = loadSprites(shadowNames)
         self.monsterSprites = loadSprites(monsterSpriteNames)
-        self.steps = 0
+        self.effectSprites = loadSprites(effectNames)
+        self.attackSprites = loadSprites(attackSpriteNames)
+        self.sheetSprites = loadSprites(songSpriteNames, directory="HUD_sprites")
+
+        self.t = 0
 
         self.compose_LOS_list()  # do some preliminary calculations for Line of Sight
 
@@ -42,6 +53,11 @@ class DungeonModelView(object):
         for x in [-1,0,1]:
             for y in [-1,0,1]:
                 self.visible[(x,y)] = True  # keeps track fo which blocks are visible
+
+
+    def update(self):
+        for x1,y1,x2,y2 in self.losLst: # decides what blocks are visible
+            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.player.x+x2, self.model.player.y+y2).transparent
         
 
     def display(self, t):
@@ -49,50 +65,91 @@ class DungeonModelView(object):
         Draws all entities, blocks, minimaps, etc. to the screen and displays
         takes input t, a float between 0 and 1 that represents at what point in the tick we are (0=beginning, 1=end)
         """
-        pSpriteInd = self.model.player.sprite
-        pxr, pyr = (self.model.player.x, self.model.player.y)   # the "real" coordinates
-        pxc, pyc = (self.model.player.getCoords(t))             # the calculated coordinates that produce smoother motion
+        if self.model.state == "R":
+            self.t = t
+        pxr, pyr = (self.model.player.x, self.model.player.y)   # the "real" player coordinates
+        pxc, pyc = self.model.player.getCoords(self.t)             # the calculated coordinates that produce smoother motion
 
-        for x1,y1,x2,y2 in self.losLst:
-            self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(pxr+x2, pyr+y2).transparent
+        self.drawBlocks(self.t, pxr, pyr, pxc, pyc)
+        self.drawMonsters(self.t, pxr, pyr, pxc, pyc)
+        self.drawAttacks(self.t, pxr, pyr, pxc, pyc)                
+        self.drawHUD(self.t, pxr, pyr, pxc, pyc)
+        pygame.display.update()
 
+
+    def drawBlocks(self, t, pxr, pyr, pxc, pyc):   # draws all nearby blocks
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
-                monsters = self.model.monstercoords.get((pxr+dx,pyr+dy),0) #this is a list
                 block = self.model.getBlock(pxr+dx, pyr+dy)
                 if self.visible[(dx,dy)]:                                       # if it is visible,
                     self.screen.blit(self.sprites[block.sprite], blockCoords)
-                    if monsters != 0:
-                        self.screen.blit(self.monsterSprites[monsters[0].sprite],blockCoords)# just draw it
                     self.minimap.set_at((pxr+dx, pyr+dy), block.color)          # and mark it on the minimap
                     block.explored = True                                       # and remember it for later
-
 
                 elif block.explored:                                            # if it is not visible but we've been here before
                     self.screen.blit(self.shadows[block.sprite], blockCoords)   # draw it, but darker
                 else:                                                           # if we don't know what it looks like
                     self.screen.blit(self.sprites[0], blockCoords)              # put in a placeholder block
 
-            if dy == 1:
+
+    def drawMonsters(self, t, pxr, pyr, pxc, pyc): # draws all nearby entites (including the player)
+        for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
+            for dx in range(self.screenBounds[0], self.screenBounds[1]):
+                blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
+                monster = self.model.monstercoords.get((pxr+dx,pyr+dy),0) #this is a Monster
+                if self.visible[(dx,dy)]:                                       # if it is visible,
+                    if monster != 0:
+                        mxr, myr = (monster.x, monster.y)
+                        mxc, myc = monster.getCoords(t)
+                        monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
+                        self.screen.blit(self.monsterSprites[monster.sprite],monstCoords)   # just draw it and the monster on it
+                        if monster.effect.get("ignited",0):
+                            self.screen.blit(self.effectSprites[1], monstCoords)
+                        if monster.effect.get("stunned",0):
+                            self.screen.blit(self.effectSprites[0], monstCoords)
+                elif self.model.player.listening: #draws "listen sprites" on all monsters within range
+                    if monster != 0:
+                        mxr, myr = (monster.x, monster.y)
+                        mxc, myc = monster.getCoords(t)
+                        monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
+                        self.screen.blit(self.soundSprite,monstCoords)
+            if dy == 0:
+                pSpriteInd = self.model.player.sprite
                 self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
 
+
+    def drawAttacks(self, t, pxr, pyr, pxc, pyc):
         direction_to_angle = {"U":0,"L":90,"D":180,"R":270}
-                
-        pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.size[0]-self.size[1], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
+        if self.model.player.attackCooldown > 0: # draw player attack sprite!
+            attackSprite = self.attackSprites[self.model.player.song]
+            for atX, atY in self.model.player.earshot:
+                attackCoords = ((atX-pxc)*self.blockSize[0]+self.dispSize[0]/2,
+                                (atY-pyc)*self.blockSize[1]+self.dispSize[1]/2 + int((self.model.player.attackCooldown-t)*20/self.model.player.attackSpeed) - 15)
+                self.screen.blit(attackSprite,attackCoords)
+
+
+    def drawHUD(self, t, pxr, pyr, pxc, pyc):
+        pygame.draw.rect(self.screen, pygame.Color("black"), (self.size[1], self.mimpSz[0], self.size[0]-self.size[1], self.size[1]))    # draw the background of the HUD
         self.screen.blit(pygame.transform.scale(self.minimap, (2*(self.size[0]-self.size[1]),2*(self.size[0]-self.size[1]))), (self.size[1],0),
             area = ((self.model.player.x/self.rempSz[0]*self.mimpSz[0], self.model.player.y/self.rempSz[1]*self.mimpSz[1]), self.mimpSz))    # draw the minimap
 
         self.screen.blit(self.dotSprite, (self.size[1]+int((self.model.player.x+0.5)*self.mimpSz[0]/self.rempSz[0])%self.mimpSz[0]-self.dotSprite.get_width()/2+1,
             int((self.model.player.y+0.5)*self.mimpSz[1]/self.rempSz[1])%self.mimpSz[1]-self.dotSprite.get_height()/2+1))  # draw the dot on the minimap
 
-        if self.model.player.hasAttacked == True: # draw player attack sprite!
-                    self.screen.blit(pygame.transform.rotate(self.sprites[self.model.player.attackSprite], direction_to_angle[self.model.player.direction]),(self.dispSize[0]/2 + self.model.player.directionCoordinates[self.model.player.direction][0]*self.blockSize[0], self.dispSize[1]/2 + self.model.player.directionCoordinates[self.model.player.direction][1]*self.blockSize[1]))
         actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
         self.screen.blit(actionLog, (0, self.size[1]-34))
 
-        hp = 3*100
-        pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-90, self.size[1]-30-hp, 60, hp)) # draw the hp bar
+        hp = 3.24*self.model.player.health
+        pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-74, self.size[1]-17-hp, 54, hp)) # draw the hp bar
+        self.screen.blit(self.HUD, (self.size[1],self.mimpSz[0]))
+
+        if len(self.model.player.availableSong) > 1:
+            self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.nextSong],(75,75)), (self.size[1]+25, self.mimpSz[0]))
+        if len(self.model.player.availableSong) > 0:
+            self.screen.blit(self.sheetSprites[self.model.player.song], (self.size[1], self.mimpSz[0]+75))  # draw the songs
+        if len(self.model.player.availableSong) > 1:
+            self.screen.blit(pygame.transform.scale(self.sheetSprites[self.model.player.lastSong],(75,75)), (self.size[1]+25, self.mimpSz[0]+225))
 
         if self.model.state == "P":
             self.screen.blit(self.pauseScreen, (0,0))
@@ -101,8 +158,8 @@ class DungeonModelView(object):
             paragraph = self.model.currentParagraph()
             for y, line in enumerate(paragraph):
                 self.screen.blit(line, (30,30+30*y))
-
-        pygame.display.update()
+        elif self.model.state == "K":
+            self.screen.blit(self.deathScreen, (0,0))
 
 
     def compose_LOS_list(self): # does preliminary calculations for line of sight
@@ -119,6 +176,10 @@ class DungeonModelView(object):
                     self.losLst.append(drawLOS(t,-r))
 
 
+    def setModel(self, model):
+        self.model = model
+
+
 def loadMinimap(grid):  # creates a minimap for the given block list-list
     output = pygame.Surface((len(grid[0]), len(grid)))
     for x in range(0, len(grid[0])):    # draw all the blocks
@@ -128,12 +189,8 @@ def loadMinimap(grid):  # creates a minimap for the given block list-list
     return output
 
 
-def loadSprites(filenames):
-    return [pygame.image.load("sprites/{}.png".format(name)) for name in filenames]
-
-
-def loadShadowSprites(filenames):
-    return [pygame.image.load("sprites/{}_Shadow.png".format(name)) for name in filenames]
+def loadSprites(filenames, directory="sprites"):
+    return [pygame.image.load("{}/{}.png".format(directory,name)) for name in filenames]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)

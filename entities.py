@@ -11,8 +11,11 @@ It's a bit more of a pain to initialize (more variables required) but we can cha
     value for 'player' and 'grid'.
 """
 
-from random import randint
+from random import randint, choice
 import pygame
+import math
+
+import terrainUtils
 
 
 """Changes:"""
@@ -32,19 +35,19 @@ import pygame
 """General Classes"""
 
 class Entity(object):
-    def __init__(self, grid, x=0, y=0, direction="U", speed=1, phasing = False, name = None, effect = dict(), hasAttacked = False):
-        self.grid = grid       
+    def __init__(self, model, x=0, y=0, monstercoords = 0, direction="U", speed=1, name = None):
+        self.model = model       
         self.direction = direction #direction can be U for up, D for down, L for left, R for right
         self.speed = speed
-        self.effect = effect
-        self.phasing = phasing
+        self.effect = dict()
         self.directionCoordinates = {"U":(0,-1),"D":(0,1),"L":(-1,0),"R":(1,0)} # a table of which directions means which coordinates
         self.moving = False
         self.x = x
         self.y = y
         self.prex = x
         self.prey = y
-        self.hasAttacked = hasAttacked
+        self.attackCooldown = 0
+        self.monstercoords = monstercoords
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
@@ -52,30 +55,28 @@ class Entity(object):
     def damage(self):
         return randint(1,self.damageRange)+self.flatDamage #roll a damageRange-sided dice and add flatDamage to the roll
 
-    def attack(this,that):
+    def attack(self,that):
         try:
-            if this.attackRoll() >= that.armor:
-                damage = this.damage()
-                that.health -= damage
-                if this.name!="You":
-                    print "{} hits {} for {} damage!".format(str(this),str(that),damage)
-                
-                
-                """Pseudocode"""
-                # DISPLAY pygame.rotate(this.attackSprite, direction_to_angle[this.direction]) AT (this.x+this.directionCoordinates[0],this.y+this.directionCoordinates[1])
-                return "{} hit {} for {} damage!".format(str(this),str(that),damage)
-
-            if this.name!="You":
-                print "{} misses {}!".format(str(this),str(that))
-            return "{} miss {}!".format(str(this),str(that))
-            this.hasAttacked = True
+            if self.attackRoll() >= that.armor:
+                damage = self.damage()
+                that.damaged(damage)
+                self.model.interp_action("{} hits {} for {} damage!".format(str(self),str(that),damage))
+            # if this.name!="You":
+            #     print "{} misses {}!".format(str(this),str(that))
+            else:
+                self.model.interp_action("{} misses {}!".format(str(self),str(that)))
+            # print "Attacked entity!"
         except AttributeError:
-            this.hasAttacked = True
+            pass
+            # print "Attacked tile!"
+
+    def damaged(self, damage):
+        self.health -= damage
 
     def effected(self,effect_specific):
     	self.effect[effect_specific] = True
     	p = ''
-    	return p.join(["You've been ",effect_specific,'!'])
+    	return p.join([self.name," has been ",effect_specific,'!'])
 
     def active_effects(self):
     	effect_list=list()
@@ -88,38 +89,48 @@ class Entity(object):
         return (self.x+self.directionCoordinates[self.direction][0], self.y+self.directionCoordinates[self.direction][1])
 
     def getCoords(self, t):   # calculates coordinates based on current x,y, previous x,y, and time t
-        return (self.x*t + self.prex*(1-t), self.y*t + self.prey*(1-t))
+        if self.x != self.prex or self.y != self.prey:
+            return (self.x*t + self.prex*(1-t), self.y*t + self.prey*(1-t))
+        else:
+            return (self.x, self.y)
 
     def update(self):
         self.prex, self.prey = (self.x, self.y)
-        if self.moving and not self.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides:
+        if self.moving and not self.model.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and not self.monstercoords.has_key(self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
+        if self.attackCooldown>0:
+            self.attackCooldown -= 1
 
     def interact(self,player):
         return "You poke the thing."
 
 """Player Related"""
 
-# I think the inventory should be a dictionary: inventory[Item] = quantity. 
 class Player(Entity):
-    def __init__(self,grid,x,y, name = "Ray"):
-        Entity.__init__(self,grid,x,y) #grid is a global variable which needs to be defined before initializing any entities.
-        self.prex = x
-        self.prey = y
+    def __init__(self,model,monstercoords,x,y, name = "Ray"):
+        Entity.__init__(self,model,x,y, monstercoords) #grid is a global variable which needs to be defined before initializing any entities.
         self.health = 100
         self.maxhealth = 100
-        self.armor = 10
-        self.accuracy = 2
+        self.armor= 10
+        self.accuracy = 20
         self.flatDamage = 2
-        self.damageRange = 2
+        self.damageRange = 5
         self.damageMod = 2
         self.inventory = dict()
         self.name = name
         self.sprite = (0,0)
         self.steps = 0
-        self.attackSprite = 3 #sprites is a list of .png images, so this calls sprites[self.attackSprite]
-        self.hasAttacked = False
+        self.attackSpeed = 2
+        self.attackCooldown = 0
+        self.healCooldown = 0
+        self.listening = False
+        self.earshot = [] # the area currently being attacked
+        self.song = 0   # the selected attack song
+        self.lastSong = 0
+        self.nextSong = 0
+        self.availableSong = []  # which songs you can play
+        self.hasBullet = True
         
     def __str__(self):
         return self.name
@@ -133,6 +144,43 @@ class Player(Entity):
     	self.inventory[Item] = quantity
     	if quantity == 0:
     		del self.inventory[Item]
+
+    def incrementSong(self):    # switches to the next song
+        if len(self.availableSong) > 0:
+            self.song, self.lastSong = (self.nextSong, self.song)
+            newSongIdx = self.availableSong.index(self.song)+1
+            self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
+
+    def decrementSong(self):    # switches to the last song
+        if len(self.availableSong) > 0:
+            self.song, self.nextSong = (self.lastSong, self.song)
+            newSongIdx = self.availableSong.index(self.song)-1
+            self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
+
+    def learnSong(self, songNum):   # adds a new song to the player's arsenal
+        self.availableSong.append(songNum)
+        newSongIdx = self.availableSong.index(self.song)+1
+        self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
+        newSongIdx = self.availableSong.index(self.song)-1
+        self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
+
+    def playSong(self):
+        if self.song == 0:      # basic attack
+            self.playSong0()
+        elif self.song == 1:    # spread attack
+            self.playSong1()
+        elif self.song == 2:    # range attack
+            self.playSong2()
+        elif self.song == 3:    # stun attack
+            self.playSong3()
+        elif self.song == 4:    # grenade attack
+            self.playSong4()
+        elif self.song == 5:    # flamethrower attack
+            self.playSong5()
+        elif self.song == 6:    # octothorpe attack
+            self.playSong6()
+        else:
+            raise TypeError("{} is not a defined song!".format(self.song))
 
     def getCurrentSprite(self):   # figures out which sprite to use for the entity
         if not self.moving:   # if the player has not moved
@@ -151,76 +199,190 @@ class Player(Entity):
         elif self.direction == "R":
             return (3,self.steps)
 
+    def damaged(self,damage):
+        self.healCooldown = 10
+        Entity.damaged(self,damage)
+
     def update(self):   # just kind of moves you around
         self.sprite = self.getCurrentSprite()
+        if self.healCooldown > 0:
+            self.healCooldown -= 1
+        elif self.health < 100:
+            self.health += 1
         Entity.update(self)
+
+    def playSong0(self):    # basic attack
+        self.earshot = [self.facingCoordinates()]   # you attack the block in front of you
+        self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
+        self.flatDamage, self.damageRange = (3,5)   #ave dmg = 6
+        if self.model.monstercoords.has_key(self.earshot[0]):
+            self.attack(self.model.monstercoords[self.earshot[0]])
+
+    def playSong1(self):    # blast attack
+        self.earshot = []
+        for dx in [-1,0,1]:
+            for dy in [-1,0,1]:
+                self.earshot.append((self.x+dx, self.y+dy)) # you attack all adjacent blocks
+        self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
+        self.flatDamage, self.damageRange = (1,3)   #ave dmg = 3
+        for place_to_attack in self.earshot:
+            if self.model.monstercoords.has_key(place_to_attack):
+                self.attack(self.model.monstercoords[place_to_attack])
+        self.attack(self)
+
+    def playSong2(self):    # ranged attack
+        self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
+        self.flatDamage, self.damageRange = (1,3)   #ave dmg = 3
+        self.earshot = []
+        coords = (self.x, self.y)
+        direc = self.directionCoordinates[self.direction]
+        for i in range(6):
+            coords = (coords[0]+direc[0], coords[1]+direc[1])
+            self.earshot.append(coords)
+            if self.model.monstercoords.has_key(coords):
+                self.attack(self.model.monstercoords[coords])
+                break
+            elif self.model.getBlock(*coords).collides:
+                break
+
+    def playSong3(self):    # stun attack
+        self.attackCooldown = 4
+        self.attackSpeed = self.attackCooldown
+        self.earshot = []
+        for dx in range(-2,3):
+            for dy in range(-2,3):
+                if (dx+dy)%2 == 1:
+                    self.earshot.append((self.x+dx, self.y+dy))
+        for place_to_stun in self.earshot:
+            if self.monstercoords.has_key(place_to_stun):
+                self.model.interp_action(self.monstercoords[place_to_stun].effected("stunned"))
+
+    def playSong4(self):    # grenade attack
+        self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
+        self.flatDamage, self.damageRange = (0,3)   #ave damage = 2
+        epicenter = (self.x,self.y)
+        direc = self.directionCoordinates[self.direction]
+        for i in range(5):
+            epicenter = (epicenter[0]+direc[0], epicenter[1]+direc[1])
+            if self.model.monstercoords.has_key(epicenter) or self.model.getBlock(*epicenter).collides:
+                break
+        epicenter = (epicenter[0]-direc[0], epicenter[1]-direc[1])
+        self.earshot = []
+        for dx, dy in [(1,0), (0,1), (-1,0), (0,-1), (0,0)]:
+            if not self.model.getBlock(epicenter[0]+dx, epicenter[1]+dy).collides:
+                for ddx, ddy in [(1,0), (0,1), (-1,0), (0,-1)]:
+                    if not (epicenter[0]+dx+ddx, epicenter[1]+dy+ddy) in self.earshot:
+                        self.earshot.append((epicenter[0]+dx+ddx, epicenter[1]+dy+ddy))
+        for place_to_attack in self.earshot:
+            if self.monstercoords.has_key(place_to_attack):
+                self.attack(self.monstercoords[place_to_attack])
+            elif place_to_attack == (self.x,self.y):
+                self.attack(self)
+
+    def playSong5(self):    # flamethrower attack
+        self.attackCooldown = 2
+        self.attackSpeed = self.attackCooldown
+        self.earshot = []
+        coords = (self.x, self.y)
+        direc = self.directionCoordinates[self.direction]
+        for i in range(0,3):
+            coords = (coords[0]+direc[0], coords[1]+direc[1])
+            if self.model.getBlock(*coords).collides:
+                break
+            for sign in [-1,1]:
+                for j in range(0, sign*(i+1), sign):
+                    newCoords = (coords[0]+j*direc[1], coords[1]+j*direc[0])
+                    if self.model.getBlock(*newCoords).collides:
+                        break
+                    self.earshot.append(newCoords)
+        for place_to_burn in self.earshot:
+            if self.monstercoords.has_key(place_to_burn):
+                self.model.interp_action(self.monstercoords[place_to_burn].effected("ignited"))
+
+    def playSong6(self):    # octothorpe attack
+        self.attackCooldown = 6
+        self.attackSpeed = self.attackCooldown
+        self.flatDamage, self.damageRange = (3,8)   #ave damage = 7.5
+        self.earshot = []
+        for dx in [-2,-1,0,1,2]:
+            for dy in [-1,1]:
+                self.earshot.append((self.x+dx, self.y+dy))
+        for dy in [-2, 0, 2]:
+            for dx in [-1,1]:
+                self.earshot.append((self.x+dx, self.y+dy))
+        for place_to_attack in self.earshot:
+            if self.monstercoords.has_key(place_to_attack):
+                self.attack(self.monstercoords[place_to_attack])
+
+    def shoot(self):    # gun
+        self.flatDamage, self.damageRange = (49,1)  # avg damage = 50
+        coords = (self.x, self.y)
+        direc = self.directionCoordinates[self.direction]
+        self.hasBullet = False
+        for i in range(6):
+            coords = (coords[0]+direc[0], coords[1]+direc[1])
+            if self.model.monstercoords.has_key(coords):
+                self.attack(self.model.monstercoords[coords])
+                self.model.interp_action("You put your singular bullet into the {}.".format(self.model.monstercoords[coords].name))
+                return
+            elif self.model.getBlock(*coords).collides:
+                if type(self.model.getBlock(*coords)).__name__ == "Glass":
+                    self.model.grid[coords[1]][coords[0]] = terrainUtils.Floor()
+                self.model.interp_action("You fire your singular bullet at the wall.")
+                return
+        self.model.interp_action("You fire your only bullet but fail to hit anything.")
+
         
 
 """Monster Subclass"""
 
 class Monster(Entity):
-    def __init__(self, x, y, player, grid): #speed =256,  flatDamage=0, armor=0):
-        Entity.__init__(self,grid,x,y)
+    def __init__(self, x, y, player, model, monstercoords): #speed =256,  flatDamage=0, armor=0):
+        Entity.__init__(self,model,x,y, monstercoords)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
         self.name = None
         self.seenrange = 8
-        self.aggrorange = 5
+        self.aggrorange = 2
         self.player = player
         self.distance = 0   # it moves when this reaches 256
 
+    def __str__(self):
+        return self.name
+
     def checkstatus(self):
-        self.seen = (abs(self.x - self.player.x)<=self.seenrange or abs(self.y - self.player.y)<=self.seenrange)
+        self.seen = (abs(self.x - self.player.x)<=self.seenrange and abs(self.y - self.player.y)<=self.seenrange)
         # print "seen:", self.seen
             # self.seen = True
-        self.aggro = (abs(self.x - self.player.x)<=self.aggrorange or abs(self.y - self.player.y)<=self.aggrorange)
+        self.aggro = (abs(self.x - self.player.x)<=self.aggrorange and abs(self.y - self.player.y)<=self.aggrorange)
         # print "aggro:", self.aggro
             # self.aggro = True
 
-    def passiveMove(self):
-        direction = [(1,0),(0,1),(-1,0),(0,-1)]
-        if self.phasing == False:
-            if self.grid[self.y][self.x+1].collides:
-                direction.remove((1,0))
-            if self.grid[self.y+1][self.x].collides:
-                direction.remove((0,1))
-            if self.grid[self.y][self.x-1].collides:
-                direction.remove((-1,0))
-            if self.grid[self.y-1][self.x].collides:
-                direction.remove((0,-1))
-        move = direction[randint(0,len(direction)-1)]
-        self.x+=move[0]
-        self.y+=move[1]
-        # print (self.x,self.y), "Passively Moving"
+    def passiveMove(self): # decides where to move and sets its variables accordingly
+        if randint(1,3) == 1 or self.effect.get("ignited", False):
+            direction = ["R","D","L","U"]
+            self.direction = choice(direction)
+            self.moving = True
+        # print (self.x,self.y), (self.player.x,self.player.y), "Passively Moving"
 
-    def aggressiveMove(self): #can't move right or down at the moment
-        print "Self:", (self.x,self.y)
-        print "Player:", (self.player.x,self.player.y) 
-        if self.phasing == False: #There's probably a more efficient way to do this, but it'll work for now.
-            if (self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x-1].collides:
-                self.x-=1
-                # print "i'm to the player's right!"
-            elif (self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y)) and not self.grid[self.y][self.x+1].collides:
-                self.x+=1
-                # print "i'm to the player's left!"
-            else:
-                if (self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x)) and not self.grid[self.y-1][self.x].collides:
-                    self.y-=1
-                if (self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x)) and not self.grid[self.y+1][self.x].collides:
-                    self.y+=1
-        else:
-            if self.x>self.player.x+1 or (self.x>self.player.x and self.y!=self.player.y):
-                self.x-=1
-                # print "i'm to the player's right!"
-            elif self.x<self.player.x-1 or (self.x<self.player.x and self.y!=self.player.y):
-                self.x+=1
-                # print "i'm to the player's left!"
-            else:
-                if self.y>self.player.y+1 or (self.y>self.player.y and self.x!=self.player.x):
-                    self.y-=1
-                if self.y<self.player.y-1 or (self.y<self.player.y and self.x!=self.player.x):
-                    self.y+=1
-        # print (self.x,self.y), "Aggressively Moving"
+    def aggressiveMove(self): # decides where to move and sets its variables accordingly
+        self.moving = True    # the monster will greedy-first search the player
+        delX, delY = (self.x-self.player.x, self.y-self.player.y)
+        matchX = (self.x-int(math.copysign(1,delX)), self.y) # where it will go if it wants to match X
+        matchY = (self.x, int(self.y-math.copysign(1,delY))) # where it will go if it wants to match Y
+        if self.monstercoords.has_key(matchX) or self.model.grid[matchX[1]][matchX[0]].collides:      # matching X is no good
+            self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]                              # so go vertical
+        elif self.monstercoords.has_key(matchY) or self.model.grid[matchY[1]][matchY[0]].collides:    # matching Y is no good
+            self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]                              # so go horizontal
+        elif abs(delX) < abs(delY):                                                             # both are open, but the vertical distance is greater
+            self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]                              # so go vertical
+        else:                                                                                   # vice versa
+            self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]                              # so go horizontal
+
 
     def decide(self): #monster checks its own status, then takes either a move or an attack action. We assume monster is melee.
         self.checkstatus()
@@ -233,10 +395,19 @@ class Monster(Entity):
             self.passiveMove()
 
     def update(self):
-        self.distance += self.speed
-        if self.distance >= 256:
-            self.distance -= 256
-            self.decide()
+        if self.effect.get("stunned",False):    # if you are stunned
+            if randint(1,35) == 1:             # you cannot move
+                self.effect["stunned"] = False
+        else:
+            self.distance += self.speed
+            if self.distance >= 256:
+                self.distance -= 256
+                self.decide()
+        if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
+            self.health -= 2                                        # you might take damage
+            if randint(1,35) == 1:
+                self.effect["ignited"] = False
+        Entity.update(self)
 
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
@@ -244,10 +415,10 @@ class Monster(Entity):
 
 
 class Zombie(Monster):
-    def __init__(self,x,y, player, grid):
-        Monster.__init__(self, x,y, player, grid)
+    def __init__(self,x,y, player, grid, monstercoords):
+        Monster.__init__(self, x,y, player, grid, monstercoords)
         self.name = "Zombie"
-        self.health = 30
+        self.health = 10
         self.accuracy = 3
         self.damageRange = 3
         self.flatDamage = 2
@@ -257,35 +428,81 @@ class Zombie(Monster):
             self.sprite = 2
         else:
             self.sprite = 3
-    def __str__(self):
-        return "Zombie"
+
 
 class Ghost(Monster):
-    def __init__(self,x,y, player, grid):
-        Monster.__init__(self, x,y, player, grid)
+    def __init__(self,x,y, player, grid, monstercoords):
+        Monster.__init__(self, x,y, player, grid, monstercoords)
         self.name = "Ghost"
-        self.health = 20
+        self.health = 6
         self.accuracy = 4
         self.damageRange = 2
         self.flatDamage = 1
         self.armor = 10
         self.speed = 150
-        self.phasing = True
         self.sprite = 1
-    def __str__(self):
-        return "Ghost"
 
+    def aggressiveMove(self):
+        self.moving = True    # the monster will greedy-first search the player
+        delX, delY = (self.x-self.player.x, self.y-self.player.y)
+        matchX = (self.x-int(math.copysign(1,delX)), self.y) # where it will go if it wants to match X
+        matchY = (self.x, int(self.y-math.copysign(1,delY))) # where it will go if it wants to match Y
+        if self.monstercoords.has_key(matchX):                      # matching X is no good
+            self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]  # so go vertical
+        elif self.monstercoords.has_key(matchY):                    # matching Y is no good
+            self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]  # so go horizontal
+        elif abs(delX) < abs(delY):                                 # both are open, but the vertical distance is greater
+            self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]  # so go vertical
+        else:                                                       # vice versa
+            self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]  # so go horizontal
+
+    def update(self):
+        self.distance += self.speed
+        if self.distance >= 256:
+            self.distance -= 256
+            self.decide()
+        self.prex, self.prey = (self.x, self.y)
+        if self.moving and not self.monstercoords.has_key(self.facingCoordinates()):
+            self.x, self.y = self.facingCoordinates()
+        self.moving = False
+
+
+class Demon(Monster):
+    def __init__(self,x,y, player, model, monstercoords):
+        Monster.__init__(self, x,y, player, model, monstercoords)
+        self.name = "Demon"
+        self.health = 15
+        self.accuracy = 1
+        self.damageRange = 6
+        self.flatDamage = 2
+        self.armor = 5
+        self.speed = 64
+        self.sprite = 0
+
+
+class Skeleton(Monster):
+    def __init__(self,x,y, player, model, monstercoords):
+        Monster.__init__(self, x,y, player, model, monstercoords)
+        self.name = "Skeleton"
+        self.health = 20
+        self.accuracy = 5
+        self.damageRange = 1
+        self.flatDamage = 4
+        self.armor = 10
+        self.speed = 100
+        self.sprite = 0
 
 
 """NPC Subclass"""
 
 class NPC(Monster): # people who do not take damage, and have dialogue
-    def __init__(self,grid,x,y,player,checklist,name,sprite,convID=0):
-        Monster.__init__(self,x,y,player,grid)
+    def __init__(self,model,x,y,player,checklist,name,sprite,convID=0):
+        Monster.__init__(self,x,y,player,model, 0)
         self.name = name
         self.sprite = sprite
         self.convID = convID
         self.checklist = checklist
+        self.health = 9001
 
     def interact(self,player):
         return "$D{}".format(self.convID)
@@ -293,20 +510,53 @@ class NPC(Monster): # people who do not take damage, and have dialogue
     def decide(self):
         pass
 
+    def post_dialogue_action(self, conv_id):
+        pass
+
 # Perhaps we should organize the code such that everything to do with the player is in one section
 #The group of NPCs is in another, and then the monsters and such are in a third.  
 
 class MrE(NPC):
-    def __init__(self, grid, x, y, player, checklist):
-        NPC.__init__(self, grid, x, y, player, checklist, "Mr. E", 4)
+    def __init__(self, model, x, y, player, checklist):
+        NPC.__init__(self, model, x, y, player, checklist, "Mr. E", 4)
 
     def interact(self,player):
-        if not self.checklist.player_Named:
+        if not self.checklist.state["player_Named"]:
             return "$D001"
-        elif not self.checklist.tutorial_Dialogue002_Finished:
+        elif not self.checklist.state["tutorial_Dialogue002_Finished"]:
             return "$D002"
-        else:
+        elif 1==2: #Need to put in a condition if the player tries to open a door.  
             return "$D003"
+        elif not self.checklist.state["tutorial_Dialogue004_Finished"]:
+            return "$D004"
+        elif not self.checklist.state["tutorial_Dialogue005_Finished"]:
+            return "$D005"
+        elif not self.checklist.state["tutorial_Dialogue006_Finished"]:
+            return "$D006"
+        elif (self.checklist.state["killcount"] >= 3) and not self.checklist.state["tutorial_quest_finished"]:
+            return "$D008"
+        elif not self.checklist.state["tutorial_quest_finished"]:
+            return "$D007"
+        elif not self.checklist.state["kerberoge_start"]:
+            return "$D009"
+    def post_dialogue_action(self, conv_id):
+        if conv_id == 1:
+            name = raw_input("What is your name?")
+            self.player.name = name
+            self.checklist.eventcomplete("player_Named")
+            return
+        if conv_id == 2:
+            self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
+        elif conv_id == 4:
+            self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
+            self.player.learnSong(0)
+            #self.player.learnSong(5)
+        elif conv_id == 5:
+            self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
+        elif conv_id == 6:
+            self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
+        elif conv_id == 8:
+            self.checklist.eventcomplete("tutorial_quest_finished")
 
 
 """Entity Related Subclasses that aren't entities"""
@@ -412,16 +662,16 @@ class Potion(Item):
 		self = Item(self,self.name,self.description,self.use_description,self.effect)
 
 if __name__ == "__main__":
-    player = Player("grid", 0,0)
+    player = Player("model", 0,0)
     d = []
     for i in range (5):
-        zombie = Zombie(randint(1,20),randint(1,20), player, "grid")
+        zombie = Zombie(randint(1,20),randint(1,20), player, "model")
         d.append(zombie)
     for monster in d:
         monster.checkstatus()
         print (monster.x,monster.y),monster.seen,monster.aggro
 
-    c = Ghost(2,2, player, "grid")
+    c = Ghost(2,2, player, "model")
     # print b.attack(a)
     print player.attack(c)
     print c.attack(player)
