@@ -567,7 +567,7 @@ class MrE(NPC):
             name = raw_input("What is your name?")
             self.player.name = name
             self.checklist.eventcomplete("player_Named")
-            time.sleep(1)
+            pygame.event.clear
             self.interact(self.player)
         elif conv_id == 2:
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
