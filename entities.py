@@ -29,7 +29,7 @@ import terrainUtils
 # also added max health, so that when the player uses potions they can't go past their max health. 
 
 # ex: Anna.effected('poisoned') -> "You've been poisoned!" -> Anna.effect['poisoned'] = True -> Anna.active_effects = ['poisoned'] -> cure_potion = Potion('cure','poisoned') 
-# 	  cure_potion.pickup(Anna) -> (fun flair text) -> Anna.inventory = {'Weird Blue Potion' , 1} -> cure_potion.use(Anna) -> (fun cured flair text) -> Anna.active_effects = []
+#       cure_potion.pickup(Anna) -> (fun flair text) -> Anna.inventory = {'Weird Blue Potion' , 1} -> cure_potion.use(Anna) -> (fun cured flair text) -> Anna.active_effects = []
 
 
 """General Classes"""
@@ -74,16 +74,16 @@ class Entity(object):
         self.health -= damage
 
     def effected(self,effect_specific):
-    	self.effect[effect_specific] = True
-    	p = ''
-    	return p.join([self.name," has been ",effect_specific,'!'])
+        self.effect[effect_specific] = True
+        p = ''
+        return p.join([self.name," has been ",effect_specific,'!'])
 
     def active_effects(self):
-    	effect_list=list()
-    	for x in self.effect:
-    		if self.effect[x] is True:
-    			effect_list.append(x)
-    	return effect_list
+        effect_list=list()
+        for x in self.effect:
+            if self.effect[x] is True:
+                effect_list.append(x)
+        return effect_list
 
     def facingCoordinates(self):    # the coordinates of the block you are facing
         return (self.x+self.directionCoordinates[self.direction][0], self.y+self.directionCoordinates[self.direction][1])
@@ -135,34 +135,45 @@ class Player(Entity):
     def __str__(self):
         return self.name
 
-    def editinventory(self,Item,add=True): #add is whether the item is being added or removed. if True, the item is being added, if False, the item is being removed.
-    	quantity = self.inventory.get(Item,0)
-    	if add == True:
-    		quantity += 1
-    	else:
-    		quantity += -1
-    	self.inventory[Item] = quantity
-    	if quantity == 0:
-    		del self.inventory[Item]
+    def editinventory(self,item,add=True): #add is whether the item is being added or removed. if True, the item is being added, if False, the item is being removed.
+        if item.autouse:
+            item.use(self)
+            return
+        quantity = self.inventory.get(item,0)
+        if add == True:
+            quantity += 1
+        else:
+            quantity += -1
+        self.inventory[item] = quantity
+        if quantity == 0:
+            del self.inventory[item]
 
     def incrementSong(self):    # switches to the next song
-        if len(self.availableSong) > 0:
+        if len(self.availableSong) > 1:
             self.song, self.lastSong = (self.nextSong, self.song)
             newSongIdx = self.availableSong.index(self.song)+1
             self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
 
     def decrementSong(self):    # switches to the last song
-        if len(self.availableSong) > 0:
+        if len(self.availableSong) > 1:
             self.song, self.nextSong = (self.lastSong, self.song)
             newSongIdx = self.availableSong.index(self.song)-1
             self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
 
     def learnSong(self, songNum):   # adds a new song to the player's arsenal
-        self.availableSong.append(songNum)
-        newSongIdx = self.availableSong.index(self.song)+1
-        self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
-        newSongIdx = self.availableSong.index(self.song)-1
-        self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
+        if songNum in self.availableSong:
+            return "You already know the {} song.".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+        elif len(self.availableSong) == 0:
+            self.availableSong.append(songNum)
+            self.song = songNum
+            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+        else:
+            self.availableSong.append(songNum)
+            newSongIdx = self.availableSong.index(self.song)+1
+            self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
+            newSongIdx = self.availableSong.index(self.song)-1
+            self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
+            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
 
     def playSong(self):
         if self.song == 0:      # basic attack
@@ -322,15 +333,15 @@ class Player(Entity):
         self.flatDamage, self.damageRange = (49,1)  # avg damage = 50
         coords = (self.x, self.y)
         direc = self.directionCoordinates[self.direction]
-        self.hasBullet = False
+        self.hasBullet = False  # you can only do it once
         for i in range(6):
             coords = (coords[0]+direc[0], coords[1]+direc[1])
             if self.model.monstercoords.has_key(coords):
-                self.attack(self.model.monstercoords[coords])
+                self.attack(self.model.monstercoords[coords])   # it will pretty much instakill anything
                 self.model.interp_action("You put your singular bullet into the {}.".format(self.model.monstercoords[coords].name))
                 return
             elif self.model.getBlock(*coords).collides:
-                if type(self.model.getBlock(*coords)).__name__ == "Glass":
+                if type(self.model.getBlock(*coords)).__name__ == "Glass":  # bullets break glass
                     self.model.grid[coords[1]][coords[0]] = terrainUtils.Floor()
                 self.model.interp_action("You fire your singular bullet at the wall.")
                 return
@@ -363,7 +374,7 @@ class Monster(Entity):
             # self.aggro = True
 
     def passiveMove(self): # decides where to move and sets its variables accordingly
-        if randint(1,3) == 1 or self.effect.get("ignited", False):
+        if randint(1,2) == 1 or self.effect.get("ignited", False):
             direction = ["R","D","L","U"]
             self.direction = choice(direction)
             self.moving = True
@@ -374,7 +385,7 @@ class Monster(Entity):
         delX, delY = (self.x-self.player.x, self.y-self.player.y)
         matchX = (self.x-int(math.copysign(1,delX)), self.y) # where it will go if it wants to match X
         matchY = (self.x, int(self.y-math.copysign(1,delY))) # where it will go if it wants to match Y
-        if self.monstercoords.has_key(matchX) or self.model.grid[matchX[1]][matchX[0]].collides:      # matching X is no good
+        if self.monstercoords.has_key(matchX) or self.model.grid[matchX[1]][matchX[0]].collides:      # matching X is no good (either a monster exists in that coordinate or it collides)
             self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]                              # so go vertical
         elif self.monstercoords.has_key(matchY) or self.model.grid[matchY[1]][matchY[0]].collides:    # matching Y is no good
             self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]                              # so go horizontal
@@ -457,14 +468,24 @@ class Ghost(Monster):
             self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]  # so go horizontal
 
     def update(self):
-        self.distance += self.speed
-        if self.distance >= 256:
-            self.distance -= 256
-            self.decide()
+        if self.effect.get("stunned",False):    # if you are stunned
+            if randint(1,35) == 1:             # you cannot move
+                self.effect["stunned"] = False
+        else:
+            self.distance += self.speed
+            if self.distance >= 256:
+                self.distance -= 256
+                self.decide()
+        if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
+            self.health -= 2                                        # you might take damage
+            if randint(1,35) == 1:
+                self.effect["ignited"] = False
         self.prex, self.prey = (self.x, self.y)
         if self.moving and not self.monstercoords.has_key(self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
+        if self.attackCooldown>0:
+            self.attackCooldown -= 1
 
 
 class Demon(Monster):
@@ -563,103 +584,113 @@ class MrE(NPC):
 
 # allows easy creation/organization of different attacks and their stats (useful if a creature has more than one attack)
 class Attack(Entity):
-	def __init__(self,preattack,attack,postattack,damage,range,accuracy):
-		pass
+    def __init__(self,preattack,attack,postattack,damage,range,accuracy):
+        pass
 
 class Effect(object):
-	def __init__(self,effect_type,effect_description,effect_value=10,effect_specific=None):
-		self.effect_type = effect_type
-		self.effect_value = effect_value
-		self.effect_description = effect_description
-		self.no_effect_description = "It doesn't seem to do anything."
-		self.effect_specific = effect_specific
-	def effect_on(self,Entity):
-		if self.effect_type == 'heal':
-			if Entity.health < Entity.maxhealth:
-				if Entity.health + self.effect_value < Entity.maxhealth:
-					Entity.health += self.effect_value
-				else:
-					Entity.health = Entity.maxhealth
-			else:
-				return self.no_effect_description
-		elif self.effect_type == 'cure':
-			if self.effect_specific == None:
-				Entity.effect = dict()
-				Entity.health = Entity.maxhealth
-			elif Entity.effect[self.effect_specific] == True:
-				Entity.effect[self.effect_specific] = False
-				Entity.health += self.effect_value-10
-			else:
-				return self.no_effect_description
-		return self.effect_description
-		#add in other effects as we come up with them
+    def __init__(self,effect_type,effect_description,effect_value=10,effect_specific=None):
+        self.effect_type = effect_type
+        self.effect_value = effect_value
+        self.effect_description = effect_description
+        self.no_effect_description = "It doesn't seem to do anything."
+        self.effect_specific = effect_specific
+    def effect_on(self,Entity):
+        if self.effect_type == 'heal':
+            if Entity.health < Entity.maxhealth:
+                if Entity.health + self.effect_value < Entity.maxhealth:
+                    Entity.health += self.effect_value
+                else:
+                    Entity.health = Entity.maxhealth
+            else:
+                return self.no_effect_description
+        elif self.effect_type == 'cure':
+            if self.effect_specific == None:
+                Entity.effect = dict()
+                Entity.health = Entity.maxhealth
+            elif Entity.effect[self.effect_specific] == True:
+                Entity.effect[self.effect_specific] = False
+                Entity.health += self.effect_value-10
+            else:
+                return self.no_effect_description
+        return self.effect_description
+        #add in other effects as we come up with them
 
 class Item(object):
-	def __init__(self,name,description,use_description='What are you going to do with that?',effect=None,target=None,image=None):
-		self.name = name
-		self.description = description
-		self.use_description = use_description
-		self.effect = effect
-		self.image = image
-		self.target = target
-	def __str__(self):
-		return self.name
-	def read_description(self):
-		return self.description
-	def pickup(self,Entity):
-		s = ' '
-		Entity.editinventory(self.name)
-		return s.join([Entity.name,'picks up',self.description])
-		# need to remove item from map
-	def use(self,Entity):
-		if Entity.inventory.get(self.name,0) > 0:
-			if self.effect is not None:
-				Entity.editinventory(self.name,False)
-				return self.use_description + self.effect.effect_on(Entity)
-			return self.use_description
-		else:
-			return "You don't have that."
+    def __init__(self,name,description,use_description='What are you going to do with that?',effect=None,target=None,image=None,autouse=False):
+        self.name = name
+        self.description = description
+        self.use_description = use_description
+        self.effect = effect
+        self.image = image
+        self.target = target
+        self.autouse = autouse
+    def __str__(self):
+        return self.name
+    def read_description(self):
+        return self.description
+    def pickup(self,Entity):
+        s = ' '
+        Entity.editinventory(self.name)
+        return s.join([Entity.name,'picks up',self.description])
+        # need to remove item from map
+    def use(self,Entity):
+        if Entity.inventory.get(self.name,0) > 0:
+            if self.effect is not None:
+                Entity.editinventory(self.name,False)
+                return self.use_description + self.effect.effect_on(Entity)
+            return self.use_description
+        else:
+            return "You don't have that."
 
 class Potion(Item):
-	def __init__(self,effect_type,effect_class=1,effect_specific = None,image=None):
-		self.effect_type = effect_type 
-		self.effect_class = effect_class	# effect class is the 'strength' of the potion. 1 is normal, 2 is really good.
-		self.effect_specific = effect_specific
-		s = ' '
-		p = ''
-		if effect_class == 1:
-			color_description = 'murky'
-			name_description = 'Weird'
-			end_description = 'It looks pretty gross.'
-			use_description = 'It tastes about how you expected. '
-			other_description = "It's nice to not be"
-		else:
-			color_description = 'clear'
-			name_description = 'Clear'
-			end_description = 'It actually looks drinkable.'
-			use_description = 'It tastes surprisingly nice. '
-			other_description = 'You actually feel better than you did before you were'
-		if effect_type == 'heal':
-			color = 'green'
-			self.effect_description = 'You feel rejuvinated! Whew!'
-			other_description = ''
-		elif effect_type == 'cure':
-			if effect_specific == 'poisoned':
-				color = 'blue'
-				self.effect_description = s.join(['You feel the poison leaving your body. What a relief!', other_description, p.join([effect_specific,'!'])])
-			elif effect_specific == 'paralyzed':
-				color = 'amber'
-				self.effect_description = s.join(["You can move freely again!",other_description, 'paralyzed!'])
-			else:
-				color = 'red'
-				self.effect_description = 'You feel better than you have ever felt!'
+    def __init__(self,effect_type,effect_class=1,effect_specific = None,image=None):
+        self.effect_type = effect_type 
+        self.effect_class = effect_class    # effect class is the 'strength' of the potion. 1 is normal, 2 is really good.
+        self.effect_specific = effect_specific
+        s = ' '
+        p = ''
+        if effect_class == 1:
+            color_description = 'murky'
+            name_description = 'Weird'
+            end_description = 'It looks pretty gross.'
+            use_description = 'It tastes about how you expected. '
+            other_description = "It's nice to not be"
+        else:
+            color_description = 'clear'
+            name_description = 'Clear'
+            end_description = 'It actually looks drinkable.'
+            use_description = 'It tastes surprisingly nice. '
+            other_description = 'You actually feel better than you did before you were'
+        if effect_type == 'heal':
+            color = 'green'
+            self.effect_description = 'You feel rejuvinated! Whew!'
+            other_description = ''
+        elif effect_type == 'cure':
+            if effect_specific == 'poisoned':
+                color = 'blue'
+                self.effect_description = s.join(['You feel the poison leaving your body. What a relief!', other_description, p.join([effect_specific,'!'])])
+            elif effect_specific == 'paralyzed':
+                color = 'amber'
+                self.effect_description = s.join(["You can move freely again!",other_description, 'paralyzed!'])
+            else:
+                color = 'red'
+                self.effect_description = 'You feel better than you have ever felt!'
 
-		ncolor = color.capitalize()
-		self.description = s.join(['a vial filled with a',color_description,color,'liquid.',end_description])
-		self.name = s.join([name_description,ncolor,'Potion'])
-		self.use_description = s.join(['You drink the',p.join([self.name,'.']),use_description])
-		self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
-		self = Item(self,self.name,self.description,self.use_description,self.effect)
+        ncolor = color.capitalize()
+        self.description = s.join(['a vial filled with a',color_description,color,'liquid.',end_description])
+        self.name = s.join([name_description,ncolor,'Potion'])
+        self.use_description = s.join(['You drink the',p.join([self.name,'.']),use_description])
+        self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
+        self = Item(self,self.name,self.description,self.use_description,self.effect)
+
+class MusicSheet(Item):
+    def __init__(self, songNum):
+        Item.__init__(self,["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum]+" song sheet","A brief song written for guitar.",autouse=True)
+        self.num = songNum
+
+    def use(self,entity):
+        entity.learnSong(self.num)
+
 
 if __name__ == "__main__":
     player = Player("model", 0,0)

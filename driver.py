@@ -22,7 +22,7 @@ if __name__ == '__main__':
     size = (screenX, screenY)
     delay = 0.15
     
-    if raw_input("Would you like to start where you left off? [y/n]") == "y":
+    if raw_input("Would you like to start where you left off? [Y/n]") != "n":
         model = loadDungeon()
     else:
         model = coreMechanics.Dungeon(120, 120, method="whole")
