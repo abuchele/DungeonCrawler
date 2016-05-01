@@ -7,7 +7,7 @@ from dialogue.textutil import TextUtility
 import pygame
 import eventList
 import copy
-
+import time
 
 
 
@@ -175,10 +175,10 @@ class Dungeon(object):
 		self.lnInd += 1
 		if self.lnInd >= len(self.lines):	# if the dialogue is over
 			self.do_post_dialogue_action()
-			self.state = "R"				# resume the game
 			self.text = None				# clear these variables
 			self.lines = None				#because they take up too much space
 			self.current_convo = None
+			self.state = "R"				# resume the game
 			#pygame.key.set_repeat(100,100)
 
 	def do_post_dialogue_action(self):
@@ -202,6 +202,8 @@ class Dungeon(object):
 	def pause(self):
 		self.state = "P"
 
+	def menu_pause(self):
+		self.state = "M"
 
 	def resume(self):
 		self.state = "R"

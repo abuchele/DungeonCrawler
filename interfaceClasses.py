@@ -11,9 +11,8 @@ class PyGameKeyboardController(object):
         self.attackSongs = [pygame.mixer.Sound('songZ{}.wav'.format(i)) for i in range(0,8)]
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
-        pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_f:1,pygame.K_TAB:1,pygame.K_LSHIFT:1,
-        pygame.K_1:1,pygame.K_2:1,pygame.K_3:1,pygame.K_4:1,pygame.K_5:1,pygame.K_6:1,pygame.K_7:1,pygame.K_g:1,
-        pygame.K_RETURN:1}
+        pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_TAB:1,pygame.K_LSHIFT:1,
+        pygame.K_1:1,pygame.K_2:1,pygame.K_3:1,pygame.K_4:1,pygame.K_5:1,pygame.K_6:1,pygame.K_7:1,pygame.K_g:1}
 
         pygame.key.set_repeat()
         self.reset = False
@@ -34,6 +33,9 @@ class PyGameKeyboardController(object):
                         return self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
                     if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
                         self.model.pause()
+                        return True
+                    if event.type == KEYDOWN and event.key == pygame.K_RETURN: #Menu
+                        self.model.menu_pause()
                         return True
                 elif self.model.state == "D": #Dialogue
                     if event.type == KEYDOWN:
@@ -62,7 +64,7 @@ class PyGameKeyboardController(object):
         takes a pygame event and executes on it. Returns True if the program should continue running
         """
         self.model.player.listening = False
-        if event.type == KEYDOWN:
+        if event.type == KEYDOWN and self.model.state=="R":
             # if event.key == pygame.K_f:
             #     self.model.player.listening = True
             if event.key == pygame.K_e:
