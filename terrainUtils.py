@@ -219,17 +219,16 @@ class Loot(Block):
 		self.raised = True
 		self.islocked = islocked
 		self.isopen = isopen
-		if self.islocked == True:
-			self.descriptions = ["This chest is locked."]
 		if self.isopen == True:
 			self.sprite = 13
 			self.contents = None
 		else:
 			self.sprite = 12
+			self.contents = []
 			if rng.random() < 0.5:
-				self.contents = [entities.Item('Frog',"a frog. It isn't moving. Is it dead?",)] #contents can be a list of stuff
-			else:
-				self.contents = None
+				self.contents.append(entities.Item('Frog',"a frog. It isn't moving. Is it dead?",)) #contents can be a list of stuff
+			if rng.random() < 0.2:
+				self.contents.append(entities.MusicSheet(rng.choice([1,3,5])))	# chests can have odd songs
 
 	def __str__(self):
 		return "[]"
@@ -247,7 +246,7 @@ class Loot(Block):
 				return "The chest is empty."
 			else:
 				for item in self.contents:
-					player.inventory[item]=player.inventory.get(item, 0)+1
+					player.editinventory(item)
 				self.isopen = True
 				self.contents = None
 				return "You loot the chest of its contents."
