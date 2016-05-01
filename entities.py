@@ -536,7 +536,20 @@ class Skeleton(Monster):
         self.flatDamage = 4
         self.armor = 10
         self.speed = 100
-        self.sprite = 0
+        self.sprite = 6
+        self.timer = 0
+
+    def update(self):
+        if self.timer <= 0:
+            self.sprite = 6
+            Monster.update(self)
+        if self.timer > 0:
+            self.timer -= 1
+        if self.health <= 0:
+            self.health = 20
+            self.speed += 20
+            self.sprite = 4
+            self.timer = 20
 
 
 """NPC Subclass"""
@@ -600,7 +613,7 @@ class MrE(NPC):
             #self.player.learnSong(5)
         elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
-            self.save("saves/last_save.dun")
+            #self.model.save("saves/last_save.dun")
         elif conv_id == 6:
             self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
         elif conv_id == 8:
