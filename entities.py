@@ -96,7 +96,7 @@ class Entity(object):
 
     def update(self):
         self.prex, self.prey = (self.x, self.y)
-        if self.moving and not self.model.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and not self.monstercoords.has_key(self.facingCoordinates()):
+        if self.moving and (self.model.player.x,self.model.player.y)!=self.facingCoordinates() and not self.model.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and not self.monstercoords.has_key(self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
         if self.attackCooldown>0:
@@ -496,11 +496,34 @@ class Demon(Monster):
         self.name = "Demon"
         self.health = 15
         self.accuracy = 1
-        self.damageRange = 6
-        self.flatDamage = 2
+        self.damageRange = 5
+        self.flatDamage = 5
         self.armor = 5
-        self.speed = 64
+        self.speed = 32
         self.sprite = 0
+        self.attackCoords = None
+        self.aggrorange = 5
+        self.attackWarmup = -1
+
+    def decide(self):
+        self.checkstatus()
+        if self.aggro == True:
+            if self.seen and randint(1,3) == 1:
+                self.attackWarmup = 5
+                self.sprite = 5
+                self.attackCoords = (self.player.x, self.player.y)
+            else:
+                self.aggressiveMove()
+        elif self.seen == True:
+            self.passiveMove()
+
+    def update(self):
+        if self.attackWarmup >= 0:
+            self.attackWarmup -= 1
+        if self.attackWarmup == 0 and self.attackCoords == (self.player.x,self.player.y):
+            self.attack(self.player)
+            self.sprite = 0
+        Monster.update(self)
 
 
 class Skeleton(Monster):
@@ -577,6 +600,7 @@ class MrE(NPC):
             #self.player.learnSong(5)
         elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
+            self.save("saves/last_save.dun")
         elif conv_id == 6:
             self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
         elif conv_id == 8:
@@ -584,12 +608,6 @@ class MrE(NPC):
 
 
 """Entity Related Subclasses that aren't entities"""
-
-# allows easy creation/organization of different attacks and their stats (useful if a creature has more than one attack)
-class Attack(Entity):
-    def __init__(self,preattack,attack,postattack,damage,range,accuracy):
-        pass
-
 class Effect(object):
     def __init__(self,effect_type,effect_description,effect_value=10,effect_specific=None):
         self.effect_type = effect_type

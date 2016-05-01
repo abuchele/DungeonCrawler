@@ -20,11 +20,14 @@ class DungeonModelView(object):
         self.bigmap = pygame.Surface((size[0], size[0]))    # the actual display window
         self.minimap = loadMinimap(dungeon.grid)    # the 1 pixel/block map
         self.font = pygame.font.SysFont("Times New Roman", 26, bold=True)
+        self.targetLocations = []
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
 
         spriteNames = [["Stand","Walk1","Walk2"], ["Back","Front","Left","Right"]]
         self.playerSprites = [[pygame.image.load("sprites/Player"+direc+movem+".png") for movem in spriteNames[0]] for direc in spriteNames[1]]
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
+        self.crossheir = pygame.image.load("sprites/Target.png")
+        self.blastSprite = pygame.image.load("sprites/Blast.png")
         self.pauseScreen = pygame.image.load("HUD_sprites/Paused.png")
         self.dialogueBox = pygame.image.load("HUD_sprites/Dialogue_GUI.png")
         self.deathScreen = pygame.image.load("HUD_sprites/Dead.png")
@@ -35,7 +38,7 @@ class DungeonModelView(object):
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal",
                         "Loot","LootOpen","Furniture0","Furniture1","Furniture2","Furniture3"]
         shadowNames = [name+"_Shadow" for name in spriteNames]
-        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC"]
+        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC","DemonAttack"]
         effectNames = ["Stunned","OnFire"]
         attackSpriteNames = ["attack"+str(i) for i in range(0,8)]
         songSpriteNames = ["song"+str(i) for i in range(0,8)]
@@ -59,7 +62,8 @@ class DungeonModelView(object):
     def update(self):
         for x1,y1,x2,y2 in self.losLst: # decides what blocks are visible
             self.visible[(x1,y1)] = self.visible[(x2,y2)] and self.model.getBlock(self.model.player.x+x2, self.model.player.y+y2).transparent
-        
+        self.targetLocations = []
+        self.explosionLocations = []
 
     def display(self, t):
         """
@@ -109,6 +113,11 @@ class DungeonModelView(object):
                             self.screen.blit(self.effectSprites[1], monstCoords)
                         if monster.effect.get("stunned",0):
                             self.screen.blit(self.effectSprites[0], monstCoords)
+                        if monster.name == "Demon":
+                            if monster.attackWarmup > 0:
+                                self.targetLocations.append(monster.attackCoords)
+                            elif monster.attackWarmup == 0:
+                                self.explosionLocations.append(monster.attackCoords)
                 elif self.model.player.listening: #draws "listen sprites" on all monsters within range
                     if monster != 0:
                         mxr, myr = (monster.x, monster.y)
@@ -128,6 +137,12 @@ class DungeonModelView(object):
                 attackCoords = ((atX-pxc)*self.blockSize[0]+self.dispSize[0]/2,
                                 (atY-pyc)*self.blockSize[1]+self.dispSize[1]/2 + int((self.model.player.attackCooldown-t)*20/self.model.player.attackSpeed) - 15)
                 self.screen.blit(attackSprite,attackCoords)
+        for atX, atY in self.targetLocations:
+            attackCoords = ((atX-pxc)*self.blockSize[0]+self.dispSize[0]/2, (atY-pyc)*self.blockSize[1]+self.dispSize[1]/2)
+            self.screen.blit(self.crossheir,attackCoords)
+        for atX, atY in self.explosionLocations:
+            attackCoords = ((atX-pxc)*self.blockSize[0]+self.dispSize[0]/2, (atY-pyc)*self.blockSize[1]+self.dispSize[1]/2)
+            self.screen.blit(self.blastSprite,attackCoords)
 
 
     def drawHUD(self, t, pxr, pyr, pxc, pyc):
@@ -179,6 +194,7 @@ class DungeonModelView(object):
 
     def setModel(self, model):
         self.model = model
+        self.minimap = loadMinimap(model.grid)
 
 
 def loadMinimap(grid):  # creates a minimap for the given block list-list
