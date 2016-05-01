@@ -12,7 +12,8 @@ class PyGameKeyboardController(object):
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
             pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_f:1,pygame.K_TAB:1,pygame.K_LSHIFT:1,
-            pygame.K_1:1,pygame.K_2:1,pygame.K_3:1,pygame.K_4:1,pygame.K_5:1,pygame.K_6:1,pygame.K_7:1,pygame.K_g:1}
+            pygame.K_1:1,pygame.K_2:1,pygame.K_3:1,pygame.K_4:1,pygame.K_5:1,pygame.K_6:1,pygame.K_7:1,pygame.K_g:1
+            pygame.K_RETURN:1}
         pygame.key.set_repeat()
         self.reset = False
 
@@ -23,23 +24,27 @@ class PyGameKeyboardController(object):
             for event in reversed(events):
                 if event.type == QUIT:
                         return False
-                if self.model.state == "P":
+                if self.model.state == "P": #Paused
                     if event.type == KEYDOWN:   # if it is paused, any key press resumes the game
                         self.model.resume()
                         return True
-                elif self.model.state == "R":
+                elif self.model.state == "R": #Running
                     if event.type == KEYDOWN and event.key in self.controls:
                         return self.handle_event(event)#IF YOU LET GO OF THE KEY, THE LAST EVENT IS A KEY UP!!!
                     if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
                         self.model.pause()
                         return True
-                elif self.model.state == "D":
+                elif self.model.state == "D": #Dialogue
                     if event.type == KEYDOWN:
                         self.model.advance_dialogue()
                         return True
-                elif self.model.state == "K":
+                elif self.model.state == "K": #killed.
                     if event.type == KEYDOWN:
                         self.reset = True
+                elif self.model.state == "M": #Menu
+                    if event.type == KEYDOWN:
+                        self.model.resume()
+                        return True
             pygame.event.clear()  #empties queue
 
         held = pygame.key.get_pressed()  # if there are no key presses, check for keys being held down
