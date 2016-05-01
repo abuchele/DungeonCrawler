@@ -19,7 +19,7 @@ class DungeonModelView(object):
         self.screenBounds = (-size[1]/self.blockSize[0]/2, size[1]/self.blockSize[0]/2+1, -size[1]/self.blockSize[1]/2, size[1]/self.blockSize[1]/2+1)
         self.bigmap = pygame.Surface((size[0], size[0]))    # the actual display window
         self.minimap = loadMinimap(dungeon.grid)    # the 1 pixel/block map
-        self.font = pygame.font.SysFont("Times New Roman", 30, bold=True)
+        self.font = pygame.font.SysFont("Times New Roman", 26, bold=True)
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
 
         spriteNames = [["Stand","Walk1","Walk2"], ["Back","Front","Left","Right"]]
@@ -32,7 +32,8 @@ class DungeonModelView(object):
         self.HUD = pygame.image.load("HUD_sprites/Hud.png")
         self.playerSprite = self.playerSprites[0][0]
 
-        spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal","Loot","LootOpen","NPC"]
+        spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal",
+                        "Loot","LootOpen","Furniture0","Furniture1","Furniture2","Furniture3"]
         shadowNames = [name+"_Shadow" for name in spriteNames]
         monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC"]
         effectNames = ["Stunned","OnFire"]
@@ -138,7 +139,7 @@ class DungeonModelView(object):
             int((self.model.player.y+0.5)*self.mimpSz[1]/self.rempSz[1])%self.mimpSz[1]-self.dotSprite.get_height()/2+1))  # draw the dot on the minimap
 
         actionLog = self.font.render(self.model.getLog(), 1, (255,255,255,255), (0,0,0,100))    # draw the action log
-        self.screen.blit(actionLog, (0, self.size[1]-34))
+        self.screen.blit(actionLog, (0, self.size[1]-30))
 
         hp = 3.24*self.model.player.health
         pygame.draw.rect(self.screen, pygame.Color("red"), (self.size[0]-74, self.size[1]-17-hp, 54, hp)) # draw the hp bar
