@@ -14,7 +14,7 @@ It's a bit more of a pain to initialize (more variables required) but we can cha
 from random import randint, choice
 import pygame
 import math
-
+import time
 import terrainUtils
 
 
@@ -347,6 +347,8 @@ class Player(Entity):
                 return
         self.model.interp_action("You fire your only bullet but fail to hit anything.")
 
+    def open_menu(self):
+        pass
         
 
 """Monster Subclass"""
@@ -588,8 +590,9 @@ class MrE(NPC):
             name = raw_input("What is your name?")
             self.player.name = name
             self.checklist.eventcomplete("player_Named")
-            return
-        if conv_id == 2:
+            pygame.event.clear
+            self.interact(self.player)
+        elif conv_id == 2:
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
         elif conv_id == 4:
             self.checklist.eventcomplete("tutorial_Dialogue004_Finished")

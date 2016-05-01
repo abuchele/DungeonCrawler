@@ -7,7 +7,7 @@ from dialogue.textutil import TextUtility
 import pygame
 import eventList
 import copy
-
+import time
 
 
 
@@ -43,7 +43,8 @@ class Dungeon(object):
 		self.text = None	# the class that will help to organize the dialogue
 		self.lnInd = 0		# the line number in this conversation
 		self.lines = None	# the list of surfaces that represent this conversation
-
+		self.current_interactee = self.mr_E
+		self.interp_action(self.mr_E.interact(self.player)) 
 
 	def __str__(self):
 		output = ""
@@ -58,7 +59,7 @@ class Dungeon(object):
 		Fills the world with monsters of various kinds
 		"""
 		mr_E = entities.MrE(self, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
-		
+		self.mr_E = mr_E
 		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
 		# self.monsterlist.append(mr_E)
 
@@ -175,10 +176,10 @@ class Dungeon(object):
 		self.lnInd += 1
 		if self.lnInd >= len(self.lines):	# if the dialogue is over
 			self.do_post_dialogue_action()
-			self.state = "R"				# resume the game
 			self.text = None				# clear these variables
 			self.lines = None				#because they take up too much space
 			self.current_convo = None
+			self.state = "R"				# resume the game
 			#pygame.key.set_repeat(100,100)
 
 	def do_post_dialogue_action(self):
@@ -202,6 +203,8 @@ class Dungeon(object):
 	def pause(self):
 		self.state = "P"
 
+	def menu_pause(self):
+		self.state = "M"
 
 	def resume(self):
 		self.state = "R"
