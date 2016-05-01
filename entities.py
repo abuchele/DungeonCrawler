@@ -468,14 +468,24 @@ class Ghost(Monster):
             self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]  # so go horizontal
 
     def update(self):
-        self.distance += self.speed
-        if self.distance >= 256:
-            self.distance -= 256
-            self.decide()
+        if self.effect.get("stunned",False):    # if you are stunned
+            if randint(1,35) == 1:             # you cannot move
+                self.effect["stunned"] = False
+        else:
+            self.distance += self.speed
+            if self.distance >= 256:
+                self.distance -= 256
+                self.decide()
+        if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
+            self.health -= 2                                        # you might take damage
+            if randint(1,35) == 1:
+                self.effect["ignited"] = False
         self.prex, self.prey = (self.x, self.y)
         if self.moving and not self.monstercoords.has_key(self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
+        if self.attackCooldown>0:
+            self.attackCooldown -= 1
 
 
 class Demon(Monster):
