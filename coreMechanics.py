@@ -43,7 +43,8 @@ class Dungeon(object):
 		self.text = None	# the class that will help to organize the dialogue
 		self.lnInd = 0		# the line number in this conversation
 		self.lines = None	# the list of surfaces that represent this conversation
-
+		self.current_interactee = self.mr_E
+		self.interp_action(self.mr_E.interact(self.player)) 
 
 	def __str__(self):
 		output = ""
@@ -58,7 +59,7 @@ class Dungeon(object):
 		Fills the world with monsters of various kinds
 		"""
 		mr_E = entities.MrE(self, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
-		
+		self.mr_E = mr_E
 		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
 		# self.monsterlist.append(mr_E)
 
