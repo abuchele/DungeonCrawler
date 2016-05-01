@@ -385,7 +385,7 @@ class Monster(Entity):
         delX, delY = (self.x-self.player.x, self.y-self.player.y)
         matchX = (self.x-int(math.copysign(1,delX)), self.y) # where it will go if it wants to match X
         matchY = (self.x, int(self.y-math.copysign(1,delY))) # where it will go if it wants to match Y
-        if self.monstercoords.has_key(matchX) or self.model.grid[matchX[1]][matchX[0]].collides:      # matching X is no good
+        if self.monstercoords.has_key(matchX) or self.model.grid[matchX[1]][matchX[0]].collides:      # matching X is no good (either a monster exists in that coordinate or it collides)
             self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]                              # so go vertical
         elif self.monstercoords.has_key(matchY) or self.model.grid[matchY[1]][matchY[0]].collides:    # matching Y is no good
             self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]                              # so go horizontal
