@@ -43,8 +43,7 @@ class Dungeon(object):
 		self.text = None	# the class that will help to organize the dialogue
 		self.lnInd = 0		# the line number in this conversation
 		self.lines = None	# the list of surfaces that represent this conversation
-
-
+		self.interp_action("$D1")
 	def __str__(self):
 		output = ""
 		for row in self.grid:
