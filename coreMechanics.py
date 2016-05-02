@@ -38,7 +38,6 @@ class Dungeon(object):
 		self.player = entities.Player(self, self.monstercoords, *(thing[1][0]))
 
 		self.generateMonsters()
-		#self.generateMonsters(monsterFrequency=0.002)
 
 		self.text = None	# the class that will help to organize the dialogue
 		self.lnInd = 0		# the line number in this conversation
@@ -63,9 +62,8 @@ class Dungeon(object):
 		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
 		# self.monsterlist.append(mr_E)
 
-		count = 0
-		for y in rng.sample(range(0,self.h-1), self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
-			for x in rng.sample(range(0,self.w-1), self.w-1):
+		for y in range(0,self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
+			for x in range(0,self.w-1):
 				block = self.grid[y][x]
 				if not block.collides and not self.monstercoords.has_key((x,y)) and rng.random() < monsterFrequency:
 					if block.biome == 0:
@@ -88,7 +86,6 @@ class Dungeon(object):
 						continue
 
 					self.monstercoords[(x,y)] = newMonst
-					count +=1
 
 	def update(self):
 		if self.state == "R":	# it doesn't update if the game is paused

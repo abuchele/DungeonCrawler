@@ -380,11 +380,11 @@ class Monster(Entity):
         Entity.__init__(self,model,x,y, monstercoords)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
-        self.name = None
         self.seenrange = 8
         self.aggrorange = 2
         self.player = player
         self.distance = 0   # it moves when this reaches 256
+        self.name = self.newName()
 
     def __str__(self):
         return self.name
@@ -443,12 +443,14 @@ class Monster(Entity):
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
 
+    def newName(self):      # thinks of a new name
+        return "missingno"
+
 
 
 class Zombie(Monster):
     def __init__(self,x,y, player, grid, monstercoords):
         Monster.__init__(self, x,y, player, grid, monstercoords)
-        self.name = "Zombie"
         self.health = 10
         self.accuracy = 3
         self.damageRange = 3
@@ -460,11 +462,16 @@ class Zombie(Monster):
         else:
             self.sprite = 3
 
+    def newName(self):
+        consonants = ["K","Kr","G","G","B","Br","M","F","P",""]
+        vowels = ["a","u","oo","e","o","ou","er"]
+        endings = ["gh","m","r","p","ng","h",""]
+        return choice(consonants)+choice(vowels)+choice(endings)
+
 
 class Ghost(Monster):
     def __init__(self,x,y, player, grid, monstercoords):
         Monster.__init__(self, x,y, player, grid, monstercoords)
-        self.name = "Ghost"
         self.health = 6
         self.accuracy = 4
         self.damageRange = 2
@@ -497,11 +504,13 @@ class Ghost(Monster):
                 return False    # you cannot walk through other monsters (an exception is made for jumping over skeletons)
         return True
 
+    def newName(self):
+        return choice(["Bob","Bill","Joe","Jim","Frank","Jeff","Sally","Sue","Jane","Susan","Linda","Barbara","Mr. Smith","Ms. Doe","Mr. Doe","Ms. Smith"])
+
 
 class Demon(Monster):
     def __init__(self,x,y, player, model, monstercoords):
         Monster.__init__(self, x,y, player, model, monstercoords)
-        self.name = "Demon"
         self.health = 15
         self.accuracy = 1
         self.damageRange = 5
@@ -533,11 +542,19 @@ class Demon(Monster):
             self.sprite = 0
         Monster.update(self)
 
+    def newName(self):
+        consonants = ["K","Th","Qu","Kh","P","T","D","V","M","N","'","F","J","R","Ng","Lh","Z","L"]
+        vowels = ["a","e","i","o","u","y","ae","oa","oe"]
+        endings = ["m","r","k","th","q","ng","w","b","c","h","","",""]
+        name = choice(consonants)+choice(vowels)
+        for i in range(0,randint(1,3)):
+            name = name+choice(consonants).lower()+choice(vowels)
+        return name+choice(endings)
+
 
 class Skeleton(Monster):
     def __init__(self,x,y, player, model, monstercoords):
         Monster.__init__(self, x,y, player, model, monstercoords)
-        self.name = "Skeleton"
         self.health = 20
         self.accuracy = 5
         self.damageRange = 2
@@ -560,6 +577,9 @@ class Skeleton(Monster):
             self.sprite = 8
             self.timer = 20
             self.jumpable = True
+
+    def newName(self):
+        return "No. {:03d}".format(randint(1,999))
 
 
 """NPC Subclass"""
