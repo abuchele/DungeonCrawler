@@ -119,7 +119,8 @@ class Entity(object):
             if randint(1,35) == 1:
                 self.effect["ignited"] = False
         if self.effect.get("submerged in lava",False):  # if you are in lava
-            self.health = 0                             # you are dead
+            self.damaged(self.health-18)                             # you are dead
+            self.effect["submerged in lava"] = False
 
     def interact(self,player):
         return "You poke the thing."
@@ -231,6 +232,8 @@ class Player(Entity):
 
     def damaged(self,damage):
         self.healCooldown = 10
+        if damage < 0:  # damage for negative damage is not a thing
+            return
         Entity.damaged(self,damage)
 
     def update(self):   # just kind of moves you around
@@ -607,11 +610,11 @@ class MrE(NPC):
             return "$D009"
     def post_dialogue_action(self, conv_id):
         if conv_id == 1:
-            name = raw_input("What is your name?")
+            name = raw_input("What is your name? ")
             self.player.name = name
             self.checklist.eventcomplete("player_Named")
             pygame.event.clear()
-            self.interact(self.player)
+            self.model.interp_action("$D002")
         elif conv_id == 2:
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
         elif conv_id == 4:
@@ -620,7 +623,7 @@ class MrE(NPC):
             #self.player.learnSong(5)
         elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
-            #self.model.save("saves/last_save.dun")
+            self.model.save("saves/last_save.dun")
         elif conv_id == 6:
             self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
         elif conv_id == 8:

@@ -699,9 +699,9 @@ def erectPanel(x,y,grid):
 
 def splatterLava(x, y, grid):	# makes a little lava puddle
 	P = [
-	[0.20, 0.40, 0.20],
-	[0.40, 1.00, 0.40],
-	[0.20, 0.40, 0.20]]
+	[0.15, 0.35, 0.15],
+	[0.35, 1.00, 0.35],
+	[0.15, 0.35, 0.15]]
 
 	for i,dx in enumerate([-1,0,1]):
 		for j,dy in enumerate([-1,0,1]):

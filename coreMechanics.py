@@ -71,7 +71,7 @@ class Dungeon(object):
 					if block.biome == 0:
 						newMonst = entities.Zombie(x,y,self.player,self,self.monstercoords)
 					elif block.biome == 1:
-						if rng.random() < 0.5:
+						if rng.random() < 0.4:
 							newMonst = entities.Zombie(x,y,self.player,self,self.monstercoords)
 						else:
 							newMonst = entities.Ghost(x,y,self.player,self, self.monstercoords)
@@ -100,11 +100,11 @@ class Dungeon(object):
 
 			if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":	# you can jump over one block of lava
 				if not self.player.canMoveTo(*self.player.facingCoordinates()):			# if there is no block in front of you
-					self.effected("submerged in lava")
+					self.player.effected("submerged in lava")
 				else:
 					self.player.x,self.player.y = self.player.facingCoordinates()		# also please try not to jump into more lava
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
-						self.effected("submerged in lava")
+						self.player.effected("submerged in lava")
 			elif self.monstercoords.has_key((self.player.x,self.player.y)):				# you can jump over one jumpable monster
 				if self.player.canMoveTo(*self.player.facingCoordinates()):				# if there is no block in front of you
 					self.player.x,self.player.y = self.player.facingCoordinates()
@@ -177,11 +177,11 @@ class Dungeon(object):
 	def advance_dialogue(self):	# moves to the next line
 		self.lnInd += 1
 		if self.lnInd >= len(self.lines):	# if the dialogue is over
-			self.do_post_dialogue_action()
 			self.text = None				# clear these variables
 			self.lines = None				#because they take up too much space
-			self.current_convo = None
 			self.state = "R"				# resume the game
+			self.do_post_dialogue_action()
+			self.current_convo = None
 			#pygame.key.set_repeat(100,100)
 
 	def do_post_dialogue_action(self):
