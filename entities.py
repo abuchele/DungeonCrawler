@@ -635,7 +635,6 @@ class MrE(NPC):
             self.checklist.eventcomplete("player_Named")
             pygame.event.clear()
             self.model.interp_action("$D002")
-        elif conv_id == 2:
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
         elif conv_id == 4:
             self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
