@@ -99,12 +99,15 @@ class Dungeon(object):
 				self.last_save += 1
 
 			if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":	# you can jump over one block of lava
-				if self.getBlock(*self.player.facingCoordinates()).collides:			# if there is no block in front of you
-					self.player.health = 0
+				if not self.player.canMoveTo(*self.player.facingCoordinates()):			# if there is no block in front of you
+					self.effected("submerged in lava")
 				else:
 					self.player.x,self.player.y = self.player.facingCoordinates()		# also please try not to jump into more lava
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
-						self.player.health = 0
+						self.effected("submerged in lava")
+			elif self.monstercoords.has_key((self.player.x,self.player.y)):				# you can jump over one jumpable monster
+				if self.player.canMoveTo(*self.player.facingCoordinates()):				# if there is no block in front of you
+					self.player.x,self.player.y = self.player.facingCoordinates()
 
 			if self.player.health <= 0:
 				self.state = "K"
@@ -120,7 +123,6 @@ class Dungeon(object):
 							self.monstercoords[(monster.x,monster.y)] = monster
 						else:
 							self.checklist.state["killcount"] = self.checklist.state.get("killcount",0) + 1
-							# print self.checklist.state.get("killcount",0)
 
 
 			if rng.random() < 0.003:

@@ -48,6 +48,7 @@ class Entity(object):
         self.prey = y
         self.attackCooldown = 0
         self.monstercoords = monstercoords
+        self.jumpable = False
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
@@ -94,13 +95,31 @@ class Entity(object):
         else:
             return (self.x, self.y)
 
+    def canMoveTo(self, x, y):
+        if self.model.player.x == x and self.model.player.y == y:
+            return False    # you cannot walk into the player
+        if self.model.grid[y][x].collides:
+            return False    # you cannot walk through walls*
+        if self.monstercoords.has_key((x,y)):
+            if type(self).__name__ == "Player" and self.monstercoords[(x,y)].jumpable:
+                return True
+            else:
+                return False    # you cannot walk through other monsters (an exception is made for jumping over skeletons)
+        return True
+
     def update(self):
         self.prex, self.prey = (self.x, self.y)
-        if self.moving and (self.model.player.x,self.model.player.y)!=self.facingCoordinates() and not self.model.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and not self.monstercoords.has_key(self.facingCoordinates()):
+        if self.moving and self.canMoveTo(*self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
         if self.attackCooldown>0:
             self.attackCooldown -= 1
+        if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
+            self.health -= 2                                        # you might take damage
+            if randint(1,35) == 1:
+                self.effect["ignited"] = False
+        if self.effect.get("submerged in lava",False):  # if you are in lava
+            self.health = 0                             # you are dead
 
     def interact(self,player):
         return "You poke the thing."
@@ -416,10 +435,6 @@ class Monster(Entity):
             if self.distance >= 256:
                 self.distance -= 256
                 self.decide()
-        if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
-            self.health -= 2                                        # you might take damage
-            if randint(1,35) == 1:
-                self.effect["ignited"] = False
         Entity.update(self)
 
     def interact(self,player):
@@ -469,25 +484,15 @@ class Ghost(Monster):
         else:                                                       # vice versa
             self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]  # so go horizontal
 
-    def update(self):
-        if self.effect.get("stunned",False):    # if you are stunned
-            if randint(1,35) == 1:             # you cannot move
-                self.effect["stunned"] = False
-        else:
-            self.distance += self.speed
-            if self.distance >= 256:
-                self.distance -= 256
-                self.decide()
-        if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
-            self.health -= 2                                        # you might take damage
-            if randint(1,35) == 1:
-                self.effect["ignited"] = False
-        self.prex, self.prey = (self.x, self.y)
-        if self.moving and not self.monstercoords.has_key(self.facingCoordinates()):
-            self.x, self.y = self.facingCoordinates()
-        self.moving = False
-        if self.attackCooldown>0:
-            self.attackCooldown -= 1
+    def canMoveTo(self, x, y):
+        if self.model.player.x == x and self.model.player.y == y:
+            return False    # you cannot walk into the player
+        if self.monstercoords.has_key((x,y)):
+            if type(self).__name__ == "Player" and type(self.monstercoords[(x,y)]).__name__ == "Skeleton" and self.monstercoords[(x,y)].timer > 0:
+                return True
+            else:
+                return False    # you cannot walk through other monsters (an exception is made for jumping over skeletons)
+        return True
 
 
 class Demon(Monster):
@@ -532,24 +537,26 @@ class Skeleton(Monster):
         self.name = "Skeleton"
         self.health = 20
         self.accuracy = 5
-        self.damageRange = 1
-        self.flatDamage = 4
+        self.damageRange = 2
+        self.flatDamage = 3
         self.armor = 10
         self.speed = 100
-        self.sprite = 6
+        self.sprite = 7
         self.timer = 0
 
     def update(self):
-        if self.timer <= 0:
-            self.sprite = 6
+        if self.timer <= 0: # only update if alive
+            self.sprite = 7
             Monster.update(self)
+            self.jumpable = False
         if self.timer > 0:
             self.timer -= 1
         if self.health <= 0:
             self.health = 20
             self.speed += 20
-            self.sprite = 4
+            self.sprite = 8
             self.timer = 20
+            self.jumpable = True
 
 
 """NPC Subclass"""
@@ -603,7 +610,7 @@ class MrE(NPC):
             name = raw_input("What is your name?")
             self.player.name = name
             self.checklist.eventcomplete("player_Named")
-            pygame.event.clear
+            pygame.event.clear()
             self.interact(self.player)
         elif conv_id == 2:
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
