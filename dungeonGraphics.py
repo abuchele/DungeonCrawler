@@ -33,7 +33,6 @@ class DungeonModelView(object):
         self.deathScreen = pygame.image.load("HUD_sprites/Dead.png")
         self.soundSprite = pygame.image.load("sprites/Sound.png")
         self.HUD = pygame.image.load("HUD_sprites/Hud.png")
-        self.playerSprite = self.playerSprites[0][0]
 
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal",
                         "Loot","LootOpen","Furniture0","Furniture1","Furniture2","Furniture3"]
@@ -75,14 +74,20 @@ class DungeonModelView(object):
         pxr, pyr = (self.model.player.x, self.model.player.y)   # the "real" player coordinates
         pxc, pyc = self.model.player.getCoords(self.t)             # the calculated coordinates that produce smoother motion
 
-        self.drawBlocks(self.t, pxr, pyr, pxc, pyc)
-        self.drawMonsters(self.t, pxr, pyr, pxc, pyc)
+        self.drawBlocksandMonsters(self.t, pxr, pyr, pxc, pyc)
         self.drawAttacks(self.t, pxr, pyr, pxc, pyc)                
         self.drawHUD(self.t, pxr, pyr, pxc, pyc)
         pygame.display.update()
 
 
-    def drawBlocks(self, t, pxr, pyr, pxc, pyc):   # draws all nearby blocks
+    def drawBlocksandMonsters(self, t, pxr, pyr, pxc, pyc):   # draws all nearby blocks
+        apparentmonstercoords = dict()  # the monsters in their shifted coordinates
+        for dy in range(self.screenBounds[2], self.screenBounds[3]):
+            for dx in range(self.screenBounds[0], self.screenBounds[1]):
+                if self.model.monstercoords.has_key((pxr+dx,pyr+dy)): # finds all nearby monsters and saves not where they are,
+                    mon = self.model.monstercoords[(pxr+dx,pyr+dy)] # but where they need to be drawn
+                    apparentmonstercoords[(max(mon.prex,mon.x), max(mon.prey,mon.y))] = mon
+
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
@@ -91,23 +96,17 @@ class DungeonModelView(object):
                     self.screen.blit(self.sprites[block.sprite], blockCoords)
                     self.minimap.set_at((pxr+dx, pyr+dy), block.color)          # and mark it on the minimap
                     block.explored = True                                       # and remember it for later
-
                 elif block.explored:                                            # if it is not visible but we've been here before
                     self.screen.blit(self.shadows[block.sprite], blockCoords)   # draw it, but darker
                 else:                                                           # if we don't know what it looks like
                     self.screen.blit(self.sprites[0], blockCoords)              # put in a placeholder block
 
-
-    def drawMonsters(self, t, pxr, pyr, pxc, pyc): # draws all nearby entites (including the player)
-        for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
-            for dx in range(self.screenBounds[0], self.screenBounds[1]):
-                blockCoords = ((dx-pxc+pxr)*self.blockSize[0]+self.dispSize[0]/2, (dy-pyc+pyr)*self.blockSize[1]+self.dispSize[1]/2)
-                monster = self.model.monstercoords.get((pxr+dx,pyr+dy),0) #this is a Monster
-                if self.visible[(dx,dy)]:                                       # if it is visible,
-                    if monster != 0:
-                        mxr, myr = (monster.x, monster.y)
-                        mxc, myc = monster.getCoords(t)
-                        monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
+                monster = apparentmonstercoords.get((pxr+dx,pyr+dy),0) #this is a Monster
+                if monster != 0:
+                    mxr, myr = (monster.x, monster.y)
+                    mxc, myc = monster.getCoords(t)
+                    monstCoords = ((mxc-pxc)*self.blockSize[0]+self.dispSize[0]/2, (myc-pyc)*self.blockSize[1]+self.dispSize[1]/2)
+                    if self.visible[(mxr-pxr,myr-pyr)]:                                       # if it is visible,
                         self.screen.blit(self.monsterSprites[monster.sprite],monstCoords)   # just draw it and the monster on it
                         if monster.effect.get("ignited",0):
                             self.screen.blit(self.effectSprites[1], monstCoords)
@@ -118,15 +117,12 @@ class DungeonModelView(object):
                                 self.targetLocations.append(monster.attackCoords)
                             elif monster.attackWarmup == 0:
                                 self.explosionLocations.append(monster.attackCoords)
-                elif self.model.player.listening: #draws "listen sprites" on all monsters within range
-                    if monster != 0:
-                        mxr, myr = (monster.x, monster.y)
-                        mxc, myc = monster.getCoords(t)
-                        monstCoords = (blockCoords[0]+self.blockSize[0]*(mxc-mxr), blockCoords[1]+self.blockSize[1]*(myc-myr))
+                    elif self.model.player.listening: #draws "listen sprites" on all monsters within range
                         self.screen.blit(self.soundSprite,monstCoords)
-            if dy == 0:
-                pSpriteInd = self.model.player.sprite
-                self.screen.blit(self.playerSprites[pSpriteInd[0]][pSpriteInd[1]], (self.dispSize[0]/2, self.dispSize[1]/2))   # draw the player
+
+                playerSprite = self.playerSprites[self.model.player.sprite[0]][self.model.player.sprite[1]] # draw the player at the appropriate time
+                if dx == max(self.model.player.prex-self.model.player.x,0) and dy == max(self.model.player.prey-self.model.player.y,0):
+                    self.screen.blit(playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))
 
 
     def drawAttacks(self, t, pxr, pyr, pxc, pyc):
