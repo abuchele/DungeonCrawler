@@ -119,7 +119,7 @@ class Entity(object):
             if randint(1,35) == 1:
                 self.effect["ignited"] = False
         if self.effect.get("submerged in lava",False):  # if you are in lava
-            self.damaged(self.health-18)                             # you are dead
+            self.damaged(83)                             # you are dead
             self.effect["submerged in lava"] = False
 
     def interact(self,player):
@@ -360,7 +360,7 @@ class Player(Entity):
             coords = (coords[0]+direc[0], coords[1]+direc[1])
             if self.model.monstercoords.has_key(coords):
                 self.attack(self.model.monstercoords[coords])   # it will pretty much instakill anything
-                self.model.interp_action("You put your singular bullet into the {}.".format(self.model.monstercoords[coords].name))
+                self.model.interp_action("You put your singular bullet into {}.".format(self.model.monstercoords[coords].name))
                 return
             elif self.model.getBlock(*coords).collides:
                 if type(self.model.getBlock(*coords)).__name__ == "Glass":  # bullets break glass
@@ -463,10 +463,13 @@ class Zombie(Monster):
             self.sprite = 3
 
     def newName(self):
-        consonants = ["K","Kr","G","G","B","Br","M","F","P",""]
-        vowels = ["a","u","oo","e","o","ou","er"]
-        endings = ["gh","m","r","p","ng","h",""]
-        return choice(consonants)+choice(vowels)+choice(endings)
+        if randint(1,1000) == 1:
+            return "Michael Jackson"
+        else:
+            consonants = ["K","Kr","G","G","B","Br","M","F","P","Ch"]
+            vowels = ["a","u","oo","e","o","ou","er"]
+            endings = ["gh","m","r","p","ng","h",""]
+            return choice(consonants)+choice(vowels)+choice(endings)
 
 
 class Ghost(Monster):
@@ -505,7 +508,10 @@ class Ghost(Monster):
         return True
 
     def newName(self):
-        return choice(["Bob","Bill","Joe","Jim","Frank","Jeff","Sally","Sue","Jane","Susan","Linda","Barbara","Mr. Smith","Ms. Doe","Mr. Doe","Ms. Smith"])
+        if randint(1,1000) == 1:
+            return "Esteban Juan Julio Billybob Thorton Jr. III"
+        else:
+            return choice(["Bob","Bill","Joe","Jim","Frank","Jeff","Sally","Sue","Jane","Susan","Linda","Barbara","Mr. Smith","Ms. Doe","Mr. Doe","Ms. Smith"])
 
 
 class Demon(Monster):
@@ -514,7 +520,7 @@ class Demon(Monster):
         self.health = 15
         self.accuracy = 1
         self.damageRange = 5
-        self.flatDamage = 5
+        self.flatDamage = 8
         self.armor = 5
         self.speed = 32
         self.sprite = 0
@@ -543,13 +549,16 @@ class Demon(Monster):
         Monster.update(self)
 
     def newName(self):
-        consonants = ["K","Th","Qu","Kh","P","T","D","V","M","N","'","F","J","R","Ng","Lh","Z","L"]
-        vowels = ["a","e","i","o","u","y","ae","oa","oe"]
-        endings = ["m","r","k","th","q","ng","w","b","c","h","","",""]
-        name = choice(consonants)+choice(vowels)
-        for i in range(0,randint(1,3)):
-            name = name+choice(consonants).lower()+choice(vowels)
-        return name+choice(endings)
+        if randint(1,1000) == 1:
+            return "Kazaakthpilik"
+        else:
+            consonants = ["K","Th","Qu","Kh","P","T","D","V","M","N","'","F","J","R","Ng","L","Z","L"]
+            vowels = ["a","e","i","o","u","y","ae","oa","oe"]
+            endings = ["m","r","k","th","q","ng","w","b","c","h","","",""]
+            name = choice(consonants)+choice(vowels)
+            for i in range(0,randint(1,3)):
+                name = name+choice(consonants).lower()+choice(vowels)
+            return name+choice(endings)
 
 
 class Skeleton(Monster):
@@ -579,7 +588,10 @@ class Skeleton(Monster):
             self.jumpable = True
 
     def newName(self):
-        return "No. {:03d}".format(randint(1,999))
+        if randint(1,1000) == 1:
+            return "Spooky Scary Skeleton"
+        else:
+            return "No. {:03d}".format(randint(1,999))
 
 
 """NPC Subclass"""
@@ -606,8 +618,9 @@ class NPC(Monster): # people who do not take damage, and have dialogue
 #The group of NPCs is in another, and then the monsters and such are in a third.  
 
 class MrE(NPC):
-    def __init__(self, model, x, y, player, checklist):
+    def __init__(self, model, x, y, player, checklist, position=0):
         NPC.__init__(self, model, x, y, player, checklist, "Mr. E", 4)
+        self.position = position # the part of the story this one Mr. E belongs to
 
     def interact(self,player):
         if not self.checklist.state["player_Named"]:
@@ -626,8 +639,13 @@ class MrE(NPC):
             return "$D008"
         elif not self.checklist.state["tutorial_quest_finished"]:
             return "$D007"
-        elif not self.checklist.state["kerberoge_start"]:
+        elif self.position == 0 and not self.checklist.state["kerberoge_start"]:
             return "$D009"
+        elif not self.checklist.state["kerberoge_defeated"]:
+            return "$D010"
+        else:
+            return "$D011"
+
     def post_dialogue_action(self, conv_id):
         if conv_id == 1:
             name = raw_input("What is your name? ")
@@ -639,7 +657,6 @@ class MrE(NPC):
         elif conv_id == 4:
             self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
             self.player.learnSong(0)
-            #self.player.learnSong(5)
         elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
             self.model.save("saves/last_save.dun")
@@ -647,6 +664,15 @@ class MrE(NPC):
             self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
         elif conv_id == 8:
             self.checklist.eventcomplete("tutorial_quest_finished")
+            newX, newY = self.model.savePoints[1]
+            newX += math.copysign(2,self.x-newX)
+            newY += math.copysign(2,self.y-newY)
+            self.model.monstercoords[(newX,newY)] = MrE(self.model, newX,newY, self.player,self.checklist, 1)
+        elif conv_id == 10:
+            self.checklist.eventcomplete("kerberoge_defeated")
+            self.player.learnSong(2)
+            self.player.learnSong(4)
+            self.player.learnSong(6)
 
 
 """Entity Related Subclasses that aren't entities"""

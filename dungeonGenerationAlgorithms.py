@@ -332,6 +332,11 @@ def generateWhole(w, h):
 			break
 	savePoints.append((w,1))
 
+	for x in range(w+2,w+7):
+		for y in range(1,6):
+			if grid[y][x].collides:
+				grid[y][x] = Floor()	# builds a room for the first boss battle
+
 	for d in range(1,min(w,h)):			# same deal as before but for quadrant 3
 		done = False
 		for t in range(0,d+1):

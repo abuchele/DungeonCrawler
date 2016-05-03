@@ -123,6 +123,9 @@ class Lava(Block):
 	def __str__(self):
 		return "::"
 
+	def passable(self):
+		return False
+
 	def interact(self,player):
 		return rng.choice(["You can feel the heat from here.","I'd better not fall into that.","Magma... I must be deep!"])
 

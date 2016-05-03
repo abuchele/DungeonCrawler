@@ -6,9 +6,8 @@ import pygame.mixer
 
 class PyGameKeyboardController(object):
     def __init__(self, model):
-        #pygame.mixer.init(frequency=22050, size=-16, buffer=4096)
         pygame.mixer.init()
-        self.attackSongs = [pygame.mixer.Sound('songZ{}.wav'.format(i)) for i in range(0,8)]
+        self.attackSongs = [pygame.mixer.Sound('sounds/songZ{}.wav'.format(i)) for i in range(0,8)]
         self.model = model
         self.controls = {pygame.K_e:1,pygame.K_r:1,pygame.K_LEFT:1,pygame.K_RIGHT:1,pygame.K_UP:1,pygame.K_DOWN:1,
         pygame.K_w:1,pygame.K_a:1,pygame.K_s:1,pygame.K_d:1,pygame.K_TAB:1,pygame.K_LSHIFT:1,

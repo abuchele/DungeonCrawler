@@ -112,13 +112,13 @@ class DungeonModelView(object):
                             self.screen.blit(self.effectSprites[1], monstCoords)
                         if monster.effect.get("stunned",0):
                             self.screen.blit(self.effectSprites[0], monstCoords)
-                        if monster.name == "Demon":
-                            if monster.attackWarmup > 0:
-                                self.targetLocations.append(monster.attackCoords)
-                            elif monster.attackWarmup == 0:
-                                self.explosionLocations.append(monster.attackCoords)
                     elif self.model.player.listening: #draws "listen sprites" on all monsters within range
                         self.screen.blit(self.soundSprite,monstCoords)
+                    if type(monster).__name__ == "Demon":
+                        if monster.attackWarmup > 0:
+                            self.targetLocations.append(monster.attackCoords)
+                        elif monster.attackWarmup == 0:
+                            self.explosionLocations.append(monster.attackCoords)    
 
                 playerSprite = self.playerSprites[self.model.player.sprite[0]][self.model.player.sprite[1]] # draw the player at the appropriate time
                 if dx == max(self.model.player.prex-self.model.player.x,0) and dy == max(self.model.player.prey-self.model.player.y,0):

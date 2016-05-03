@@ -81,4 +81,14 @@ id=0009
 Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  I messed that up-- anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$
 end_0009
 
+id=0010
+Mr.E: Well, it's about time you got here!
+@player@: How did you...
+Mr.E: ...become so dashing and brilliant? Lots and lots of vegetables. Now, here's the deal. The boss fight that's supposed to be here is a WIP, and nothing after this is really coded, so...
+CONGRATULATIONS! YOU WIN!
+end_0010
+
+id=0011
+Mr.E: Yeah, that's the end. Go explore the other dungeons. They're fun, even if they don't have story in them.
+end_0011
 
