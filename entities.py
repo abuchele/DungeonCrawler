@@ -578,10 +578,12 @@ class Skeleton(Monster):
             self.sprite = 7
             Monster.update(self)
             self.jumpable = False
+        else
+            self.moving = False
         if self.timer > 0:
             self.timer -= 1
         if self.health <= 0:
-            self.health = 20
+            self.health = 15
             self.speed += 20
             self.sprite = 8
             self.timer = 20
