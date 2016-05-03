@@ -6,7 +6,7 @@ import entities
 
 
 class Block(object):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		self.explored = False
 		self.biome = biome
 
@@ -18,7 +18,7 @@ class Block(object):
 
 
 class Null(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (0,0,0)
 		self.collides = False
@@ -33,7 +33,7 @@ class Null(Block):
 
 
 class Floor(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (200,200,200)
 		self.collides = False
@@ -48,7 +48,7 @@ class Floor(Block):
 
 
 class Stone(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (80,80,80)
 		self.collides = True
@@ -63,7 +63,7 @@ class Stone(Block):
 
 
 class Brick(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (70,70,70)
 		self.collides = True
@@ -78,7 +78,7 @@ class Brick(Block):
 
 
 class Door(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (120,120,120)
 		self.collides = True
@@ -113,7 +113,7 @@ class Door(Block):
 
 
 class Lava(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (255,20,0)
 		self.collides = False
@@ -123,12 +123,15 @@ class Lava(Block):
 	def __str__(self):
 		return "::"
 
+	def passable(self):
+		return False
+
 	def interact(self,player):
 		return rng.choice(["You can feel the heat from here.","I'd better not fall into that.","Magma... I must be deep!"])
 
 
 class Bedrock(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (0,0,0)
 		self.collides = True
@@ -143,7 +146,7 @@ class Bedrock(Block):
 
 
 class Obsidian(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (80,10,100)
 		self.collides = True
@@ -158,7 +161,7 @@ class Obsidian(Block):
 
 
 class Glass(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (240,240,240)
 		self.collides = True
@@ -173,7 +176,7 @@ class Glass(Block):
 
 
 class Metal(Block):
-	def __init__(self, biome=0):
+	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (140,140,140)
 		self.collides = True
@@ -187,8 +190,31 @@ class Metal(Block):
 		return rng.choice(["The walls here are metal and hollow.","You knock on the wall, and hear a resounding clang.","There are no bolts here; the metal is fused together."])
 
 
+class Furniture(Block):
+	def __init__(self, biome=-1):
+		Block.__init__(self, biome)
+		self.color = (200,150,120)
+		self.collides = True
+		self.transparent = True
+		self.sprite = rng.randint(14,17)
+
+	def __str__(self):
+		return "TT"
+
+	def interact(self,player):
+		if self.sprite == 14:
+			return rng.choice(["There is nothing on this table.","You lean on the table, and it wobbles dangerously.","The surface of the table is caked in dust."])
+		elif self.sprite == 15:
+			return rng.choice(["You sit down, and then stand back up.","This chair has a broken leg.","This must be the time-out chair."])
+		elif self.sprite == 16:
+			return "You examine a random book: "+rng.choice(["Death of Pi","To Murder a Mockingbird","The Afterlife for Dummies","Basics of Pomegrante Gardening","Twilight","Bury Potter and the Dead Hallows","Bury Potter and the Non-Copyright Reference","Dealing with Grief","Pictures of Puppies","It's Okay to be Dead"])
+		else:
+			return rng.choice(["What a comfy-looking couch.","You would sit, but it's filled with holes.","You reach under the cusions and find a penny."])
+
+
+
 class Loot(Block):
-	def __init__(self, value, islocked = False, isopen = False, biome=0):
+	def __init__(self, value, islocked = False, isopen = False, biome=-1):
 		Block.__init__(self, biome)
 		self.color = (255,250,0)
 		self.collides = True
@@ -196,17 +222,16 @@ class Loot(Block):
 		self.raised = True
 		self.islocked = islocked
 		self.isopen = isopen
-		if self.islocked == True:
-			self.descriptions = ["This chest is locked."]
 		if self.isopen == True:
 			self.sprite = 13
 			self.contents = None
 		else:
 			self.sprite = 12
+			self.contents = []
 			if rng.random() < 0.5:
-				self.contents = [entities.Item('Frog',"a frog. It isn't moving. Is it dead?",)] #contents can be a list of stuff
-			else:
-				self.contents = None
+				self.contents.append(entities.Item('Frog',"a frog. It isn't moving. Is it dead?",)) #contents can be a list of stuff
+			if rng.random() < 0.2:
+				self.contents.append(entities.MusicSheet(rng.choice([1,3,5])))	# chests can have odd songs
 
 	def __str__(self):
 		return "[]"
@@ -224,7 +249,7 @@ class Loot(Block):
 				return "The chest is empty."
 			else:
 				for item in self.contents:
-					player.inventory[item]=player.inventory.get(item, 0)+1
+					player.editinventory(item)
 				self.isopen = True
 				self.contents = None
 				return "You loot the chest of its contents."

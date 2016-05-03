@@ -146,6 +146,7 @@ def generatePiece(w, h, n):
 		x = x+1
 
 	placeTreasure(0.007, grid)
+	placeFurniture(0.01, grid)
 	return [grid, [(w/2,h/2)]]
 
 
@@ -231,6 +232,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 		x = x+1
 
 	placeTreasure(0.005, grid)
+	placeFurniture(0.01, grid)
 	return [grid, [(w/2,h/2)]]
 
 
@@ -329,6 +331,11 @@ def generateWhole(w, h):
 		if done:
 			break
 	savePoints.append((w,1))
+
+	for x in range(w+2,w+7):
+		for y in range(1,6):
+			if grid[y][x].collides:
+				grid[y][x] = Floor()	# builds a room for the first boss battle
 
 	for d in range(1,min(w,h)):			# same deal as before but for quadrant 3
 		done = False
@@ -448,7 +455,7 @@ def findRegion(xs, ys, grid):	# gets all the open blocks connected to this one
 	return region
 
 
-def randomQueueFlood(x0, y0, grid, region=0):	# random recursive flood algorithm that creates mazes
+def randomQueueFlood(x0, y0, grid, region=0, biome=3):	# random recursive flood algorithm that creates mazes
 	queue = [(x0,y0,x0,y0)]	# the list of nodes that need to be filled as well as where they will be filled from
 	while len(queue) > 0:
 		x,y,xp,yp = rng.choice(queue)
@@ -456,9 +463,9 @@ def randomQueueFlood(x0, y0, grid, region=0):	# random recursive flood algorithm
 		if not grid[y][x].collides:	# someone beat us to it
 			continue
 
-		grid[yp][xp] = Floor()	# draw the path
+		grid[yp][xp] = Floor(biome=biome)	# draw the path
 		grid[yp][xp].region = region
-		grid[y][x] = Floor()
+		grid[y][x] = Floor(biome=biome)
 		grid[y][x].region = region
 
 		for p in [(0,1),(0,-1),(1,0),(-1,0)]:
@@ -467,13 +474,13 @@ def randomQueueFlood(x0, y0, grid, region=0):	# random recursive flood algorithm
 					queue.append((x+2*p[0], y+2*p[1], x+p[0], y+p[1]))
 
 
-def randomStackFlood(x, y, grid, region=0):	# random recursive flood algorithm that creates mazes
-	grid[y][x] = Floor()
+def randomStackFlood(x, y, grid, region=0, biome=3):	# random recursive flood algorithm that creates mazes
+	grid[y][x] = Floor(biome=biome)
 	grid[y][x].region = region
 	for p in rng.sample([(0,1),(0,-1),(1,0),(-1,0)], 4):
 		if y+2*p[1] >= 0 and y+2*p[1] < len(grid) and x+2*p[0] >= 0 and x+2*p[0] < len(grid[y]):
 			if grid[y+2*p[1]][x+2*p[0]].collides:	# each segment is at least two long to give it that "a maze"-ing look (get it?)
-				grid[y+p[1]][x+p[0]] = Floor()
+				grid[y+p[1]][x+p[0]] = Floor(biome=biome)
 				grid[y+p[1]][x+p[0]].region = region
 				randomStackFlood(x+2*p[0], y+2*p[1], grid, region)
 
@@ -500,7 +507,7 @@ def isClear(x0, y0, x1, y1, grid):	# checks the grid to see if a given rectangle
 	return True
 
 
-def makeCorridor(x0,y0,d,l,grid):
+def makeCorridor(x0,y0,d,l,grid,biome=0):
 	"""
 	builds a corridor given x0, y0, direction, length, and the grid to edit
 	and returns whether it succeeded
@@ -511,11 +518,11 @@ def makeCorridor(x0,y0,d,l,grid):
 		return False
 	for x in range(x0+d[0], x0+d[0]+dx, int(math.copysign(1,dx))):
 		for y in range(y0+d[1], y0+d[1]+dy, int(math.copysign(1,dy))):
-			grid[y][x] = Floor()
+			grid[y][x] = Floor(biome=biome)
 	return True
 
 
-def makeSquigglyCorridor(x0,y0,d,a,l,grid):
+def makeSquigglyCorridor(x0,y0,d,a,l,grid,biome=0):
 	"""
 	builds a squiggly corridor given x0, y0, direction, amplitude, length, and the grid to edit
 	and returns whether it succeeded
@@ -525,37 +532,37 @@ def makeSquigglyCorridor(x0,y0,d,a,l,grid):
 			return False
 		for dy in range(1, l+2):
 			if (1+dy)%4 > 0:
-				grid[y0+dy][x0] = Floor()
+				grid[y0+dy][x0] = Floor(biome=biome)
 			if (3+dy)%4 > 0:
-				grid[y0+dy][x0+a] = Floor()
+				grid[y0+dy][x0+a] = Floor(biome=biome)
 	elif d == (0,-1):	# up
 		if not isClear(x0,y0-1,x0+a,y0-l-1, grid):
 			return False
 		for dy in range(-l-1, 0):
 			if (1-dy)%4 > 0:
-				grid[y0+dy][x0] = Floor()
+				grid[y0+dy][x0] = Floor(biome=biome)
 			if (3-dy)%4 > 0:
-				grid[y0+dy][x0+a] = Floor()
+				grid[y0+dy][x0+a] = Floor(biome=biome)
 	elif d == (1,0):	# right
 		if not isClear(x0+1,y0,x0+l+1,y0+a, grid):
 			return False
 		for dx in range(1, l+2):
 			if (1+dx)%4 > 0:
-				grid[y0][x0+dx] = Floor()
+				grid[y0][x0+dx] = Floor(biome=biome)
 			if (3+dx)%4 > 0:
-				grid[y0+a][x0+dx] = Floor()
+				grid[y0+a][x0+dx] = Floor(biome=biome)
 	elif d == (-1,0):	# left
 		if not isClear(x0-1,y0,x0-l-1,y0+a, grid):
 			return False
 		for dx in range(-l-1, 0):
 			if (1-dx)%4 > 0:
-				grid[y0][x0+dx] = Floor()
+				grid[y0][x0+dx] = Floor(biome=biome)
 			if (3-dx)%4 > 0:
-				grid[y0+a][x0+dx] = Floor()
+				grid[y0+a][x0+dx] = Floor(biome=biome)
 	return True
 
 
-def makeRoom(x0,y0,d,w,h,grid):
+def makeRoom(x0,y0,d,w,h,grid,biome=0):
 	"""
 	builds a rectangular room given x0, y0, direction, width, height, and the grid to edit
 	and returns whether it succeeded
@@ -568,11 +575,11 @@ def makeRoom(x0,y0,d,w,h,grid):
 		return False
 	for x in range(min(x1,x2), max(x1,x2)+1):
 		for y in range(min(y1,y2), max(y1,y2)+1):
-			grid[y][x] = Floor()
+			grid[y][x] = Floor(biome=biome)
 	return True
 
 
-def makeFancyRoom(x0,y0,d,s,grid):
+def makeFancyRoom(x0,y0,d,s,grid,biome=0):
 	"""
 	builds a fancy room given x0, y0, direction, side-length, and the grid to edit
 	and returns whether it succeeded
@@ -583,19 +590,19 @@ def makeFancyRoom(x0,y0,d,s,grid):
 		return False
 	for r in range(s/2,-1,-2):	# I had to use an old fasioned for-loop because range doesn't take floats
 		for t in range(-r,r+1):
-			grid[int(yc+r)][int(xc+t)] = Floor()	# creates rings
-			grid[int(yc-r)][int(xc+t)] = Floor()
-			grid[int(yc+t)][int(xc+r)] = Floor()
-			grid[int(yc+t)][int(xc-r)] = Floor()
+			grid[int(yc+r)][int(xc+t)] = Floor(biome=biome)	# creates rings
+			grid[int(yc-r)][int(xc+t)] = Floor(biome=biome)
+			grid[int(yc+t)][int(xc+r)] = Floor(biome=biome)
+			grid[int(yc+t)][int(xc-r)] = Floor(biome=biome)
 	for r in range(s/2-1,0,-2):
-		grid[int(yc+r)][int(xc)] = Floor()			# creates passageways
-		grid[int(yc-r)][int(xc)] = Floor()
-		grid[int(yc)][int(xc+r)] = Floor()
-		grid[int(yc)][int(xc-r)] = Floor()
+		grid[int(yc+r)][int(xc)] = Floor(biome=biome)			# creates passageways
+		grid[int(yc-r)][int(xc)] = Floor(biome=biome)
+		grid[int(yc)][int(xc+r)] = Floor(biome=biome)
+		grid[int(yc)][int(xc-r)] = Floor(biome=biome)
 	return True
 
 
-def makeColumnRoom(x0,y0,d,w,h,grid):
+def makeColumnRoom(x0,y0,d,w,h,grid,biome=0):
 	"""
 	builds a column room given x0, y0, direction, width, height, and the grid to edit
 	and returns whether it succeeded
@@ -609,11 +616,11 @@ def makeColumnRoom(x0,y0,d,w,h,grid):
 	for dx in range(0, abs(x1-x2)+1):
 		for dy in range(0, abs(y1-y2)+1):
 			if dx%2 == 0 or dy%2 == 0:
-				grid[min(y1,y2)+dy][min(x1,x2)+dx] = Floor()
+				grid[min(y1,y2)+dy][min(x1,x2)+dx] = Floor(biome=biome)
 	return True
 
 
-def makeCircleRoom(x0,y0,d,r,grid):
+def makeCircleRoom(x0,y0,d,r,grid,biome=0):
 	"""
 	builds a circular room given x0, y0, direction, radius, and the grid to edit
 	and returns whether it succeeded
@@ -625,7 +632,7 @@ def makeCircleRoom(x0,y0,d,r,grid):
 	for x in range(-int(r), int(r)+1):
 		for y in range(-int(r), int(r)+1):
 			if math.hypot(x,y) <= r:
-				grid[yc+y][xc+x] = Floor()
+				grid[yc+y][xc+x] = Floor(biome=biome)
 	return True
 
 
@@ -697,9 +704,9 @@ def erectPanel(x,y,grid):
 
 def splatterLava(x, y, grid):	# makes a little lava puddle
 	P = [
-	[0.20, 0.40, 0.20],
-	[0.40, 1.00, 0.40],
-	[0.20, 0.40, 0.20]]
+	[0.15, 0.35, 0.15],
+	[0.35, 1.00, 0.35],
+	[0.15, 0.35, 0.15]]
 
 	for i,dx in enumerate([-1,0,1]):
 		for j,dy in enumerate([-1,0,1]):
@@ -737,3 +744,27 @@ def placeTreasure(dens, grid):	# scatters treasure blocks across the map
 
 			if wallsHit < 2 and rng.random() < dens*(wallCount):
 				grid[y][x] = Loot(5)
+
+
+def placeFurniture(dens, grid):	# scatters treasure blocks across the map
+	for y in range(1,len(grid)-1):
+		for x in range(1,len(grid[y])-1):
+			if grid[y][x].collides:
+				continue
+
+			neighbors = [grid[y+p[1]][x+p[0]] for p in [(1,1),(1,0),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1),(0,1)]]
+			wallCount = 1
+
+			wallsHit = 0
+			for i in range(len(neighbors)):
+				if neighbors[i].collides:
+					wallCount = wallCount + 1
+				if neighbors[i].passable() and neighbors[(i+1)%len(neighbors)].collides:	# this may only be triggered once
+					if wallsHit >= 1:
+						wallsHit = 2														# multiple triggerings means this chest may block off a room
+						break
+					else:
+						wallsHit = 1
+
+			if wallsHit < 2 and rng.random() < dens*(wallCount):
+				grid[y][x] = Furniture()

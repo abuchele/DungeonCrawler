@@ -20,23 +20,26 @@ Mr.E: That's a pun you say?  Well, I'm sure it's not intentional.  So kid, you g
 end_0001
 
 id=0002
-Mr.E: Your Driver's ID says @player@, huh?  What kind of name is that?  Hahaha.  Back to protocol.  Do you remember anything besides your name?$$
+Mr.E: Your Driver's ID says @player@, huh?  What kind of name is that?  Hahaha.  Back to protocol.  Do you remember anything besides your name?  Don't tell me, you have amnesia, too?$$
 @player@: ...  I need to find my friend.$$
 Mr.E: Son of a gun!  You CAN talk!$$
 @player@: Do you know where my friend could be?$$
-Mr.E: For the low price of $19.99, I could give you what's going on right now.$$
-Mr.E: ...$$
+Mr.E: Sounds like you need a guide.  If only there was a guide character to help you.  What a shame...$$
+Mr.E: I know!  For the low price of $19.99 (plus tax), I would be willing to offer my services as your guide!$$
+**a margarita voucher falls out as you open your wallet**$$
 Mr.E: You're flat broke, aren't you?$$
-Mr.E: Tell you what, if you call me the "Great, Magnificent, Better than than his crazy deathbeam building contemporary Mr. E" and ask again, I'll reconsider.$$
+Mr.E: Tell you what, if you call me the "Great, Magnificent, Better than than his crazy deathbeam building contemporary Mr. E" and ask again, I might lower my rates.$$
 @player@: ...$$
-Mr.E: The silent treatment, huh?  Well, I'll show you!$$
-The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E: Hahaha.  Thankfully, Mr.E is tightlipped.  He would never let slip such a cliche story like how your friend is in
-the Fields of Encounter, and that you as a player must go through different worlds for a reunion.$$
+Mr.E: Oh?  The silent treatment?  Well, I'll show you!$$
+The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E:  Who's laughing now?$$
+The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E: My contemporary?  How cliche!  Unlike that buffoon, I would never let slip such a cliche story like how 
+your friend is in the Fields of Encounter, and that you as a player must journey through different worlds for a reunion.$$
 @player@: What?$$
 The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E: *cough cough* I said, I would never let slip such a *cough* cliche.$$
 @player@: My friend is in the Fields of Encounter?$$
-Mr.E: Did pulling you from the river affect your comprehension, too?$$
-Mr.E: Anyway, let's see how much you can do.  To move, have whoever's pulling your strings use the WASD or Arrow keys.  To interact with something, have that person put their finger down on the "E" key.$$
+Mr.E: What on earth did that river water do to your listening skills?$$
+Mr.E: Anyway, let's see how much of the following you'll understand.$$
+Mr.E: To move, have whoever's pulling your strings use the WASD or Arrow keys.  To interact with something, have that person put their finger down on the "E" key.$$
 end_0002
 
 id=0003
@@ -46,15 +49,19 @@ end_0003
 id=0004
 Mr.E: Good.  Good.  Well, see?  Isn't interaction nice?$$
 @player@: So how do I beat up monsters?$$
-Mr.E: What?  You think this is a fantasy RPG game?  Well...  If you MUST attack something, have your voodoo magic guideperson press the R key-- hey wait, don't do that near me!$$
+Mr.E: What?  You think this is a fantasy RPG game?  I'm sure these monsters have families to go home to every night.  Just kidding.  I think they spawn from the dank floors.$$
+Mr.E: On second thought, it would weigh on the shred of my conscience if you died to a weak enemy. It looks like you have a guitar on you.  Hand that over for a sec.$$
+**Mr.E fiddles with your instrument for 2 seconds.**$$
+Mr.E: There.  If you MUST attack something, have your voodoo magic controller person press the R key-- hey! Don't do that near me!$$
 end_0004
 
 id=0005
-Mr.E: Surprised? Well, you can always use G to fire your gun, but seeing as you only have one bullet left, you might as well use your music to fight. Don't worry; you're pretty good. I think you'll find people around here respond quite strongly to your music.$$
-@player@: So how do I check my inventory?  Like the stuff I will undoubtedly pick up?$$
+Mr.E: Surprised?  Imagine what heavy metal would do.  Speaking of which, you do have a gun in your inventory, too.  But it looks like you only have one bullet.  So don't waste it.$$
+@player@: How do I check my inventory?  Like the stuff I will undoubtedly pick up?$$
 Mr.E: You're asking me this?  You don't even have a bag on you.  Where do you even keep all your things?$$
 @player@: In my pockets.$$
-Mr.E: ...  Well, for NORMAL people in this world, we access our INVENTORIES with having your controller person press the "return" key.  Use the keys to navigate - q is confirm, and e is return$$
+Mr.E: ...  Well, NORMAL people don't have infinite pocket space.  But for you...  it seems like you would access your INVENTORY by having your interface person press the "return" key.$$
+Mr.E: Use the arrow keys to navigate - q is confirm/select, and e is cancel/back.$$
 end_0005
 
 id=0006
@@ -74,4 +81,14 @@ id=0009
 Mr.E: What?  You're still here?  Shoo!  I have things to see and people to--  I messed that up-- anyway, move out!  Like I said, meet me at the at the end of the dungeon!$$
 end_0009
 
+id=0010
+Mr.E: Well, it's about time you got here!
+@player@: How did you...
+Mr.E: ...become so dashing and brilliant? Lots and lots of vegetables. Now, here's the deal. The boss fight that's supposed to be here is a WIP, and nothing after this is really coded, so...
+CONGRATULATIONS! YOU WIN!
+end_0010
+
+id=0011
+Mr.E: Yeah, that's the end. Go explore the other dungeons. They're fun, even if they don't have story in them.
+end_0011
 

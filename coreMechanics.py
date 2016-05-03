@@ -7,7 +7,7 @@ from dialogue.textutil import TextUtility
 import pygame
 import eventList
 import copy
-
+import time
 
 
 
@@ -38,12 +38,12 @@ class Dungeon(object):
 		self.player = entities.Player(self, self.monstercoords, *(thing[1][0]))
 
 		self.generateMonsters()
-		#self.generateMonsters(monsterFrequency=0.002)
 
 		self.text = None	# the class that will help to organize the dialogue
 		self.lnInd = 0		# the line number in this conversation
 		self.lines = None	# the list of surfaces that represent this conversation
-
+		self.current_interactee = self.mr_E
+		self.interp_action(self.mr_E.interact(self.player)) 
 
 	def __str__(self):
 		output = ""
@@ -58,19 +58,18 @@ class Dungeon(object):
 		Fills the world with monsters of various kinds
 		"""
 		mr_E = entities.MrE(self, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
-		
+		self.mr_E = mr_E
 		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
 		# self.monsterlist.append(mr_E)
 
-		count = 0
-		for y in rng.sample(range(0,self.h-1), self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
-			for x in rng.sample(range(0,self.w-1), self.w-1):
+		for y in range(0,self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
+			for x in range(0,self.w-1):
 				block = self.grid[y][x]
 				if not block.collides and not self.monstercoords.has_key((x,y)) and rng.random() < monsterFrequency:
 					if block.biome == 0:
 						newMonst = entities.Zombie(x,y,self.player,self,self.monstercoords)
 					elif block.biome == 1:
-						if rng.random() < 0.5:
+						if rng.random() < 0.4:
 							newMonst = entities.Zombie(x,y,self.player,self,self.monstercoords)
 						else:
 							newMonst = entities.Ghost(x,y,self.player,self, self.monstercoords)
@@ -87,7 +86,6 @@ class Dungeon(object):
 						continue
 
 					self.monstercoords[(x,y)] = newMonst
-					count +=1
 
 	def update(self):
 		if self.state == "R":	# it doesn't update if the game is paused
@@ -98,12 +96,15 @@ class Dungeon(object):
 				self.last_save += 1
 
 			if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":	# you can jump over one block of lava
-				if self.getBlock(*self.player.facingCoordinates()).collides:			# if there is no block in front of you
-					self.player.health = 0
+				if not self.player.canMoveTo(*self.player.facingCoordinates()):			# if there is no block in front of you
+					self.player.effected("submerged in lava")
 				else:
 					self.player.x,self.player.y = self.player.facingCoordinates()		# also please try not to jump into more lava
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
-						self.player.health = 0
+						self.player.effected("submerged in lava")
+			elif self.monstercoords.has_key((self.player.x,self.player.y)):				# you can jump over one jumpable monster
+				if self.player.canMoveTo(*self.player.facingCoordinates()):				# if there is no block in front of you
+					self.player.x,self.player.y = self.player.facingCoordinates()
 
 			if self.player.health <= 0:
 				self.state = "K"
@@ -119,7 +120,6 @@ class Dungeon(object):
 							self.monstercoords[(monster.x,monster.y)] = monster
 						else:
 							self.checklist.state["killcount"] = self.checklist.state.get("killcount",0) + 1
-							# print self.checklist.state.get("killcount",0)
 
 
 			if rng.random() < 0.003:
@@ -174,10 +174,10 @@ class Dungeon(object):
 	def advance_dialogue(self):	# moves to the next line
 		self.lnInd += 1
 		if self.lnInd >= len(self.lines):	# if the dialogue is over
-			self.do_post_dialogue_action()
-			self.state = "R"				# resume the game
 			self.text = None				# clear these variables
 			self.lines = None				#because they take up too much space
+			self.state = "R"				# resume the game
+			self.do_post_dialogue_action()
 			self.current_convo = None
 			#pygame.key.set_repeat(100,100)
 
@@ -202,6 +202,8 @@ class Dungeon(object):
 	def pause(self):
 		self.state = "P"
 
+	def menu_pause(self):
+		self.state = "M"
 
 	def resume(self):
 		self.state = "R"

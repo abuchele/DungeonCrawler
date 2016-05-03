@@ -14,7 +14,7 @@ It's a bit more of a pain to initialize (more variables required) but we can cha
 from random import randint, choice
 import pygame
 import math
-
+import time
 import terrainUtils
 
 
@@ -29,7 +29,7 @@ import terrainUtils
 # also added max health, so that when the player uses potions they can't go past their max health. 
 
 # ex: Anna.effected('poisoned') -> "You've been poisoned!" -> Anna.effect['poisoned'] = True -> Anna.active_effects = ['poisoned'] -> cure_potion = Potion('cure','poisoned') 
-# 	  cure_potion.pickup(Anna) -> (fun flair text) -> Anna.inventory = {'Weird Blue Potion' , 1} -> cure_potion.use(Anna) -> (fun cured flair text) -> Anna.active_effects = []
+#       cure_potion.pickup(Anna) -> (fun flair text) -> Anna.inventory = {'Weird Blue Potion' , 1} -> cure_potion.use(Anna) -> (fun cured flair text) -> Anna.active_effects = []
 
 
 """General Classes"""
@@ -48,6 +48,7 @@ class Entity(object):
         self.prey = y
         self.attackCooldown = 0
         self.monstercoords = monstercoords
+        self.jumpable = False
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
@@ -74,16 +75,16 @@ class Entity(object):
         self.health -= damage
 
     def effected(self,effect_specific):
-    	self.effect[effect_specific] = True
-    	p = ''
-    	return p.join([self.name," has been ",effect_specific,'!'])
+        self.effect[effect_specific] = True
+        p = ''
+        return p.join([self.name," has been ",effect_specific,'!'])
 
     def active_effects(self):
-    	effect_list=list()
-    	for x in self.effect:
-    		if self.effect[x] is True:
-    			effect_list.append(x)
-    	return effect_list
+        effect_list=list()
+        for x in self.effect:
+            if self.effect[x] is True:
+                effect_list.append(x)
+        return effect_list
 
     def facingCoordinates(self):    # the coordinates of the block you are facing
         return (self.x+self.directionCoordinates[self.direction][0], self.y+self.directionCoordinates[self.direction][1])
@@ -94,13 +95,32 @@ class Entity(object):
         else:
             return (self.x, self.y)
 
+    def canMoveTo(self, x, y):
+        if self.model.player.x == x and self.model.player.y == y:
+            return False    # you cannot walk into the player
+        if self.model.grid[y][x].collides:
+            return False    # you cannot walk through walls*
+        if self.monstercoords.has_key((x,y)):
+            if type(self).__name__ == "Player" and self.monstercoords[(x,y)].jumpable:
+                return True
+            else:
+                return False    # you cannot walk through other monsters (an exception is made for jumping over skeletons)
+        return True
+
     def update(self):
         self.prex, self.prey = (self.x, self.y)
-        if self.moving and not self.model.grid[self.facingCoordinates()[1]][self.facingCoordinates()[0]].collides and not self.monstercoords.has_key(self.facingCoordinates()):
+        if self.moving and self.canMoveTo(*self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
         self.moving = False
         if self.attackCooldown>0:
             self.attackCooldown -= 1
+        if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
+            self.health -= 2                                        # you might take damage
+            if randint(1,35) == 1:
+                self.effect["ignited"] = False
+        if self.effect.get("submerged in lava",False):  # if you are in lava
+            self.damaged(83)                             # you are dead
+            self.effect["submerged in lava"] = False
 
     def interact(self,player):
         return "You poke the thing."
@@ -135,34 +155,45 @@ class Player(Entity):
     def __str__(self):
         return self.name
 
-    def editinventory(self,Item,add=True): #add is whether the item is being added or removed. if True, the item is being added, if False, the item is being removed.
-    	quantity = self.inventory.get(Item,0)
-    	if add == True:
-    		quantity += 1
-    	else:
-    		quantity += -1
-    	self.inventory[Item] = quantity
-    	if quantity == 0:
-    		del self.inventory[Item]
+    def editinventory(self,item,add=True): #add is whether the item is being added or removed. if True, the item is being added, if False, the item is being removed.
+        if item.autouse:
+            item.use(self)
+            return
+        quantity = self.inventory.get(item,0)
+        if add == True:
+            quantity += 1
+        else:
+            quantity += -1
+        self.inventory[item] = quantity
+        if quantity == 0:
+            del self.inventory[item]
 
     def incrementSong(self):    # switches to the next song
-        if len(self.availableSong) > 0:
+        if len(self.availableSong) > 1:
             self.song, self.lastSong = (self.nextSong, self.song)
             newSongIdx = self.availableSong.index(self.song)+1
             self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
 
     def decrementSong(self):    # switches to the last song
-        if len(self.availableSong) > 0:
+        if len(self.availableSong) > 1:
             self.song, self.nextSong = (self.lastSong, self.song)
             newSongIdx = self.availableSong.index(self.song)-1
             self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
 
     def learnSong(self, songNum):   # adds a new song to the player's arsenal
-        self.availableSong.append(songNum)
-        newSongIdx = self.availableSong.index(self.song)+1
-        self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
-        newSongIdx = self.availableSong.index(self.song)-1
-        self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
+        if songNum in self.availableSong:
+            return "You already know the {} song.".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+        elif len(self.availableSong) == 0:
+            self.availableSong.append(songNum)
+            self.song = songNum
+            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+        else:
+            self.availableSong.append(songNum)
+            newSongIdx = self.availableSong.index(self.song)+1
+            self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
+            newSongIdx = self.availableSong.index(self.song)-1
+            self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
+            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
 
     def playSong(self):
         if self.song == 0:      # basic attack
@@ -201,6 +232,8 @@ class Player(Entity):
 
     def damaged(self,damage):
         self.healCooldown = 10
+        if damage < 0:  # damage for negative damage is not a thing
+            return
         Entity.damaged(self,damage)
 
     def update(self):   # just kind of moves you around
@@ -322,20 +355,22 @@ class Player(Entity):
         self.flatDamage, self.damageRange = (49,1)  # avg damage = 50
         coords = (self.x, self.y)
         direc = self.directionCoordinates[self.direction]
-        self.hasBullet = False
+        self.hasBullet = False  # you can only do it once
         for i in range(6):
             coords = (coords[0]+direc[0], coords[1]+direc[1])
             if self.model.monstercoords.has_key(coords):
-                self.attack(self.model.monstercoords[coords])
-                self.model.interp_action("You put your singular bullet into the {}.".format(self.model.monstercoords[coords].name))
+                self.attack(self.model.monstercoords[coords])   # it will pretty much instakill anything
+                self.model.interp_action("You put your singular bullet into {}.".format(self.model.monstercoords[coords].name))
                 return
             elif self.model.getBlock(*coords).collides:
-                if type(self.model.getBlock(*coords)).__name__ == "Glass":
+                if type(self.model.getBlock(*coords)).__name__ == "Glass":  # bullets break glass
                     self.model.grid[coords[1]][coords[0]] = terrainUtils.Floor()
                 self.model.interp_action("You fire your singular bullet at the wall.")
                 return
         self.model.interp_action("You fire your only bullet but fail to hit anything.")
 
+    def open_menu(self):
+        pass
         
 
 """Monster Subclass"""
@@ -345,11 +380,11 @@ class Monster(Entity):
         Entity.__init__(self,model,x,y, monstercoords)
         self.aggro = False
         self.seen = False #With large numbers of monsters, we want them idle when out of player vision
-        self.name = None
         self.seenrange = 8
         self.aggrorange = 2
         self.player = player
         self.distance = 0   # it moves when this reaches 256
+        self.name = self.newName()
 
     def __str__(self):
         return self.name
@@ -363,7 +398,7 @@ class Monster(Entity):
             # self.aggro = True
 
     def passiveMove(self): # decides where to move and sets its variables accordingly
-        if randint(1,3) == 1 or self.effect.get("ignited", False):
+        if randint(1,2) == 1 or self.effect.get("ignited", False):
             direction = ["R","D","L","U"]
             self.direction = choice(direction)
             self.moving = True
@@ -374,7 +409,7 @@ class Monster(Entity):
         delX, delY = (self.x-self.player.x, self.y-self.player.y)
         matchX = (self.x-int(math.copysign(1,delX)), self.y) # where it will go if it wants to match X
         matchY = (self.x, int(self.y-math.copysign(1,delY))) # where it will go if it wants to match Y
-        if self.monstercoords.has_key(matchX) or self.model.grid[matchX[1]][matchX[0]].collides:      # matching X is no good
+        if self.monstercoords.has_key(matchX) or self.model.grid[matchX[1]][matchX[0]].collides:      # matching X is no good (either a monster exists in that coordinate or it collides)
             self.direction = {1:"U",-1:"D"}[math.copysign(1,delY)]                              # so go vertical
         elif self.monstercoords.has_key(matchY) or self.model.grid[matchY[1]][matchY[0]].collides:    # matching Y is no good
             self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]                              # so go horizontal
@@ -403,21 +438,19 @@ class Monster(Entity):
             if self.distance >= 256:
                 self.distance -= 256
                 self.decide()
-        if self.effect.get("ignited",False) and randint(1,3) == 1:  # if you are on fire
-            self.health -= 2                                        # you might take damage
-            if randint(1,35) == 1:
-                self.effect["ignited"] = False
         Entity.update(self)
 
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
+
+    def newName(self):      # thinks of a new name
+        return "missingno"
 
 
 
 class Zombie(Monster):
     def __init__(self,x,y, player, grid, monstercoords):
         Monster.__init__(self, x,y, player, grid, monstercoords)
-        self.name = "Zombie"
         self.health = 10
         self.accuracy = 3
         self.damageRange = 3
@@ -429,11 +462,19 @@ class Zombie(Monster):
         else:
             self.sprite = 3
 
+    def newName(self):
+        if randint(1,1000) == 1:
+            return "Michael Jackson"
+        else:
+            consonants = ["K","Kr","G","G","B","Br","M","F","P","Ch"]
+            vowels = ["a","u","oo","e","o","ou","er"]
+            endings = ["gh","m","r","p","ng","h",""]
+            return choice(consonants)+choice(vowels)+choice(endings)
+
 
 class Ghost(Monster):
     def __init__(self,x,y, player, grid, monstercoords):
         Monster.__init__(self, x,y, player, grid, monstercoords)
-        self.name = "Ghost"
         self.health = 6
         self.accuracy = 4
         self.damageRange = 2
@@ -456,41 +497,101 @@ class Ghost(Monster):
         else:                                                       # vice versa
             self.direction = {1:"L",-1:"R"}[math.copysign(1,delX)]  # so go horizontal
 
-    def update(self):
-        self.distance += self.speed
-        if self.distance >= 256:
-            self.distance -= 256
-            self.decide()
-        self.prex, self.prey = (self.x, self.y)
-        if self.moving and not self.monstercoords.has_key(self.facingCoordinates()):
-            self.x, self.y = self.facingCoordinates()
-        self.moving = False
+    def canMoveTo(self, x, y):
+        if self.model.player.x == x and self.model.player.y == y:
+            return False    # you cannot walk into the player
+        if self.monstercoords.has_key((x,y)):
+            if type(self).__name__ == "Player" and type(self.monstercoords[(x,y)]).__name__ == "Skeleton" and self.monstercoords[(x,y)].timer > 0:
+                return True
+            else:
+                return False    # you cannot walk through other monsters (an exception is made for jumping over skeletons)
+        return True
+
+    def newName(self):
+        if randint(1,1000) == 1:
+            return "Esteban Juan Julio Billybob Thorton Jr. III"
+        else:
+            return choice(["Bob","Bill","Joe","Jim","Frank","Jeff","Sally","Sue","Jane","Susan","Linda","Barbara","Mr. Smith","Ms. Doe","Mr. Doe","Ms. Smith"])
 
 
 class Demon(Monster):
     def __init__(self,x,y, player, model, monstercoords):
         Monster.__init__(self, x,y, player, model, monstercoords)
-        self.name = "Demon"
         self.health = 15
         self.accuracy = 1
-        self.damageRange = 6
-        self.flatDamage = 2
+        self.damageRange = 5
+        self.flatDamage = 8
         self.armor = 5
-        self.speed = 64
+        self.speed = 32
         self.sprite = 0
+        self.attackCoords = None
+        self.aggrorange = 5
+        self.attackWarmup = -1
+
+    def decide(self):
+        self.checkstatus()
+        if self.aggro == True:
+            if self.seen and randint(1,3) == 1:
+                self.attackWarmup = 5
+                self.sprite = 5
+                self.attackCoords = (self.player.x, self.player.y)
+            else:
+                self.aggressiveMove()
+        elif self.seen == True:
+            self.passiveMove()
+
+    def update(self):
+        if self.attackWarmup >= 0:
+            self.attackWarmup -= 1
+        if self.attackWarmup == 0 and self.attackCoords == (self.player.x,self.player.y):
+            self.attack(self.player)
+            self.sprite = 0
+        Monster.update(self)
+
+    def newName(self):
+        if randint(1,1000) == 1:
+            return "Kazaakthpilik"
+        else:
+            consonants = ["K","Th","Qu","Kh","P","T","D","V","M","N","'","F","J","R","Ng","L","Z","L"]
+            vowels = ["a","e","i","o","u","y","ae","oa","oe"]
+            endings = ["m","r","k","th","q","ng","w","b","c","h","","",""]
+            name = choice(consonants)+choice(vowels)
+            for i in range(0,randint(1,3)):
+                name = name+choice(consonants).lower()+choice(vowels)
+            return name+choice(endings)
 
 
 class Skeleton(Monster):
     def __init__(self,x,y, player, model, monstercoords):
         Monster.__init__(self, x,y, player, model, monstercoords)
-        self.name = "Skeleton"
         self.health = 20
         self.accuracy = 5
-        self.damageRange = 1
-        self.flatDamage = 4
+        self.damageRange = 2
+        self.flatDamage = 3
         self.armor = 10
         self.speed = 100
-        self.sprite = 0
+        self.sprite = 7
+        self.timer = 0
+
+    def update(self):
+        if self.timer <= 0: # only update if alive
+            self.sprite = 7
+            Monster.update(self)
+            self.jumpable = False
+        if self.timer > 0:
+            self.timer -= 1
+        if self.health <= 0:
+            self.health = 20
+            self.speed += 20
+            self.sprite = 8
+            self.timer = 20
+            self.jumpable = True
+
+    def newName(self):
+        if randint(1,1000) == 1:
+            return "Spooky Scary Skeleton"
+        else:
+            return "No. {:03d}".format(randint(1,999))
 
 
 """NPC Subclass"""
@@ -517,8 +618,9 @@ class NPC(Monster): # people who do not take damage, and have dialogue
 #The group of NPCs is in another, and then the monsters and such are in a third.  
 
 class MrE(NPC):
-    def __init__(self, model, x, y, player, checklist):
+    def __init__(self, model, x, y, player, checklist, position=0):
         NPC.__init__(self, model, x, y, player, checklist, "Mr. E", 4)
+        self.position = position # the part of the story this one Mr. E belongs to
 
     def interact(self,player):
         if not self.checklist.state["player_Named"]:
@@ -537,129 +639,147 @@ class MrE(NPC):
             return "$D008"
         elif not self.checklist.state["tutorial_quest_finished"]:
             return "$D007"
-        elif not self.checklist.state["kerberoge_start"]:
+        elif self.position == 0 and not self.checklist.state["kerberoge_start"]:
             return "$D009"
+        elif not self.checklist.state["kerberoge_defeated"]:
+            return "$D010"
+        else:
+            return "$D011"
+
     def post_dialogue_action(self, conv_id):
         if conv_id == 1:
-            name = raw_input("What is your name?")
+            name = raw_input("What is your name? ")
             self.player.name = name
             self.checklist.eventcomplete("player_Named")
-            return
-        if conv_id == 2:
+            pygame.event.clear()
+            self.model.interp_action("$D002")
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
         elif conv_id == 4:
             self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
             self.player.learnSong(0)
-            #self.player.learnSong(5)
         elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
+            self.model.save("saves/last_save.dun")
         elif conv_id == 6:
             self.checklist.eventcomplete("tutorial_Dialogue006_Finished")
         elif conv_id == 8:
             self.checklist.eventcomplete("tutorial_quest_finished")
+            newX, newY = self.model.savePoints[1]
+            newX += math.copysign(2,self.x-newX)
+            newY += math.copysign(2,self.y-newY)
+            self.model.monstercoords[(newX,newY)] = MrE(self.model, newX,newY, self.player,self.checklist, 1)
+        elif conv_id == 10:
+            self.checklist.eventcomplete("kerberoge_defeated")
+            self.player.learnSong(2)
+            self.player.learnSong(4)
+            self.player.learnSong(6)
 
 
 """Entity Related Subclasses that aren't entities"""
-
-# allows easy creation/organization of different attacks and their stats (useful if a creature has more than one attack)
-class Attack(Entity):
-	def __init__(self,preattack,attack,postattack,damage,range,accuracy):
-		pass
-
 class Effect(object):
-	def __init__(self,effect_type,effect_description,effect_value=10,effect_specific=None):
-		self.effect_type = effect_type
-		self.effect_value = effect_value
-		self.effect_description = effect_description
-		self.no_effect_description = "It doesn't seem to do anything."
-		self.effect_specific = effect_specific
-	def effect_on(self,Entity):
-		if self.effect_type == 'heal':
-			if Entity.health < Entity.maxhealth:
-				if Entity.health + self.effect_value < Entity.maxhealth:
-					Entity.health += self.effect_value
-				else:
-					Entity.health = Entity.maxhealth
-			else:
-				return self.no_effect_description
-		elif self.effect_type == 'cure':
-			if self.effect_specific == None:
-				Entity.effect = dict()
-				Entity.health = Entity.maxhealth
-			elif Entity.effect[self.effect_specific] == True:
-				Entity.effect[self.effect_specific] = False
-				Entity.health += self.effect_value-10
-			else:
-				return self.no_effect_description
-		return self.effect_description
-		#add in other effects as we come up with them
+    def __init__(self,effect_type,effect_description,effect_value=10,effect_specific=None):
+        self.effect_type = effect_type
+        self.effect_value = effect_value
+        self.effect_description = effect_description
+        self.no_effect_description = "It doesn't seem to do anything."
+        self.effect_specific = effect_specific
+    def effect_on(self,Entity):
+        if self.effect_type == 'heal':
+            if Entity.health < Entity.maxhealth:
+                if Entity.health + self.effect_value < Entity.maxhealth:
+                    Entity.health += self.effect_value
+                else:
+                    Entity.health = Entity.maxhealth
+            else:
+                return self.no_effect_description
+        elif self.effect_type == 'cure':
+            if self.effect_specific == None:
+                Entity.effect = dict()
+                Entity.health = Entity.maxhealth
+            elif Entity.effect[self.effect_specific] == True:
+                Entity.effect[self.effect_specific] = False
+                Entity.health += self.effect_value-10
+            else:
+                return self.no_effect_description
+        return self.effect_description
+        #add in other effects as we come up with them
 
 class Item(object):
-	def __init__(self,name,description,use_description='What are you going to do with that?',effect=None,target=None,image=None):
-		self.name = name
-		self.description = description
-		self.use_description = use_description
-		self.effect = effect
-		self.image = image
-		self.target = target
-	def __str__(self):
-		return self.name
-	def read_description(self):
-		return self.description
-	def pickup(self,Entity):
-		s = ' '
-		Entity.editinventory(self.name)
-		return s.join([Entity.name,'picks up',self.description])
-		# need to remove item from map
-	def use(self,Entity):
-		if Entity.inventory.get(self.name,0) > 0:
-			if self.effect is not None:
-				Entity.editinventory(self.name,False)
-				return self.use_description + self.effect.effect_on(Entity)
-			return self.use_description
-		else:
-			return "You don't have that."
+    def __init__(self,name,description,use_description='What are you going to do with that?',effect=None,target=None,image=None,autouse=False):
+        self.name = name
+        self.description = description
+        self.use_description = use_description
+        self.effect = effect
+        self.image = image
+        self.target = target
+        self.autouse = autouse
+    def __str__(self):
+        return self.name
+    def read_description(self):
+        return self.description
+    def pickup(self,Entity):
+        s = ' '
+        Entity.editinventory(self.name)
+        return s.join([Entity.name,'picks up',self.description])
+        # need to remove item from map
+    def use(self,Entity):
+        if Entity.inventory.get(self.name,0) > 0:
+            if self.effect is not None:
+                Entity.editinventory(self.name,False)
+                return self.use_description + self.effect.effect_on(Entity)
+            return self.use_description
+        else:
+            return "You don't have that."
 
 class Potion(Item):
-	def __init__(self,effect_type,effect_class=1,effect_specific = None,image=None):
-		self.effect_type = effect_type 
-		self.effect_class = effect_class	# effect class is the 'strength' of the potion. 1 is normal, 2 is really good.
-		self.effect_specific = effect_specific
-		s = ' '
-		p = ''
-		if effect_class == 1:
-			color_description = 'murky'
-			name_description = 'Weird'
-			end_description = 'It looks pretty gross.'
-			use_description = 'It tastes about how you expected. '
-			other_description = "It's nice to not be"
-		else:
-			color_description = 'clear'
-			name_description = 'Clear'
-			end_description = 'It actually looks drinkable.'
-			use_description = 'It tastes surprisingly nice. '
-			other_description = 'You actually feel better than you did before you were'
-		if effect_type == 'heal':
-			color = 'green'
-			self.effect_description = 'You feel rejuvinated! Whew!'
-			other_description = ''
-		elif effect_type == 'cure':
-			if effect_specific == 'poisoned':
-				color = 'blue'
-				self.effect_description = s.join(['You feel the poison leaving your body. What a relief!', other_description, p.join([effect_specific,'!'])])
-			elif effect_specific == 'paralyzed':
-				color = 'amber'
-				self.effect_description = s.join(["You can move freely again!",other_description, 'paralyzed!'])
-			else:
-				color = 'red'
-				self.effect_description = 'You feel better than you have ever felt!'
+    def __init__(self,effect_type,effect_class=1,effect_specific = None,image=None):
+        self.effect_type = effect_type 
+        self.effect_class = effect_class    # effect class is the 'strength' of the potion. 1 is normal, 2 is really good.
+        self.effect_specific = effect_specific
+        s = ' '
+        p = ''
+        if effect_class == 1:
+            color_description = 'murky'
+            name_description = 'Weird'
+            end_description = 'It looks pretty gross.'
+            use_description = 'It tastes about how you expected. '
+            other_description = "It's nice to not be"
+        else:
+            color_description = 'clear'
+            name_description = 'Clear'
+            end_description = 'It actually looks drinkable.'
+            use_description = 'It tastes surprisingly nice. '
+            other_description = 'You actually feel better than you did before you were'
+        if effect_type == 'heal':
+            color = 'green'
+            self.effect_description = 'You feel rejuvinated! Whew!'
+            other_description = ''
+        elif effect_type == 'cure':
+            if effect_specific == 'poisoned':
+                color = 'blue'
+                self.effect_description = s.join(['You feel the poison leaving your body. What a relief!', other_description, p.join([effect_specific,'!'])])
+            elif effect_specific == 'paralyzed':
+                color = 'amber'
+                self.effect_description = s.join(["You can move freely again!",other_description, 'paralyzed!'])
+            else:
+                color = 'red'
+                self.effect_description = 'You feel better than you have ever felt!'
 
-		ncolor = color.capitalize()
-		self.description = s.join(['a vial filled with a',color_description,color,'liquid.',end_description])
-		self.name = s.join([name_description,ncolor,'Potion'])
-		self.use_description = s.join(['You drink the',p.join([self.name,'.']),use_description])
-		self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
-		self = Item(self,self.name,self.description,self.use_description,self.effect)
+        ncolor = color.capitalize()
+        self.description = s.join(['a vial filled with a',color_description,color,'liquid.',end_description])
+        self.name = s.join([name_description,ncolor,'Potion'])
+        self.use_description = s.join(['You drink the',p.join([self.name,'.']),use_description])
+        self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
+        self = Item(self,self.name,self.description,self.use_description,self.effect)
+
+class MusicSheet(Item):
+    def __init__(self, songNum):
+        Item.__init__(self,["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum]+" song sheet","A brief song written for guitar.",autouse=True)
+        self.num = songNum
+
+    def use(self,entity):
+        entity.learnSong(self.num)
+
 
 if __name__ == "__main__":
     player = Player("model", 0,0)
