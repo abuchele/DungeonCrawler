@@ -69,7 +69,7 @@ Mr.E: Ugh.  I'm so ashamed.  But I couldn't think of anything else.  As much as 
 end_0006
 
 id=0007
-Mr.E: What?  You're not done yet.  Don't come back until you finish!$$
+Mr.E: What?  You're not done yet.  Don't come back until you slay 3 monsters!$$
 end_0007
 
 id=0008
