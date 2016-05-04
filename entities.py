@@ -646,11 +646,12 @@ class MrE(NPC):
             return "$D011"
 
     def post_dialogue_action(self, conv_id):
+        pygame.event.clear()
         if conv_id == 1:
             name = raw_input("What is your name? ")
+            pygame.event.clear()
             self.player.name = name
             self.checklist.eventcomplete("player_Named")
-            pygame.event.clear()
             self.model.interp_action("$D002")
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
         elif conv_id == 4:
