@@ -229,9 +229,11 @@ class Loot(Block):
 			self.sprite = 12
 			self.contents = []
 			if rng.random() < 0.5:
-				self.contents.append(entities.Item('Frog',"a frog. It isn't moving. Is it dead?",)) #contents can be a list of stuff
+				self.contents.append(entities.Item('Frog',"a frog. It isn't moving. Is it dead?")) #contents can be a list of stuff
 			if rng.random() < 0.2:
 				self.contents.append(entities.MusicSheet(rng.choice([1,3,5])))	# chests can have odd songs
+			if rng.random() < 0.95:
+				self.contents.append(entities.Potion('cure',1,'poisoned'))
 
 	def __str__(self):
 		return "[]"
