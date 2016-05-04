@@ -20,7 +20,7 @@ if __name__ == '__main__':
     screenX = 1080
     screenY = 720
     size = (screenX, screenY)
-    delay = 0.15
+    delay = 0.15 #length of each tick
     
     if raw_input("Would you like to start where you left off? [Y/n]") != "n":
         model = loadDungeon()

@@ -107,7 +107,7 @@ class Entity(object):
                 return False    # you cannot walk through other monsters (an exception is made for jumping over skeletons)
         return True
 
-    def update(self):
+    def update(self): #handles movement, attack cooldowns, burning and lava
         self.prex, self.prey = (self.x, self.y)
         if self.moving and self.canMoveTo(*self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
@@ -129,11 +129,11 @@ class Entity(object):
 
 class Player(Entity):
     def __init__(self,model,monstercoords,x,y, name = "Ray"):
-        Entity.__init__(self,model,x,y, monstercoords) #grid is a global variable which needs to be defined before initializing any entities.
+        Entity.__init__(self,model,x,y, monstercoords)
         self.health = 100
         self.maxhealth = 100
         self.armor= 10
-        self.accuracy = 20
+        self.accuracy = 20 #player can't miss - you already have to aim
         self.flatDamage = 2
         self.damageRange = 5
         self.damageMod = 2
@@ -242,7 +242,7 @@ class Player(Entity):
             self.healCooldown -= 1
         elif self.health < 100:
             self.health += 1
-        Entity.update(self)
+        Entity.update(self) #handles movement, attack cooldowns, burning and lava
 
     def playSong0(self):    # basic attack
         self.earshot = [self.facingCoordinates()]   # you attack the block in front of you
@@ -434,11 +434,11 @@ class Monster(Entity):
             if randint(1,35) == 1:             # you cannot move
                 self.effect["stunned"] = False
         else:
-            self.distance += self.speed
-            if self.distance >= 256:
-                self.distance -= 256
-                self.decide()
-        Entity.update(self)
+            self.distance += self.speed     #different monsters have different speeds, so they 'fill up' distance at different rates
+            if self.distance >= 256:    #when distance is filled up:
+                self.distance -= 256    #reset distance
+                self.decide()           #monster takes an action
+        Entity.update(self)             #handles movement, attack cooldowns, burning and lava
 
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
