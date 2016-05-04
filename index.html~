@@ -31,8 +31,8 @@
 
       <section>
         <div id="title">
-          <h1>Dungeoncrawler</h1>
-          <p>Generates terrain onto a spherical surface.</p>
+          <h1>Dungeon Crawler</h1>
+          <p>An amnesiac adventure!</p>
           <hr>
           <span class="credits left">Project maintained by <a href="https://github.com/abuchele">abuchele</a></span>
           <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
@@ -41,7 +41,9 @@
         <h1>
 <a id="dungeoncrawler" class="anchor" href="#dungeoncrawler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DungeonCrawler</h1>
 
-<p>Woo! Content! </p><a href="page.html">I am a link!</a>
+<p>Dungeon Crawler (patent pending) is a cleverly named 2-dimensional role-playing game reminicient of The Legend of Zelda.</p>
+<p>Download it <a href="https://github.com/abuchele/DungeonCrawler">here</a>!</p>
+<p>Until I figure out the ribbon, here are some links: <a href="about.html">About Us</a> | <a href="details.html">How does it work?</a> | <a href="howtoplay.html">Instructions</a> | <a href="story.html">Story</a></p>
       </section>
 
     </div>

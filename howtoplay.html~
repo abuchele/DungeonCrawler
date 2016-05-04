@@ -39,11 +39,16 @@
         </div>
 
         <h1>
-<a id="dungeoncrawler" class="anchor" href="#dungeoncrawler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DungeonCrawler</h1>
+<a id="dungeoncrawler" class="anchor" href="#dungeoncrawler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions</h1>
 
-<p>Dungeon Crawler (patent pending) is a cleverly named 2-dimensional role-playing game reminicient of The Legend of Zelda.</p>
-<p>Download it <a href="https://github.com/abuchele/DungeonCrawler">here</a>!</p>
-<p>Until I figure out the ribbon, here are some links: <a href="about.html">About Us</a> | <a href="details.html">How does it work?</a> | <a href="howtoplay.html">Instructions</a> | <a href="story.html">Story</a></p>
+<p>To play Dungeon Crawler (patent pending), simply follow the following instructions:</p>
+<ol>
+  <li>Download the ZIP file <a href="https://github.com/abuchele/DungeonCrawler/zipball/master">here</a>, or the TAR file <a href="https://github.com/abuchele/DungeonCrawler/tarball/master">here</a>.</li>
+  <li>Extract the files to wherever you want and open up the folder.</li>
+  <li>Run _DungeonCrawler_.exe.*</li>
+  <li>Profit.</li>
+</ol>
+<p>*DISCLAIMER: this file does not exist yet. If today is after 5/5/2016.</p>
       </section>
 
     </div>
