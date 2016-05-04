@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+
 import time
 import pygame
 import pickle
@@ -21,22 +24,27 @@ if __name__ == '__main__':
     screenY = 720
     size = (screenX, screenY)
     delay = 0.15 #length of each tick
-    
-    if raw_input("Would you like to start where you left off? [Y/n]") != "n":
-        model = loadDungeon()
-    else:
-        model = coreMechanics.Dungeon(120, 120, method="whole")
-        #model = pickle.load(open("saves/pregeneratedDungeon.dun",'r'))
 
     screen = pygame.display.set_mode(size)
+    screen.blit(pygame.image.load("HUD_sprites/Opening.png"),(0,0)) # the opening screen
+    pygame.display.update()
+    
+    running = False
+    while not running:  # start by determining where to load the dungeon from
+        for event in pygame.event.get():
+            if event.type == pygame.locals.KEYDOWN:
+                if event.key == pygame.K_y:     # last save,
+                    model = loadDungeon()
+                    running = True
+                elif event.key == pygame.K_n:
+                    model = coreMechanics.Dungeon(120, 120, method="whole")
+                    running = True                  # or brand new one?
+
     view = DungeonModelView(model, screen, size)
     controller = PyGameKeyboardController(model)
     events = []
-
-    running = True
-    view.update()
+    view.update()   # then jump into the main loop
     while running:
-
         start_time = time.time()                        # start the timer
         end_time = start_time+delay
 

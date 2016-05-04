@@ -154,16 +154,16 @@ class Player(Entity):
 
     def editinventory(self,item,add=True): #add is whether the item is being added or removed. if True, the item is being added, if False, the item is being removed.
         if item.autouse:
-            item.use(self)
+            self.model.interp_action(item.use(self))
             return
-        quantity = self.inventory.get(item,0)
+        quantity = self.inventory.get(item.name,0)
         if add == True:
             quantity += 1
         else:
             quantity += -1
-        self.inventory[item] = quantity
+        self.inventory[item.name] = quantity
         if quantity == 0:
-            del self.inventory[item]
+            del self.inventory[item.name]
 
     def incrementSong(self):    # switches to the next song
         if len(self.availableSong) > 1:
@@ -179,18 +179,21 @@ class Player(Entity):
 
     def learnSong(self, songNum):   # adds a new song to the player's arsenal
         if songNum in self.availableSong:
-            return "You already know the {} song.".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+            return "You already know the {} song.".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum])
         elif len(self.availableSong) == 0:
             self.availableSong.append(songNum)
             self.song = songNum
-            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum])
         else:
-            self.availableSong.append(songNum)
+            i = 0
+            while i < len(self.availableSong) and self.availableSong[i] < songNum:  # decides where to insert this new song
+                i += 1
+            self.availableSong.insert(i,songNum)
             newSongIdx = self.availableSong.index(self.song)+1
             self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
             newSongIdx = self.availableSong.index(self.song)-1
             self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
-            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum])
 
     def playSong(self):
         if self.song == 0:      # basic attack
@@ -207,6 +210,8 @@ class Player(Entity):
             self.playSong5()
         elif self.song == 6:    # octothorpe attack
             self.playSong6()
+        elif self.song == 7:
+            self.playSong7()
         else:
             raise TypeError("{} is not a defined song!".format(self.song))
 
@@ -214,10 +219,7 @@ class Player(Entity):
         if not self.moving:   # if the player has not moved
             self.steps = 0    # then they use the standing sprite
         else:
-            if self.steps is not 2:
-                self.steps += 1
-            else:
-                self.steps = 1
+            self.steps = (self.steps+1)%6
         if self.direction == "U":
             return (0,self.steps)
         elif self.direction == "D":
@@ -347,6 +349,14 @@ class Player(Entity):
         for place_to_attack in self.earshot:
             if self.monstercoords.has_key(place_to_attack):
                 self.attack(self.monstercoords[place_to_attack])
+
+    def playSong7(self):    # glass breaking attack
+        self.attackCooldown = 16
+        self.attackSpeed = self.attackCooldown
+        coords = self.facingCoordinates()
+        self.earshot = [coords]
+        if type(self.model.getBlock(*coords)).__name__ == "Glass":  # breaking glass is the only thing it does
+                    self.model.grid[coords[1]][coords[0]] = terrainUtils.Floor()
 
     def shoot(self):    # gun
         self.flatDamage, self.damageRange = (49,1)  # avg damage = 50
@@ -540,8 +550,11 @@ class Demon(Monster):
     def update(self):
         if self.attackWarmup >= 0:
             self.attackWarmup -= 1
-        if self.attackWarmup == 0 and self.attackCoords == (self.player.x,self.player.y):
-            self.attack(self.player)
+        if self.attackWarmup == 0:
+            if self.attackCoords == (self.player.x,self.player.y):
+                self.attack(self.player)
+            elif self.monstercoords.has_key(self.attackCoords):
+                self.attack(self.monstercoords[self.attackCoords])
             self.sprite = 0
         Monster.update(self)
 
@@ -648,7 +661,12 @@ class MrE(NPC):
     def post_dialogue_action(self, conv_id):
         pygame.event.clear()
         if conv_id == 1:
-            name = raw_input("What is your name? ")
+            name = ""
+            if self.model.terminal:
+                while len(name) <= 0:
+                    name = raw_input("What is your name? ")
+            else:
+                name = "Ray"
             pygame.event.clear()
             self.player.name = name
             self.checklist.eventcomplete("player_Named")
@@ -656,7 +674,7 @@ class MrE(NPC):
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
         elif conv_id == 4:
             self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
-            self.player.learnSong(0)
+            self.model.interp_action(self.player.learnSong(0))
         elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
             self.model.save("saves/last_save.dun")
@@ -670,9 +688,10 @@ class MrE(NPC):
             self.model.monstercoords[(newX,newY)] = MrE(self.model, newX,newY, self.player,self.checklist, 1)
         elif conv_id == 10:
             self.checklist.eventcomplete("kerberoge_defeated")
-            self.player.learnSong(2)
-            self.player.learnSong(4)
-            self.player.learnSong(6)
+            self.model.interp_action(self.player.learnSong(7))
+            self.model.interp_action(self.player.learnSong(4))
+            self.model.interp_action(self.player.learnSong(2))
+            self.model.interp_action(self.player.learnSong(6))
 
 
 """Entity Related Subclasses that aren't entities"""
@@ -719,7 +738,7 @@ class Item(object):
         return self.description
     def pickup(self,Entity):
         s = ' '
-        Entity.editinventory(self.name)
+        Entity.editinventory(self)
         return s.join([Entity.name,'picks up',self.description])
         # need to remove item from map
     def use(self,Entity):
@@ -770,19 +789,29 @@ class Potion(Item):
         self.name = s.join([name_description,ncolor,'Potion'])
         self.use_description = s.join(['You drink the',p.join([self.name,'.']),use_description])
         self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
-        self = Item(self,self.name,self.description,self.use_description,self.effect)
+        # self = Item(self,self.name,self.description,self.use_description,self.effect)
+        Item.__init__(self,self.name,self.description,self.use_description,self.effect)
 
 class MusicSheet(Item):
     def __init__(self, songNum):
-        Item.__init__(self,["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum]+" song sheet","A brief song written for guitar.",autouse=True)
+        Item.__init__(self,["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum]+" song sheet","A brief song written for guitar.",autouse=True)
         self.num = songNum
 
     def use(self,entity):
-        entity.learnSong(self.num)
+        return entity.learnSong(self.num)
 
 
-# if __name__ == "__main__":
-#     player = Player("model", 0,0)
+if __name__ == "__main__":
+    a = Player("model", "monstercoords", 0,0, "Ray")
+    print a.inventory
+    potion1 = Potion('heal')
+    potion2 = Potion('cure',1,'poisoned')
+    potion3 = Potion('cure',1,'poisoned')
+    # print repr(potion1)
+    # print potion1
+    potion1.pickup(a)
+    potion2.pickup(a)
+    potion3.pickup(a)
 #     d = []
 #     for i in range (5):
 #         zombie = Zombie(randint(1,20),randint(1,20), player, "model")
@@ -796,12 +825,13 @@ class MusicSheet(Item):
 #     print player.attack(c)
 #     print c.attack(player)
     # print a.inventory
-    # jar = Item('Jar','an empty glass jar.')
-    # print jar.pickup(a)
-    # print a.inventory
-    # frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
-    # print frog.pickup(a)
-    # print a.inventory
+    jar = Item('Jar','an empty glass jar.')
+    jar.pickup(a)
+    print jar.read_description()
+    print a.inventory
+    frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
+    frog.pickup(a)
+    print a.inventory
     # print frog.use(a)
     # heal = Potion('cure',1,'poisoned')
     # print heal.pickup(a)
