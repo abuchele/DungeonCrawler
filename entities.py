@@ -578,10 +578,12 @@ class Skeleton(Monster):
             self.sprite = 7
             Monster.update(self)
             self.jumpable = False
+        else:
+            self.moving = False
         if self.timer > 0:
             self.timer -= 1
         if self.health <= 0:
-            self.health = 20
+            self.health = 15
             self.speed += 20
             self.sprite = 8
             self.timer = 20
@@ -781,20 +783,20 @@ class MusicSheet(Item):
         entity.learnSong(self.num)
 
 
-if __name__ == "__main__":
-    player = Player("model", 0,0)
-    d = []
-    for i in range (5):
-        zombie = Zombie(randint(1,20),randint(1,20), player, "model")
-        d.append(zombie)
-    for monster in d:
-        monster.checkstatus()
-        print (monster.x,monster.y),monster.seen,monster.aggro
+# if __name__ == "__main__":
+#     player = Player("model", 0,0)
+#     d = []
+#     for i in range (5):
+#         zombie = Zombie(randint(1,20),randint(1,20), player, "model")
+#         d.append(zombie)
+#     for monster in d:
+#         monster.checkstatus()
+#         print (monster.x,monster.y),monster.seen,monster.aggro
 
-    c = Ghost(2,2, player, "model")
-    # print b.attack(a)
-    print player.attack(c)
-    print c.attack(player)
+#     c = Ghost(2,2, player, "model")
+#     # print b.attack(a)
+#     print player.attack(c)
+#     print c.attack(player)
     # print a.inventory
     # jar = Item('Jar','an empty glass jar.')
     # print jar.pickup(a)
