@@ -50,6 +50,6 @@ if __name__ == '__main__':
             view.setModel(model)
         
         events = [] # I know what you're thinking: "What is this convoluted events variable? pygame does all that automatically. This variable should be entirely unnecessary to make the game function properly." to which I respond, "Yes, it should."
-        while time.time() < end_time:
+        while time.time() < end_time: #after each update is called, this while loop runs for (delay) seconds before the next update can happen
             events = events+pygame.event.get()
             view.display((time.time()-start_time)/delay)
