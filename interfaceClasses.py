@@ -1,5 +1,5 @@
 import pygame
-from pygame.locals import QUIT, KEYDOWN, MOUSEMOTION
+from pygame.locals import QUIT, KEYDOWN
 import pygame.mixer
 
 

@@ -173,7 +173,6 @@ class DungeonModelView(object):
         elif self.model.state == "K":
             self.screen.blit(self.deathScreen, (0,0))
 
-
     def compose_LOS_list(self): # does preliminary calculations for line of sight
         self.losLst = []    # the list that will determine line of sight
         for r in range(2,max(self.screenBounds[1],self.screenBounds[3])+1):

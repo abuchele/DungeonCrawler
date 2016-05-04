@@ -12,11 +12,11 @@ import time
 
 
 class Dungeon(object):
-	def __init__(self, w, h, method="whole", terminal=True):
+	def __init__(self, w, h, method="whole"):
 		self.w = w
 		self.h = h
 
-		self.terminal = terminal
+		self.terminal = True
 
 		thing = dga.generate(w,h,method)
 

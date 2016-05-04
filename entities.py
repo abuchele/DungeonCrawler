@@ -154,7 +154,7 @@ class Player(Entity):
 
     def editinventory(self,item,add=True): #add is whether the item is being added or removed. if True, the item is being added, if False, the item is being removed.
         if item.autouse:
-            item.use(self)
+            self.model.interp_action(item.use(self))
             return
         quantity = self.inventory.get(item.name,0)
         if add == True:
@@ -210,6 +210,8 @@ class Player(Entity):
             self.playSong5()
         elif self.song == 6:    # octothorpe attack
             self.playSong6()
+        elif self.song == 7:
+            self.playSong7()
         else:
             raise TypeError("{} is not a defined song!".format(self.song))
 
@@ -796,7 +798,7 @@ class MusicSheet(Item):
         self.num = songNum
 
     def use(self,entity):
-        self.model.interp_action(entity.learnSong(self.num))
+        return entity.learnSong(self.num)
 
 
 if __name__ == "__main__":
