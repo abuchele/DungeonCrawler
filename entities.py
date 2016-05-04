@@ -179,18 +179,21 @@ class Player(Entity):
 
     def learnSong(self, songNum):   # adds a new song to the player's arsenal
         if songNum in self.availableSong:
-            return "You already know the {} song.".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+            return "You already know the {} song.".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum])
         elif len(self.availableSong) == 0:
             self.availableSong.append(songNum)
             self.song = songNum
-            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum])
         else:
-            self.availableSong.append(songNum)
+            i = 0
+            while i < len(self.availableSong) and self.availableSong[i] < songNum:  # decides where to insert this new song
+                i += 1
+            self.availableSong.insert(i,songNum)
             newSongIdx = self.availableSong.index(self.song)+1
             self.nextSong = self.availableSong[newSongIdx%len(self.availableSong)]
             newSongIdx = self.availableSong.index(self.song)-1
             self.lastSong = self.availableSong[newSongIdx%len(self.availableSong)]
-            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum])
+            return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum])
 
     def playSong(self):
         if self.song == 0:      # basic attack
@@ -214,10 +217,7 @@ class Player(Entity):
         if not self.moving:   # if the player has not moved
             self.steps = 0    # then they use the standing sprite
         else:
-            if self.steps is not 2:
-                self.steps += 1
-            else:
-                self.steps = 1
+            self.steps = (self.steps+1)%6
         if self.direction == "U":
             return (0,self.steps)
         elif self.direction == "D":
@@ -347,6 +347,14 @@ class Player(Entity):
         for place_to_attack in self.earshot:
             if self.monstercoords.has_key(place_to_attack):
                 self.attack(self.monstercoords[place_to_attack])
+
+    def playSong7(self):    # glass breaking attack
+        self.attackCooldown = 16
+        self.attackSpeed = self.attackCooldown
+        coords = self.facingCoordinates()
+        self.earshot = [coords]
+        if type(self.model.getBlock(*coords)).__name__ == "Glass":  # breaking glass is the only thing it does
+                    self.model.grid[coords[1]][coords[0]] = terrainUtils.Floor()
 
     def shoot(self):    # gun
         self.flatDamage, self.damageRange = (49,1)  # avg damage = 50
@@ -664,7 +672,7 @@ class MrE(NPC):
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
         elif conv_id == 4:
             self.checklist.eventcomplete("tutorial_Dialogue004_Finished")
-            self.player.learnSong(0)
+            self.model.interp_action(self.player.learnSong(0))
         elif conv_id == 5:
             self.checklist.eventcomplete("tutorial_Dialogue005_Finished")
             self.model.save("saves/last_save.dun")
@@ -678,9 +686,10 @@ class MrE(NPC):
             self.model.monstercoords[(newX,newY)] = MrE(self.model, newX,newY, self.player,self.checklist, 1)
         elif conv_id == 10:
             self.checklist.eventcomplete("kerberoge_defeated")
-            self.player.learnSong(2)
-            self.player.learnSong(4)
-            self.player.learnSong(6)
+            self.model.interp_action(self.player.learnSong(7))
+            self.model.interp_action(self.player.learnSong(4))
+            self.model.interp_action(self.player.learnSong(2))
+            self.model.interp_action(self.player.learnSong(6))
 
 
 """Entity Related Subclasses that aren't entities"""
@@ -783,11 +792,11 @@ class Potion(Item):
 
 class MusicSheet(Item):
     def __init__(self, songNum):
-        Item.__init__(self,["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe"][songNum]+" song sheet","A brief song written for guitar.",autouse=True)
+        Item.__init__(self,["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum]+" song sheet","A brief song written for guitar.",autouse=True)
         self.num = songNum
 
     def use(self,entity):
-        entity.learnSong(self.num)
+        self.model.interp_action(entity.learnSong(self.num))
 
 
 if __name__ == "__main__":

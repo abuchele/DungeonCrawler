@@ -23,8 +23,8 @@ class DungeonModelView(object):
         self.targetLocations = []
         self.shadowSprite = pygame.image.load("sprites/Shadow.png") # the sprite to put over explored but not visible blocks
 
-        spriteNames = [["Stand","Walk1","Walk2"], ["Back","Front","Left","Right"]]
-        self.playerSprites = [[pygame.image.load("sprites/Player"+direc+movem+".png") for movem in spriteNames[0]] for direc in spriteNames[1]]
+        spriteNames = ["Back","Front","Left","Right"]
+        self.playerSprites = [[pygame.image.load("sprites/Ray_{}_Walk{}.png".format(direc,movem)) for movem in range(0,6)] for direc in spriteNames]
         self.dotSprite = pygame.image.load("sprites/Dot.png")   # the dot for the minimap
         self.crossheir = pygame.image.load("sprites/Target.png")
         self.blastSprite = pygame.image.load("sprites/Blast.png")
