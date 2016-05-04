@@ -41,7 +41,8 @@
         <h1>
 <a id="dungeoncrawler" class="anchor" href="#dungeoncrawler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DungeonCrawler</h1>
 
-<p>Woo! Content! <a href="page.html">I am a link!<\a></p>
+<p>Woo! Content!</p>
+<p>This is a link: <a href="abuchele.github.io/DungeonCrawler/page.html">Hello!<\a><\p>
       </section>
 
     </div>
