@@ -33,13 +33,14 @@
         <div id="title">
           <h1>Dungeon Crawler</h1>
           <p>An amnesiac adventure!</p>
+          <p><a href="index.html">Home</a> | <a href="howtoplay.html">Instructions</a> | <a href="story.html">The Story</a> | <a href="details.html">Details</a> | <a href="about.html">About Us</a></p>
           <hr>
           <span class="credits left">Project maintained by <a href="https://github.com/abuchele">abuchele</a></span>
           <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
         </div>
 
         <h1>
-<a id="dungeoncrawler" class="anchor" href="#dungeoncrawler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DungeonCrawler</h1>
+<a id="dungeoncrawler" class="anchor" href="#dungeoncrawler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Details</h1>
 
 <p>Dungeon Crawler (patent pending) is built in pygame. It works on a 15 millisecond tick system that takes the last keyboard command entered at the end of each tick and uses that as the player's action for the next tick. It is essentially a realtime turn-based system. The exact class structure is described in the following UML diagram.</p>
 <p>TODO: Either make a janky ASCII UML diagram or get an actual image and figure out how to embed it</p>

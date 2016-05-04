@@ -33,6 +33,7 @@
         <div id="title">
           <h1>Dungeon Crawler</h1>
           <p>An amnesiac adventure!</p>
+          <p><a href="index.html">Home</a> | <a href="howtoplay.html">Instructions</a> | <a href="story.html">The Story</a> | <a href="details.html">Details</a> | <a href="about.html">About Us</a></p>
           <hr>
           <span class="credits left">Project maintained by <a href="https://github.com/abuchele">abuchele</a></span>
           <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
@@ -43,9 +44,9 @@
 
 <p>You wake up in a dimly-lit room with stone-brick walls. A stranger stares over you. He has obnoxiously bright white hair and some hipster-glasses.</p>
 <p>"Hey, you!"</p>
-<p>You groan and stand up. You cough and look around. You see that there are several doors leading out of this room. No one but you two.</p>
+<p>You groan and stand up. Looking around, you see that there are several doors leading out of this room. No one but you two.</p>
 <p>"Yeah, you!"</p>
-<p>You look up at the man. Where did he come from? You were alone when you...<br>What <i>were</i> you doing?<br>Where did you come from?<br>What is your name?</p>
+<p>You look up at the man. Where did he come from? You were alone when you...<br>What <i>were</i> you doing?<br>Where did you come from, anyway?<br>What is your name?</p>
 <p>There's only one way to find out.</p>
 <p><b>Dungeon Crawler</b> (patent pending) <b>!</b></p>
       </section>
