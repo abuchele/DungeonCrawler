@@ -134,9 +134,6 @@ class Player(Entity):
         self.maxhealth = 100
         self.armor= 10
         self.accuracy = 20 #player can't miss - you already have to aim
-        self.flatDamage = 2
-        self.damageRange = 5
-        self.damageMod = 2
         self.inventory = dict()
         self.name = name
         self.sprite = (0,0)
