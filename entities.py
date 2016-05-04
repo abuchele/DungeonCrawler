@@ -652,8 +652,11 @@ class MrE(NPC):
         pygame.event.clear()
         if conv_id == 1:
             name = ""
-            while len(name) <= 0:
-                name = raw_input("What is your name? ")
+            if self.model.terminal:
+                while len(name) <= 0:
+                    name = raw_input("What is your name? ")
+            else:
+                name = "Ray"
             pygame.event.clear()
             self.player.name = name
             self.checklist.eventcomplete("player_Named")

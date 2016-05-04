@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+
 import time
 import pygame
 import pickle
@@ -22,11 +25,11 @@ if __name__ == '__main__':
     size = (screenX, screenY)
     delay = 0.15 #length of each tick
     
+    #model = coreMechanics.Dungeon(120, 120, method="whole")
     if raw_input("Would you like to start where you left off? [Y/n]") != "n":
         model = loadDungeon()
     else:
         model = coreMechanics.Dungeon(120, 120, method="whole")
-        #model = pickle.load(open("saves/pregeneratedDungeon.dun",'r'))
 
     screen = pygame.display.set_mode(size)
     view = DungeonModelView(model, screen, size)
