@@ -42,14 +42,16 @@
         <h1>
 <a id="dungeoncrawler" class="anchor" href="#dungeoncrawler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instructions</h1>
 
-<p>To play Dungeon Crawler (patent pending), simply follow the following instructions:</p>
+<p>To play <b>Dungeon Crawler</b> (patent pending), simply follow the following instructions:</p>
 <ol>
   <li>Download the ZIP file <a href="https://github.com/abuchele/DungeonCrawler/zipball/master">here</a>, or the TAR file <a href="https://github.com/abuchele/DungeonCrawler/tarball/master">here</a>.</li>
   <li>Extract the files to wherever you want and open up the folder.</li>
-  <li>Execute _DungeonCrawler_.exe.*</li>
+  <li>Open the <i>_ADungeonCrawler_</i> folder</li>
+  <li>Execute <i>_ADungeonCrawler_.exe</i>.</li>
   <li>Profit.</li>
 </ol>
-<p>*DISCLAIMER: this file does not exist yet. If today is after 5/5/2016, please give the nearest team member a disapproving glare.</p>
+<p>Once you run that file, it should be self-explanantory. For reference, here are the controls:</p>
+<p>W   - Move up<br>A   - Move left<br>S   - Move down<br>D   - Move right<br>E   - Interact<br>R   - Attack<br>TAB - Equip next song<br>LSHIFT - Equip previous song<br>ESC - Pause<br>G  - Fire gun (you only have one bullet; use it wisely)
       </section>
 
     </div>
