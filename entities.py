@@ -107,7 +107,7 @@ class Entity(object):
                 return False    # you cannot walk through other monsters (an exception is made for jumping over skeletons)
         return True
 
-    def update(self):
+    def update(self): #handles movement, attack cooldowns, burning and lava
         self.prex, self.prey = (self.x, self.y)
         if self.moving and self.canMoveTo(*self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
@@ -129,14 +129,11 @@ class Entity(object):
 
 class Player(Entity):
     def __init__(self,model,monstercoords,x,y, name = "Ray"):
-        Entity.__init__(self,model,x,y, monstercoords) #grid is a global variable which needs to be defined before initializing any entities.
+        Entity.__init__(self,model,x,y, monstercoords)
         self.health = 100
         self.maxhealth = 100
         self.armor= 10
-        self.accuracy = 20
-        self.flatDamage = 2
-        self.damageRange = 5
-        self.damageMod = 2
+        self.accuracy = 20 #player can't miss - you already have to aim
         self.inventory = dict()
         self.name = name
         self.sprite = (0,0)
@@ -159,14 +156,14 @@ class Player(Entity):
         if item.autouse:
             item.use(self)
             return
-        quantity = self.inventory.get(item,0)
+        quantity = self.inventory.get(item.name,0)
         if add == True:
             quantity += 1
         else:
             quantity += -1
-        self.inventory[item] = quantity
+        self.inventory[item.name] = quantity
         if quantity == 0:
-            del self.inventory[item]
+            del self.inventory[item.name]
 
     def incrementSong(self):    # switches to the next song
         if len(self.availableSong) > 1:
@@ -242,7 +239,7 @@ class Player(Entity):
             self.healCooldown -= 1
         elif self.health < 100:
             self.health += 1
-        Entity.update(self)
+        Entity.update(self) #handles movement, attack cooldowns, burning and lava
 
     def playSong0(self):    # basic attack
         self.earshot = [self.facingCoordinates()]   # you attack the block in front of you
@@ -434,11 +431,11 @@ class Monster(Entity):
             if randint(1,35) == 1:             # you cannot move
                 self.effect["stunned"] = False
         else:
-            self.distance += self.speed
-            if self.distance >= 256:
-                self.distance -= 256
-                self.decide()
-        Entity.update(self)
+            self.distance += self.speed     #different monsters have different speeds, so they 'fill up' distance at different rates
+            if self.distance >= 256:    #when distance is filled up:
+                self.distance -= 256    #reset distance
+                self.decide()           #monster takes an action
+        Entity.update(self)             #handles movement, attack cooldowns, burning and lava
 
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
@@ -543,8 +540,11 @@ class Demon(Monster):
     def update(self):
         if self.attackWarmup >= 0:
             self.attackWarmup -= 1
-        if self.attackWarmup == 0 and self.attackCoords == (self.player.x,self.player.y):
-            self.attack(self.player)
+        if self.attackWarmup == 0:
+            if self.attackCoords == (self.player.x,self.player.y):
+                self.attack(self.player)
+            elif self.monstercoords.has_key(self.attackCoords):
+                self.attack(self.monstercoords[self.attackCoords])
             self.sprite = 0
         Monster.update(self)
 
@@ -578,7 +578,7 @@ class Skeleton(Monster):
             self.sprite = 7
             Monster.update(self)
             self.jumpable = False
-        else
+        else:
             self.moving = False
         if self.timer > 0:
             self.timer -= 1
@@ -649,11 +649,14 @@ class MrE(NPC):
             return "$D011"
 
     def post_dialogue_action(self, conv_id):
+        pygame.event.clear()
         if conv_id == 1:
-            name = raw_input("What is your name? ")
+            name = ""
+            while len(name) <= 0:
+                name = raw_input("What is your name? ")
+            pygame.event.clear()
             self.player.name = name
             self.checklist.eventcomplete("player_Named")
-            pygame.event.clear()
             self.model.interp_action("$D002")
             self.checklist.eventcomplete("tutorial_Dialogue002_Finished")
         elif conv_id == 4:
@@ -721,7 +724,7 @@ class Item(object):
         return self.description
     def pickup(self,Entity):
         s = ' '
-        Entity.editinventory(self.name)
+        Entity.editinventory(self)
         return s.join([Entity.name,'picks up',self.description])
         # need to remove item from map
     def use(self,Entity):
@@ -772,7 +775,8 @@ class Potion(Item):
         self.name = s.join([name_description,ncolor,'Potion'])
         self.use_description = s.join(['You drink the',p.join([self.name,'.']),use_description])
         self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
-        self = Item(self,self.name,self.description,self.use_description,self.effect)
+        # self = Item(self,self.name,self.description,self.use_description,self.effect)
+        Item.__init__(self,self.name,self.description,self.use_description,self.effect)
 
 class MusicSheet(Item):
     def __init__(self, songNum):
@@ -784,26 +788,36 @@ class MusicSheet(Item):
 
 
 if __name__ == "__main__":
-    player = Player("model", 0,0)
-    d = []
-    for i in range (5):
-        zombie = Zombie(randint(1,20),randint(1,20), player, "model")
-        d.append(zombie)
-    for monster in d:
-        monster.checkstatus()
-        print (monster.x,monster.y),monster.seen,monster.aggro
+    a = Player("model", "monstercoords", 0,0, "Ray")
+    print a.inventory
+    potion1 = Potion('heal')
+    potion2 = Potion('cure',1,'poisoned')
+    potion3 = Potion('cure',1,'poisoned')
+    # print repr(potion1)
+    # print potion1
+    potion1.pickup(a)
+    potion2.pickup(a)
+    potion3.pickup(a)
+#     d = []
+#     for i in range (5):
+#         zombie = Zombie(randint(1,20),randint(1,20), player, "model")
+#         d.append(zombie)
+#     for monster in d:
+#         monster.checkstatus()
+#         print (monster.x,monster.y),monster.seen,monster.aggro
 
-    c = Ghost(2,2, player, "model")
-    # print b.attack(a)
-    print player.attack(c)
-    print c.attack(player)
+#     c = Ghost(2,2, player, "model")
+#     # print b.attack(a)
+#     print player.attack(c)
+#     print c.attack(player)
     # print a.inventory
-    # jar = Item('Jar','an empty glass jar.')
-    # print jar.pickup(a)
-    # print a.inventory
-    # frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
-    # print frog.pickup(a)
-    # print a.inventory
+    jar = Item('Jar','an empty glass jar.')
+    jar.pickup(a)
+    print jar.read_description()
+    print a.inventory
+    frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
+    frog.pickup(a)
+    print a.inventory
     # print frog.use(a)
     # heal = Potion('cure',1,'poisoned')
     # print heal.pickup(a)
