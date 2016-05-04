@@ -45,6 +45,7 @@ class Dungeon(object):
 		self.lnInd = 0		# the line number in this conversation
 		self.lines = None	# the list of surfaces that represent this conversation
 		self.current_interactee = self.mr_E
+		self.save("saves/last_save.dun")
 		self.interp_action(self.mr_E.interact(self.player)) 
 
 	def __str__(self):
