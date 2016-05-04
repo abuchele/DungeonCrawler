@@ -156,14 +156,14 @@ class Player(Entity):
         if item.autouse:
             item.use(self)
             return
-        quantity = self.inventory.get(item,0)
+        quantity = self.inventory.get(item.name,0)
         if add == True:
             quantity += 1
         else:
             quantity += -1
-        self.inventory[item] = quantity
+        self.inventory[item.name] = quantity
         if quantity == 0:
-            del self.inventory[item]
+            del self.inventory[item.name]
 
     def incrementSong(self):    # switches to the next song
         if len(self.availableSong) > 1:
@@ -718,7 +718,7 @@ class Item(object):
         return self.description
     def pickup(self,Entity):
         s = ' '
-        Entity.editinventory(self.name)
+        Entity.editinventory(self)
         return s.join([Entity.name,'picks up',self.description])
         # need to remove item from map
     def use(self,Entity):
@@ -769,7 +769,8 @@ class Potion(Item):
         self.name = s.join([name_description,ncolor,'Potion'])
         self.use_description = s.join(['You drink the',p.join([self.name,'.']),use_description])
         self.effect = Effect(self.effect_type,self.effect_description,10*(self.effect_class*2),effect_specific=self.effect_specific)
-        self = Item(self,self.name,self.description,self.use_description,self.effect)
+        # self = Item(self,self.name,self.description,self.use_description,self.effect)
+        Item.__init__(self,self.name,self.description,self.use_description,self.effect)
 
 class MusicSheet(Item):
     def __init__(self, songNum):
@@ -780,8 +781,17 @@ class MusicSheet(Item):
         entity.learnSong(self.num)
 
 
-# if __name__ == "__main__":
-#     player = Player("model", 0,0)
+if __name__ == "__main__":
+    a = Player("model", "monstercoords", 0,0, "Ray")
+    print a.inventory
+    potion1 = Potion('heal')
+    potion2 = Potion('cure',1,'poisoned')
+    potion3 = Potion('cure',1,'poisoned')
+    # print repr(potion1)
+    # print potion1
+    potion1.pickup(a)
+    potion2.pickup(a)
+    potion3.pickup(a)
 #     d = []
 #     for i in range (5):
 #         zombie = Zombie(randint(1,20),randint(1,20), player, "model")
@@ -795,12 +805,13 @@ class MusicSheet(Item):
 #     print player.attack(c)
 #     print c.attack(player)
     # print a.inventory
-    # jar = Item('Jar','an empty glass jar.')
-    # print jar.pickup(a)
-    # print a.inventory
-    # frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
-    # print frog.pickup(a)
-    # print a.inventory
+    jar = Item('Jar','an empty glass jar.')
+    jar.pickup(a)
+    print jar.read_description()
+    print a.inventory
+    frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
+    frog.pickup(a)
+    print a.inventory
     # print frog.use(a)
     # heal = Potion('cure',1,'poisoned')
     # print heal.pickup(a)
