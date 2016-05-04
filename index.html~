@@ -16,6 +16,9 @@
     <![endif]-->
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
+{% for page in site.pages %}
+    <a href={{ page.filename }}>{{ page.title }}</a>
+{% endfor %}
   </head>
   <body>
       <div id="header">
@@ -41,7 +44,7 @@
         <h1>
 <a id="DungeonCrawler" class="anchor" href="#DungeonCrawler" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DungeonCrawler</h1>
 
-<p>This is going to be in markdown.</p>
+{{ content }}
       </section>
 
     </div>
