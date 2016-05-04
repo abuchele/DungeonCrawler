@@ -109,10 +109,10 @@ class Dungeon(object):
 			if self.player.health <= 0:
 				self.state = "K"
 
-			old_monstercoords = copy.copy(self.monstercoords)
+			old_monstercoords = copy.copy(self.monstercoords) 
 			for dy in range(-8,9):			# move all the monsters
 				for dx in range(-8,9):
-					monster = old_monstercoords.pop((self.player.x+dx,self.player.y+dy), None)
+					monster = old_monstercoords.pop((self.player.x+dx,self.player.y+dy), None) #this makes sure each monster only updates once
 					if monster != None:
 						self.monstercoords.pop((monster.x,monster.y))
 						monster.update()

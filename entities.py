@@ -107,7 +107,7 @@ class Entity(object):
                 return False    # you cannot walk through other monsters (an exception is made for jumping over skeletons)
         return True
 
-    def update(self):
+    def update(self): #handles movement, attack cooldowns, burning and lava
         self.prex, self.prey = (self.x, self.y)
         if self.moving and self.canMoveTo(*self.facingCoordinates()):
             self.x, self.y = self.facingCoordinates()
@@ -129,14 +129,11 @@ class Entity(object):
 
 class Player(Entity):
     def __init__(self,model,monstercoords,x,y, name = "Ray"):
-        Entity.__init__(self,model,x,y, monstercoords) #grid is a global variable which needs to be defined before initializing any entities.
+        Entity.__init__(self,model,x,y, monstercoords)
         self.health = 100
         self.maxhealth = 100
         self.armor= 10
-        self.accuracy = 20
-        self.flatDamage = 2
-        self.damageRange = 5
-        self.damageMod = 2
+        self.accuracy = 20 #player can't miss - you already have to aim
         self.inventory = dict()
         self.name = name
         self.sprite = (0,0)
@@ -242,7 +239,7 @@ class Player(Entity):
             self.healCooldown -= 1
         elif self.health < 100:
             self.health += 1
-        Entity.update(self)
+        Entity.update(self) #handles movement, attack cooldowns, burning and lava
 
     def playSong0(self):    # basic attack
         self.earshot = [self.facingCoordinates()]   # you attack the block in front of you
@@ -434,11 +431,11 @@ class Monster(Entity):
             if randint(1,35) == 1:             # you cannot move
                 self.effect["stunned"] = False
         else:
-            self.distance += self.speed
-            if self.distance >= 256:
-                self.distance -= 256
-                self.decide()
-        Entity.update(self)
+            self.distance += self.speed     #different monsters have different speeds, so they 'fill up' distance at different rates
+            if self.distance >= 256:    #when distance is filled up:
+                self.distance -= 256    #reset distance
+                self.decide()           #monster takes an action
+        Entity.update(self)             #handles movement, attack cooldowns, burning and lava
 
     def interact(self,player):
         return "You try to poke the "+self.name+", but it swats your hand away."
@@ -578,10 +575,12 @@ class Skeleton(Monster):
             self.sprite = 7
             Monster.update(self)
             self.jumpable = False
+        else:
+            self.moving = False
         if self.timer > 0:
             self.timer -= 1
         if self.health <= 0:
-            self.health = 20
+            self.health = 15
             self.speed += 20
             self.sprite = 8
             self.timer = 20
@@ -782,20 +781,20 @@ class MusicSheet(Item):
         entity.learnSong(self.num)
 
 
-if __name__ == "__main__":
-    player = Player("model", 0,0)
-    d = []
-    for i in range (5):
-        zombie = Zombie(randint(1,20),randint(1,20), player, "model")
-        d.append(zombie)
-    for monster in d:
-        monster.checkstatus()
-        print (monster.x,monster.y),monster.seen,monster.aggro
+# if __name__ == "__main__":
+#     player = Player("model", 0,0)
+#     d = []
+#     for i in range (5):
+#         zombie = Zombie(randint(1,20),randint(1,20), player, "model")
+#         d.append(zombie)
+#     for monster in d:
+#         monster.checkstatus()
+#         print (monster.x,monster.y),monster.seen,monster.aggro
 
-    c = Ghost(2,2, player, "model")
-    # print b.attack(a)
-    print player.attack(c)
-    print c.attack(player)
+#     c = Ghost(2,2, player, "model")
+#     # print b.attack(a)
+#     print player.attack(c)
+#     print c.attack(player)
     # print a.inventory
     # jar = Item('Jar','an empty glass jar.')
     # print jar.pickup(a)
