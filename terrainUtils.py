@@ -233,7 +233,7 @@ class Loot(Block):
 			if rng.random() < 0.2:
 				self.contents.append(entities.MusicSheet(rng.choice([1,3,5])))	# chests can have odd songs
 			if rng.random() < 0.95:
-				self.contents.append(entities.Potion('cure',1,'poisoned'))
+				self.contents.append(entities.Potion('heal',1))
 
 	def __str__(self):
 		return "[]"
