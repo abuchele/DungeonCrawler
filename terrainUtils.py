@@ -9,6 +9,7 @@ class Block(object):
 	def __init__(self, biome=-1):
 		self.explored = False
 		self.biome = biome
+		self.sound = -1
 
 	def passable(self):
 		return not self.collides
@@ -104,6 +105,7 @@ class Door(Block):
 		self.transparent = False
 
 	def interact(self, player):
+		self.sound = 0
 		if self.collides:
 			self.open()
 			return rng.choice(["You push the door open.","The door slides into the ground.","The door creaks as it moves out of the way."])

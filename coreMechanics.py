@@ -116,14 +116,20 @@ class Dungeon(object):
 					self.player.effected("submerged in lava")
 				else:
 					self.player.x,self.player.y = self.player.facingCoordinates()		# also please try not to jump into more lava
+					self.sound = 0
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
 						self.player.effected("submerged in lava")
 			elif self.monstercoords.has_key((self.player.x,self.player.y)):				# you can jump over one jumpable monster
 				if self.player.canMoveTo(*self.player.facingCoordinates()):				# if there is no block in front of you
 					self.player.x,self.player.y = self.player.facingCoordinates()
+					self.sound = 0
 
 			if self.player.health <= 0:
 				self.state = "K"
+
+			if self.player.easterEggProgress < 0:
+				print "da dadadum"
+				self.player.sound = 3
 
 			old_monstercoords = copy.copy(self.monstercoords) 
 			for dy in range(-8,9):			# move all the monsters

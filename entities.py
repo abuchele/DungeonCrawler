@@ -49,6 +49,7 @@ class Entity(object):
         self.attackCooldown = 0
         self.monstercoords = monstercoords
         self.jumpable = False
+        self.sound = -1
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
@@ -73,6 +74,7 @@ class Entity(object):
 
     def damaged(self, damage):
         self.health -= damage
+        self.sound = 1
 
     def effected(self,effect_specific):
         self.effect[effect_specific] = True
@@ -141,6 +143,7 @@ class Player(Entity):
         self.attackSpeed = 2
         self.attackCooldown = 0
         self.healCooldown = 0
+        self.easterEggProgress = 6
         self.listening = False
         self.earshot = [] # the area currently being attacked
         self.song = 0   # the selected attack song
@@ -148,6 +151,7 @@ class Player(Entity):
         self.nextSong = 0
         self.availableSong = []  # which songs you can play
         self.hasBullet = True
+
         
     def __str__(self):
         return self.name
@@ -196,6 +200,10 @@ class Player(Entity):
             return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum])
 
     def playSong(self):
+        if self.song == self.easterEggProgress:
+            self.easterEggProgress -= 1
+        else:
+            self.easterEggProgress = 6
         if self.song == 0:      # basic attack
             self.playSong0()
         elif self.song == 1:    # spread attack
@@ -392,6 +400,7 @@ class Monster(Entity):
         self.player = player
         self.distance = 0   # it moves when this reaches 256
         self.name = self.newName()
+
 
     def __str__(self):
         return self.name

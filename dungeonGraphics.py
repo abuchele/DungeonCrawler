@@ -48,6 +48,9 @@ class DungeonModelView(object):
         self.attackSprites = loadSprites(attackSpriteNames)
         self.sheetSprites = loadSprites(songSpriteNames, directory="HUD_sprites")
 
+        soundNames = ["jump","hit","rumble","easterEgg"]
+        self.soundEffects = loadSounds(soundNames)
+
         self.t = 0
 
         self.compose_LOS_list()  # do some preliminary calculations for Line of Sight
@@ -55,7 +58,7 @@ class DungeonModelView(object):
         self.visible = dict()
         for x in [-1,0,1]:
             for y in [-1,0,1]:
-                self.visible[(x,y)] = True  # keeps track fo which blocks are visible
+                self.visible[(x,y)] = True  # keeps track of which blocks are visible
 
 
     def update(self):
@@ -121,11 +124,21 @@ class DungeonModelView(object):
                         if monster.attackWarmup > 0:
                             self.targetLocations.append(monster.attackCoords)
                         elif monster.attackWarmup == 0:
-                            self.explosionLocations.append(monster.attackCoords)    
+                            self.explosionLocations.append(monster.attackCoords)  
+
+                    if monster.sound >= 0:
+                        self.soundEffects[monster.sound].play() # play all the sounds
+                        monster.sounnd = -1
+                if block.sound >= 0:
+                    self.soundEffects[block.sound].play()
+                    block.sound = -1  
 
                 playerSprite = self.playerSprites[self.model.player.sprite[0]][self.model.player.sprite[1]] # draw the player at the appropriate time
                 if dx == max(self.model.player.prex-self.model.player.x,0) and dy == max(self.model.player.prey-self.model.player.y,0):
-                    self.screen.blit(playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))
+                    self.screen.blit(playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))    # draw the player
+                if self.model.player.sound >= 0:
+                    self.soundEffects[self.model.player.sound].play()   # play the player sound
+                    self.model.player.sound = -1
 
 
     def drawAttacks(self, t, pxr, pyr, pxc, pyc):
@@ -206,6 +219,9 @@ def loadMinimap(grid):  # creates a minimap for the given block list-list
 
 def loadSprites(filenames, directory="sprites"):
     return [pygame.image.load("{}/{}.png".format(directory,name)) for name in filenames]
+
+def loadSounds(filenames, directory="sounds"):
+    return [pygame.mixer.Sound("{}/{}.wav".format(directory,name)) for name in filenames]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)
