@@ -37,7 +37,7 @@ class DungeonModelView(object):
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal",
                         "Loot","LootOpen","Furniture0","Furniture1","Furniture2","Furniture3"]
         shadowNames = [name+"_Shadow" for name in spriteNames]
-        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC","DemonAttack","Creeper","Skeleton","Bones","Kerberoge"]
+        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC","DemonAttack","Creeper","Skeleton","Bones","Kerberoge_Front_Base"]
         effectNames = ["Stunned","OnFire"]
         attackSpriteNames = ["attack"+str(i) for i in range(0,8)]
         songSpriteNames = ["song"+str(i) for i in range(0,8)]

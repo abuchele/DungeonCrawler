@@ -693,6 +693,17 @@ class MrE(NPC):
             self.model.interp_action(self.player.learnSong(2))
             self.model.interp_action(self.player.learnSong(6))
 
+class Nike(NPC):
+    def __init__(self, model, x, y, player, checklist, position=0):
+        NPC.__init__(self, model, x, y, player, checklist, "Nike", 5)
+        self.position = position 
+
+    def interact(self,player):
+        pass
+
+    def post_dialogue_action(self, conv_id):
+        pass
+
 
 class Kerberoge(NPC):
     def __init__(self,model,x,y,player,checklist, invisible=False):

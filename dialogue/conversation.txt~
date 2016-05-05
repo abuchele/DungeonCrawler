@@ -102,7 +102,7 @@ Where is his voice coming from, anyway?$$
 end_0013
 
 id=0014
-Nike: Ara~ it seems like you've been travelling a while, @player@.  You haven't met me before, but I am Nike.  Although I'm not your guide like Mr. E, I guess you can say I'm a major character.  Or should be.  Your story...  It may be cliche, and there may be shitty plot twists, but as an NPC--denizen-- I'm bound to be moved by them.  It's not like you're a special case or anything, but big sister Nike will be helping you from the sidelines.  If you're ever hurt, just come by me and I'll heal you.  You can find me wandering around.$$
+Nike: Ara~ it seems like you've been travelling a while, @player@.  You haven't met me before, but I am Nike.  Although I'm not your guide like Mr. E, I guess you can say I'm a major character.  Or should be.  Your story...  It may be cliche, and there may be shitty plot twists, but as an NPC--uh, denizen-- I'm bound to be moved by them.  It's not like you're a special case or anything, but big sister Nike will be helping you from the sidelines.  If you're ever hurt, just come by me and I'll heal you.  You can find me wandering around.$$
 end_0014
 
 id=0015
@@ -115,6 +115,14 @@ Nike: There!  All good~$$
 end_0016
 
 id=0017
-Kerberoge: MUCH PLAY.  VERY EXCITE.  LET'S PLAY!$$
+Kerberoge: MUCH PLAY.  VERY EXCITE.  LET'S PLAY!  DO YOU HAVE PLAY?$$
 end_0017
 
+id=0018
+Kerberoge: NOT COOL, DOG.  SUCH WHELMING.$$
+end_0018
+
+id=0019
+Kerberoge: SUCH FROG!  THIS DOES ME A MUCH PLEASE!$$
+**Kerberoge chases the frog through shadow travel**  How does he do it?$$
+end_0019

@@ -33,6 +33,7 @@ class Dungeon(object):
 
 		self.last_save = 0
 		self.savePoints = thing[1] + [(None,None)]
+		self.nikePoints = thing[2]
 
 		self.state = "R"	# R for running, P for paused, and D for dialogue
 
@@ -75,6 +76,11 @@ class Dungeon(object):
 
 		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
 		self.monstercoords[(kx, ky)] = kerberoge    # the second npc
+
+		for i in self.nikePoints:
+			nike = entities.Nike(self, self.nikePoints[i][0], self.nikePoints[i][1]-1, self.player, self.checklist)
+			self.nike = nike
+			self.monstercoords[(nike.x, nike.y)] = nike
 
 		for y in range(0,self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
 			for x in range(0,self.w-1):
