@@ -80,7 +80,7 @@ class Brick(Block):
 class Door(Block):
 	def __init__(self, biome=-1):
 		Block.__init__(self, biome)
-		self.color = (120,120,120)
+		self.color = (140,140,140)
 		self.collides = True
 		self.sprite = 5
 		self.transparent = False

@@ -50,12 +50,13 @@ class PyGameKeyboardController(object):
                         return True
             pygame.event.clear()  #empties queue
 
-        held = pygame.key.get_pressed()  # if there are no key presses, check for keys being held down
-        for key in self.controls:
-            if held[key]:
-                return self.handle_event(pygame.event.Event(KEYDOWN, key=key))
-            else:
-                self.model.player.listening = True
+        if self.model.state == "R":
+            held = pygame.key.get_pressed()  # if there are no key presses, check for keys being held down
+            for key in self.controls:
+                if held[key]:
+                    return self.handle_event(pygame.event.Event(KEYDOWN, key=key))
+                else:
+                    self.model.player.listening = True
         return True
 
 

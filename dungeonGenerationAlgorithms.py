@@ -146,7 +146,7 @@ def generatePiece(w, h, n):
 		x = x+1
 
 	placeTreasure(0.007, grid)
-	placeFurniture(0.01, grid)
+	placeFurniture(0.02, grid)
 	return [grid, [(w/2,h/2)]]
 
 
