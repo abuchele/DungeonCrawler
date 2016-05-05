@@ -207,7 +207,7 @@ class Furniture(Block):
 		elif self.sprite == 15:
 			return rng.choice(["You sit down, and then stand back up.","This chair has a broken leg.","This must be the time-out chair."])
 		elif self.sprite == 16:
-			return "You examine a random book: "+rng.choice(["Death of Pi","To Murder a Mockingbird","The Afterlife for Dummies","Basics of Pomegrante Gardening","Twilight","Bury Potter and the Dead Hallows","Bury Potter and the Non-Copyright Reference","Dealing with Grief","Pictures of Puppies","It's Okay to be Dead"])
+			return "You examine a random book: "+rng.choice(["Death of Pi","To Murder a Mockingbird","The Afterlife for Dummies","Basics of Pomegrante Gardening","Twilight","Bury Potter and the Dead Hallows","Dealing with Grief","Pictures of Puppies","It's Okay to be Dead"])
 		else:
 			return rng.choice(["What a comfy-looking couch.","You would sit, but it's filled with holes.","You reach under the cusions and find a penny."])
 
@@ -233,7 +233,7 @@ class Loot(Block):
 			if rng.random() < 0.2:
 				self.contents.append(entities.MusicSheet(rng.choice([1,3,5])))	# chests can have odd songs
 			if rng.random() < 0.95:
-				self.contents.append(entities.Potion('cure',1,'poisoned'))
+				self.contents.append(entities.Potion('heal',1))
 
 	def __str__(self):
 		return "[]"
