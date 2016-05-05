@@ -695,13 +695,23 @@ class MrE(NPC):
 
 class Nike(NPC):
     def __init__(self, model, x, y, player, checklist, position=0):
-        NPC.__init__(self, model, x, y, player, checklist, "Nike", 5)
+        NPC.__init__(self, model, x, y, player, checklist, "Nike", 9)
         self.position = position 
 
     def interact(self,player):
-
+        if not self.checklist.state["NikeIntro"]:
+            return "$D014"
+        elif self.player.health == self.player.maxhealth:
+            return "$D015"
+        elif self.player.health < self.player.maxhealth:
+            return "$D016"
     def post_dialogue_action(self, conv_id):
-        pass
+        if conv_id == 14:
+            self.checklist.eventcomplete("NikeIntro")
+        elif conv_id == 16:
+            self.player.health = self.player.maxhealth
+
+
 """Entity Related Subclasses that aren't entities"""
 class Effect(object):
     def __init__(self,effect_type,effect_description,effect_value=10,effect_specific=None):

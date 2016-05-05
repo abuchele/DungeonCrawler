@@ -66,7 +66,7 @@ class Dungeon(object):
 		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
 		# self.monsterlist.append(mr_E)
 
-		for i in self.nikePoints:
+		for i in range(len(self.nikePoints)):
 			nike = entities.Nike(self, self.nikePoints[i][0], self.nikePoints[i][1]-1, self.player, self.checklist)
 			self.nike = nike
 			self.monstercoords[(nike.x, nike.y)] = nike

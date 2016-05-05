@@ -18,9 +18,9 @@ class Checklist():
 		"tutorial_quest_finished":False, #Kill 3 Monsters (possibly flash a quest complete)
 		"tutorial_quest_confirmed_finished":False, #Talk to Mr. E
 		"kerberoge_start":False, 
-		"kerberoge_defeated":False
+		"kerberoge_defeated":False,
 		#World2
-		
+		"NikeIntro":False
 		}
 		
 		"""So basically, the player starts off the game talking to Mr.E, dialogue 0001.  Then after the

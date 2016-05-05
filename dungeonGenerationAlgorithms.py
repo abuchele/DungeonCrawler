@@ -306,13 +306,13 @@ def generateWhole(w, h):
 	Generates a huge dungeon incorporating the piece, panel, cellular, and maze algorithms
 	w, h = the dimensions of each section
 	"""
-	sectors = [generate(w,h,method)[0] for method in ["piece","panel","cells","maze1"]]
+	sectors = [generate(w,h,method) for method in ["piece","panel","cells","maze1"]]
 
 	grid = []
 	for y in range(h+1):
-		grid.append(sectors[1][y] + sectors[0][y])	# starts by globbing together the four dungeons
+		grid.append(sectors[1][0][y] + sectors[0][0][y])	# starts by globbing together the four dungeons
 	for y in range(h+1):
-		grid.append(sectors[2][y] + sectors[3][y])
+		grid.append(sectors[2][0][y] + sectors[3][0][y])
 
 	savePoints = [(3*w/2+1,h/2)]
 
@@ -403,7 +403,7 @@ def generateWhole(w, h):
 		for i, tp in enumerate(savePoints):
 			savePoints[i] = (tp[1], tp[0])
 
-	return [grid, savePoints]
+	return [grid, savePoints, sectors[2][1]]
 	
 
 def dist(dest, strt, grid):	# A* search
@@ -684,6 +684,7 @@ def flowLava(x, y, grid, n, d):	# make a lava river!
 
 def erectPanel(x,y,grid):
 	nikelist = []
+	r = rng.random()
 	if rng.random() < 0.5:	# horizontal
 		for dx in [-1, 0, 1]:
 			if r < 0.60:
@@ -702,10 +703,10 @@ def erectPanel(x,y,grid):
 				grid[y+dy][x] = Glass()
 			elif r < 0.90 and dy == 0:
 				grid[y+dy][x] = Loot(5)
-			elif dx == 0:
+			elif dy == 0:
 				nikelist.append([y+dy, x])
 	
-	return nikelist
+	return [grid, nikelist]
 
 def splatterLava(x, y, grid):	# makes a little lava puddle
 	P = [
