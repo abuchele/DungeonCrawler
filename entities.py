@@ -694,6 +694,17 @@ class MrE(NPC):
             self.model.interp_action(self.player.learnSong(6))
 
 
+class Kerberoge(NPC):
+    def __init__(self,model,x,y,player,checklist, invisible=False):
+        NPC.__init__(self, model, x, y, player, checklist, "Kerberoge",9)
+        if not invisible:
+            self.model.monstercoords[(x+1,y)] = Kerberoge(model,x+1,y,player,checklist,True)    # these are the other parts of kerberoge
+            self.model.monstercoords[(x,y+1)] = Kerberoge(model,x,y+1,player,checklist,True)
+            self.model.monstercoords[(x+1,y+1)] = Kerberoge(model,x+1,y+1,player,checklist,True)
+        else:
+            self.sprite = -1
+
+
 """Entity Related Subclasses that aren't entities"""
 class Effect(object):
     def __init__(self,effect_type,effect_description,effect_value=10,effect_specific=None):

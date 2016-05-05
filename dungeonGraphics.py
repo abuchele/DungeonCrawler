@@ -37,7 +37,7 @@ class DungeonModelView(object):
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal",
                         "Loot","LootOpen","Furniture0","Furniture1","Furniture2","Furniture3"]
         shadowNames = [name+"_Shadow" for name in spriteNames]
-        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC","DemonAttack","Creeper","Skeleton","Bones"]
+        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC","DemonAttack","Creeper","Skeleton","Bones","Kerberoge"]
         effectNames = ["Stunned","OnFire"]
         attackSpriteNames = ["attack"+str(i) for i in range(0,8)]
         songSpriteNames = ["song"+str(i) for i in range(0,8)]
@@ -102,7 +102,7 @@ class DungeonModelView(object):
                     self.screen.blit(self.sprites[0], blockCoords)              # put in a placeholder block
 
                 monster = apparentmonstercoords.get((pxr+dx,pyr+dy),0) #this is a Monster
-                if monster != 0:
+                if monster != 0 and monster.sprite >= 0:    # if there is a monster and it is not invisible...
                     mxr, myr = (monster.x, monster.y)
                     mxc, myc = monster.getCoords(t)
                     monstCoords = ((mxc-pxc)*self.blockSize[0]+self.dispSize[0]/2, (myc-pyc)*self.blockSize[1]+self.dispSize[1]/2)

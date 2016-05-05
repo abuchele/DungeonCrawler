@@ -8,6 +8,7 @@ import pygame
 import eventList
 import copy
 import time
+import math
 
 
 
@@ -62,8 +63,18 @@ class Dungeon(object):
 		"""
 		mr_E = entities.MrE(self, self.savePoints[0][0], self.savePoints[0][1]-1, self.player, self.checklist)
 		self.mr_E = mr_E
+
+		kx, ky = self.savePoints[1]
+		if min(kx,2*self.w) < 3:
+			kx = int(math.floor(kx + math.copysign(0.5, self.mr_E.x-kx)))	# calculates where to place kerberoge
+			ky = int(math.floor(ky + math.copysign(2.5, self.mr_E.y-ky)))
+		else:
+			kx = int(math.floor(kx + math.copysign(2.5, self.mr_E.x-kx)))	# it depends on the direction
+			ky = int(math.floor(ky + math.copysign(0.5, self.mr_E.y-ky)))
+		kerberoge = entities.Kerberoge(self, kx, ky, self.player, self.checklist)
+
 		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
-		# self.monsterlist.append(mr_E)
+		self.monstercoords[(kx, ky)] = kerberoge    # the second npc
 
 		for y in range(0,self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
 			for x in range(0,self.w-1):
