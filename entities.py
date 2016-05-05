@@ -744,11 +744,11 @@ class Item(object):
     def use(self,Entity):
         if Entity.inventory.get(self.name,0) > 0:
             if self.effect is not None:
-                Entity.editinventory(self.name,False)
+                Entity.editinventory(self,False)
                 return self.use_description + self.effect.effect_on(Entity)
             return self.use_description
         else:
-            return "You don't have that."
+            print "You don't have that."
 
 class Potion(Item):
     def __init__(self,effect_type,effect_class=1,effect_specific = None,image=None):
@@ -800,18 +800,31 @@ class MusicSheet(Item):
     def use(self,entity):
         return entity.learnSong(self.num)
 
+def parseItem(description): #Weird Green Potion, for example
+    if 'Potion' in description:
+        keywordList = description.split()
+        quality = {"Weird":1, "Clear":2}[keywordList[0]]
+        potType = {'Green':('heal',None),'Blue':('cure','poisoned'),'Amber':('cure','paralyzed'),"Red":('cure',None)}[keywordList[1]]
+        return Potion(potType[0],quality,potType[1])
+    else:
+        return Item(description, None)
+
 
 if __name__ == "__main__":
     a = Player("model", "monstercoords", 0,0, "Ray")
-    print a.inventory
     potion1 = Potion('heal')
     potion2 = Potion('cure',1,'poisoned')
     potion3 = Potion('cure',1,'poisoned')
     # print repr(potion1)
     # print potion1
-    potion1.pickup(a)
-    potion2.pickup(a)
-    potion3.pickup(a)
+    # potion1.pickup(a)
+    # potion2.pickup(a)
+    # potion3.pickup(a)
+    tempPot = parseItem('Weird Green Potion')
+    tempPot.pickup(a)
+    print a.inventory
+    b = parseItem('Weird Green Potion')
+    print b.__repr__()
 #     d = []
 #     for i in range (5):
 #         zombie = Zombie(randint(1,20),randint(1,20), player, "model")
@@ -825,13 +838,13 @@ if __name__ == "__main__":
 #     print player.attack(c)
 #     print c.attack(player)
     # print a.inventory
-    jar = Item('Jar','an empty glass jar.')
-    jar.pickup(a)
-    print jar.read_description()
-    print a.inventory
-    frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
-    frog.pickup(a)
-    print a.inventory
+    # jar = Item('Jar','an empty glass jar.')
+    # jar.pickup(a)
+    # print jar.read_description()
+    # print a.inventory
+    # frog = Item('Frog',"a frog. It isn't moving. Is it dead?",)
+    # frog.pickup(a)
+    # print a.inventory
     # print frog.use(a)
     # heal = Potion('cure',1,'poisoned')
     # print heal.pickup(a)

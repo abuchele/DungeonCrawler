@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import QUIT, KEYDOWN
 import pygame.mixer
+import entities
 
 
 
@@ -67,7 +68,7 @@ class PyGameKeyboardController(object):
             # if event.key == pygame.K_f:
             #     self.model.player.listening = True
             if event.key == pygame.K_i:
-                print self.model.player.inventory
+                self.handlePlayerInventory()
             elif event.key == pygame.K_e:
                 blockcoords = self.model.player.facingCoordinates()
                 monster = self.model.monstercoords.get(blockcoords, 0)
@@ -130,6 +131,17 @@ class PyGameKeyboardController(object):
 
         pygame.event.clear()
         return True
+
+    def handlePlayerInventory(self):
+        self.model.pause()
+        print "Inventory: " + str(self.model.player.inventory)
+        userInput = raw_input("Use an item by typing its name and pressing Enter. Type 'exit' to exit.")
+        while userInput.lower() != 'exit':
+            item = entities.parseItem(userInput)
+            # print item.__repr__()
+            item.use(self.model.player)
+            userInput = raw_input("Use another item?")
+        self.model.resume()
 
 
     def setModel(self, model):
