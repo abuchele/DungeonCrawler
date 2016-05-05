@@ -683,24 +683,29 @@ def flowLava(x, y, grid, n, d):	# make a lava river!
 
 
 def erectPanel(x,y,grid):
-	r = rng.random()	# r determines the material
+	nikelist = []
 	if rng.random() < 0.5:	# horizontal
 		for dx in [-1, 0, 1]:
-			if r < 0.65:
+			if r < 0.60:
 				grid[y][x+dx] = Metal()
-			elif r < 0.85:
+			elif r < 0.75:
 				grid[y][x+dx] = Glass()	# there is a small chance there will be nothing there
-			elif r < 0.9 and dx == 0:
+			elif r < 0.90 and dx == 0:
 				grid[y][x+dx] = Loot(5)
+			elif dx == 0:
+				nikelist.append([y, x+dx])	
 	else:	# vertical
 		for dy in [-1, 0, 1]:
-			if r < 0.65:
+			if r < 0.60:
 				grid[y+dy][x] = Metal()
-			elif r < 0.85:
+			elif r < 0.75:
 				grid[y+dy][x] = Glass()
-			elif r < 0.9 and dy == 0:
+			elif r < 0.90 and dy == 0:
 				grid[y+dy][x] = Loot(5)
-
+			elif dx == 0:
+				nikelist.append([y+dy, x])
+	
+	return nikelist
 
 def splatterLava(x, y, grid):	# makes a little lava puddle
 	P = [
