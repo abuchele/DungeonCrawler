@@ -69,7 +69,7 @@ Mr.E: Ugh.  I'm so ashamed.  But I couldn't think of anything else.  As much as 
 end_0006
 
 id=0007
-Mr.E: What?  You're not done yet.  Don't come back until you finish!$$
+Mr.E: What?  You're not done yet.  Don't come back until you slay 3 monsters!$$
 end_0007
 
 id=0008
@@ -91,4 +91,16 @@ end_0010
 id=0011
 Mr.E: Yeah, that's the end. Go explore the other dungeons. They're fun, even if they don't have story in them.$$
 end_0011
+
+id=0012
+@player@ used @item@!$$
+end_0012
+
+id=0013
+Mr.E:"There's a time and place for everything, but not now!"$$
+Where is his voice coming from, anyway?$$
+end_0013
+
+id=0014
+Nike: Ara~ it seems like you've been travelling a while, @player@.  You haven't met me before, but I am Nike.  Although I'm not your guide like Mr. E, 
 
