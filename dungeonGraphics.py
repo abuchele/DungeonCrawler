@@ -37,7 +37,7 @@ class DungeonModelView(object):
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal",
                         "Loot","LootOpen","Furniture0","Furniture1","Furniture2","Furniture3"]
         shadowNames = [name+"_Shadow" for name in spriteNames]
-        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC","DemonAttack","Creeper","Skeleton","Bones","Kerberoge_Front_Base"]
+        monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC","DemonAttack","Creeper","Skeleton","Bones","Kerberoge_Front_Base", "NikeStandFront"]
         effectNames = ["Stunned","OnFire"]
         attackSpriteNames = ["attack"+str(i) for i in range(0,8)]
         songSpriteNames = ["song"+str(i) for i in range(0,8)]
@@ -86,7 +86,10 @@ class DungeonModelView(object):
             for dx in range(self.screenBounds[0], self.screenBounds[1]):
                 if self.model.monstercoords.has_key((pxr+dx,pyr+dy)): # finds all nearby monsters and saves not where they are,
                     mon = self.model.monstercoords[(pxr+dx,pyr+dy)] # but where they need to be drawn
-                    apparentmonstercoords[(max(mon.prex,mon.x), max(mon.prey,mon.y))] = mon
+                    if type(mon).__name__ == "Kerberoge":   # kerberoge is special because of his size
+                        apparentmonstercoords[(max(mon.prex,mon.x)+1, max(mon.prey,mon.y)+1)] = mon
+                    else:
+                        apparentmonstercoords[(max(mon.prex,mon.x), max(mon.prey,mon.y))] = mon
 
         for dy in range(self.screenBounds[2], self.screenBounds[3]):    # draw all the blocks and monsters
             for dx in range(self.screenBounds[0], self.screenBounds[1]):

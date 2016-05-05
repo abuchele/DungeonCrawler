@@ -693,16 +693,24 @@ class MrE(NPC):
             self.model.interp_action(self.player.learnSong(2))
             self.model.interp_action(self.player.learnSong(6))
 
+
 class Nike(NPC):
     def __init__(self, model, x, y, player, checklist, position=0):
-        NPC.__init__(self, model, x, y, player, checklist, "Nike", 5)
+        NPC.__init__(self, model, x, y, player, checklist, "Nike", 10)
         self.position = position 
 
     def interact(self,player):
-        pass
-
+        if not self.checklist.state["NikeIntro"]:
+            return "$D014"
+        elif self.player.health == self.player.maxhealth:
+            return "$D015"
+        elif self.player.health < self.player.maxhealth:
+            return "$D016"
     def post_dialogue_action(self, conv_id):
-        pass
+        if conv_id == 14:
+            self.checklist.eventcomplete("NikeIntro")
+        elif conv_id == 16:
+            self.player.health = self.player.maxhealth
 
 
 class Kerberoge(NPC):
@@ -714,6 +722,19 @@ class Kerberoge(NPC):
             self.model.monstercoords[(x+1,y+1)] = Kerberoge(model,x+1,y+1,player,checklist,True)
         else:
             self.sprite = -1
+
+    def interact(self,player):
+        if not self.checklist.state["kerberoge_defeated"]:
+            return "$D017"
+        else:
+            return "$D019"
+
+    def post_dialogue_action(self, conv_id):
+        if conv_id == 19:
+            for x in range(self.x-1, self.x+2):
+                for y in range(self.y-1, self.y+2):
+                    if type(self.model.monstercoords.get((x,y),0)).__name__ == "Kerberoge":
+                        self.model.monstercoords.pop((x,y)) # deletes himself after the 'boss fight'
 
 
 """Entity Related Subclasses that aren't entities"""

@@ -33,7 +33,6 @@ class Dungeon(object):
 
 		self.last_save = 0
 		self.savePoints = thing[1] + [(None,None)]
-		self.nikePoints = thing[2]
 
 		self.state = "R"	# R for running, P for paused, and D for dialogue
 
@@ -58,7 +57,7 @@ class Dungeon(object):
 			output = output+"\n"
 		return output
 
-	def generateMonsters(self, monsterFrequency = 0.05):
+	def generateMonsters(self, monsterFrequencies =[0.05,0.05,0.05,0.05,1.00]):
 		"""
 		Fills the world with monsters of various kinds
 		"""
@@ -66,7 +65,7 @@ class Dungeon(object):
 		self.mr_E = mr_E
 
 		kx, ky = self.savePoints[1]
-		if min(kx,2*self.w) < 3:
+		if abs(kx-self.w) > abs(ky-self.h):
 			kx = int(math.floor(kx + math.copysign(0.5, self.mr_E.x-kx)))	# calculates where to place kerberoge
 			ky = int(math.floor(ky + math.copysign(2.5, self.mr_E.y-ky)))
 		else:
@@ -77,15 +76,10 @@ class Dungeon(object):
 		self.monstercoords[(mr_E.x, mr_E.y)] = mr_E	# the first npc
 		self.monstercoords[(kx, ky)] = kerberoge    # the second npc
 
-		for i in self.nikePoints:
-			nike = entities.Nike(self, self.nikePoints[i][0], self.nikePoints[i][1]-1, self.player, self.checklist)
-			self.nike = nike
-			self.monstercoords[(nike.x, nike.y)] = nike
-
 		for y in range(0,self.h-1):		# spawns a bunch of other numbers on non-colliding spaces
 			for x in range(0,self.w-1):
 				block = self.grid[y][x]
-				if not block.collides and not self.monstercoords.has_key((x,y)) and rng.random() < monsterFrequency:
+				if not block.collides and not self.monstercoords.has_key((x,y)) and rng.random() < monsterFrequencies[block.biome]:
 					if block.biome == 0:
 						newMonst = entities.Zombie(x,y,self.player,self,self.monstercoords)
 					elif block.biome == 1:
@@ -102,6 +96,8 @@ class Dungeon(object):
 							newMonst = entities.Demon(x,y,self.player,self, self.monstercoords)
 					elif block.biome == 3:
 						newMonst = entities.Skeleton(x,y,self.player,self, self.monstercoords)
+					elif block.biome == 4:
+						newMonst = entities.Nike(self, x,y, self.player, self.checklist)
 					else:
 						continue
 

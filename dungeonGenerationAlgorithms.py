@@ -8,10 +8,10 @@ from terrainUtils import *
 def generate(w,h,method):
 	"""
 	generates a dungeon (nested list of blocks) using the given method
-	returns the dungeon as a nested list and a list of tuples representing the save points
+	returns the dungeon as a nested list and a list of tuples representing the save points and the places to spawn nike
 	w, h = the dimensions of the desired dungeon
 	method = a string representing the method I should use
-	returns [nested list, int tuple list]
+	returns [nested list, int tuple list, int tuple list]
 	"""
 	if method == "panel":
 		return generatePanel(w,h)
@@ -34,6 +34,7 @@ def generatePanel(w,h):
 	generates a series of rotating panels to form an adjustable labyrinth
 	w = the width of the dungeon in blocks
 	h = the height of the dungeon in blocks
+	returns [resulting grid, list of spawn points, list of nike locations]
 	"""
 	grid = []
 	for y in range(0,h+1):
@@ -56,7 +57,7 @@ def generatePanel(w,h):
 		for y in range(2,h-1,4):
 			if not (x==2 and y==2) and not (x==2 and y==h-2) and not (x==w-2 and y==2) and not (x==w-2 and y==h-2):	#skips the corners
 				if (x < rx1 or x >= rx2 or y < ry1 or y >= ry2):	# also skips the middle area
-					erectPanel(x,y,grid)
+					erectPanel(x,y,grid)	# builds a panel (or a nike, if necessary)
 
 	for x in range(4,w-1,4):
 		for y in range(4,h-1,4):
@@ -78,6 +79,7 @@ def generatePiece(w, h, n):
 	constructs a piecemeal dungeon by using preset features
 	w, h = the dimensions of the dungeon
 	n = the approximate number of features to generate (actual number will be somewhat less)
+	returns [resulting grid, list of spawn points]
 	"""
 	grid = []
 	for y in range(h+1):
@@ -158,6 +160,7 @@ def generateMazes(w, h, s, n, doors, mazeAlg):
 	n = the approximate number of rooms (actual number will be somewhat less)
 	doors = a number that makes more unnecessary doors
 	mazeAlg = True for random breadth-first-search, False for random depth-first-search
+	returns [resulting grid, list of spawn points]
 	"""
 	sr = (s-1)/2	# gets the odd "root" of s
 	wr = w/2
@@ -243,6 +246,7 @@ def generateCells(w, h, deathLim, birthLim, prob, n):
 	deathLim, birthLim = the limits that command the cellular automation process
 	prob = the initial probability of stone
 	n = the number of steps
+	returns [resulting grid, list of spawn points]
 	"""
 	grid = []
 	for y in range(0,h+1):
@@ -305,6 +309,7 @@ def generateWhole(w, h):
 	"""
 	Generates a huge dungeon incorporating the piece, panel, cellular, and maze algorithms
 	w, h = the dimensions of each section
+	returns [resulting grid, list of spawn points]
 	"""
 	sectors = [generate(w,h,method)[0] for method in ["piece","panel","cells","maze1"]]
 
@@ -382,6 +387,7 @@ def generateWhole(w, h):
 		if done:
 			break
 	savePoints.append((w+1,2*h))
+
 	# randomizes some things
 	if rng.random() < 0.5:	# flip about the x-axis
 		grid.reverse()
@@ -682,30 +688,34 @@ def flowLava(x, y, grid, n, d):	# make a lava river!
 	print "JOWEEE"
 
 
-def erectPanel(x,y,grid):
+def erectPanel(x,y,grid):	# erects a random panel here
 	nikelist = []
+	r = rng.random()
 	if rng.random() < 0.5:	# horizontal
 		for dx in [-1, 0, 1]:
 			if r < 0.60:
 				grid[y][x+dx] = Metal()
-			elif r < 0.75:
+			elif r < 0.80:
 				grid[y][x+dx] = Glass()	# there is a small chance there will be nothing there
-			elif r < 0.90 and dx == 0:
-				grid[y][x+dx] = Loot(5)
-			elif dx == 0:
-				nikelist.append([y, x+dx])	
+			elif r < 0.90:
+				if dx == 0:
+					grid[y][x+dx] = Loot(5)
+			elif r < 0.91:
+				if dx == 0:
+					grid[y][x+dx].biome = 4
 	else:	# vertical
 		for dy in [-1, 0, 1]:
 			if r < 0.60:
 				grid[y+dy][x] = Metal()
-			elif r < 0.75:
+			elif r < 0.80:
 				grid[y+dy][x] = Glass()
-			elif r < 0.90 and dy == 0:
-				grid[y+dy][x] = Loot(5)
-			elif dx == 0:
-				nikelist.append([y+dy, x])
-	
-	return nikelist
+			elif r < 0.90:
+				if dy == 0:
+					grid[y+dy][x] = Loot(5)
+			elif r < 0.91:
+				if dy == 0:
+					grid[y+dy][x].biome = 4
+
 
 def splatterLava(x, y, grid):	# makes a little lava puddle
 	P = [
