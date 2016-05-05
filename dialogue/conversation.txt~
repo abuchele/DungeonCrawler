@@ -84,9 +84,9 @@ end_0009
 id=0010
 Mr.E: Well, it's about time you got here!$$
 @player@: How did you...$$
-Mr.E: ...become so dashing and brilliant? Lots and lots of vegetables. Now, here's the deal. The boss fight that's supposed to be here is a WIP, and nothing after this is really coded, so...$$
-CONGRATULATIONS! YOU WIN!$$
-Mr.E: Why don't you go tell my dog the good news?$$
+Mr.E: ...become so dashing and brilliant? Lots and lots of vegetables. Now, here's the deal. This is my dog, Kerberoge.  Weapons don't work on him.  Don't even think about it.  He's kind of bored, but maybe you can entertain him.$$
+Mr.E: Here's all the songs! Toggle them with TAB and LSHIFT.$$
+Mr.E: Now why don't you go tell my dog the good news?$$
 end_0010
 
 id=0011

@@ -1,26 +1,37 @@
 DungeonCrawler
 =======  
-You wake up in a dark stone room. A turbid river runs through the center of it. You can't remember who you are or where you came from. All you know is that you're here to save a friend. You turn on your flashlight, but it flickers out immediately. Soaked. You stand and examine the dimly-lit room. It looks like a dungeon. And the doors are pretty low. Looks like you'll have to become a Dungeon Crawler [TODO: Think of a better name]!  
+[abuchele.github.io/DungeonCrawler](abuchele.github.io/DungeonCrawler)
+
+You wake up in a dark stone room. You can't remember who you are or where you came from. All you know is that you're here to save a friend. You stand and examine the dimly-lit room. It looks like a dungeon. And the doors are pretty low. Looks like you'll have to become a Dungeon Crawler!  
 _by Anna Buchele, Justin Kunimune, Leon Lam, and Max Wei_
 
-### Install:  
-  You will need pygame and pickle to play this game. If you do not have them, use  
-  `$ sudo apt-get install pygame pickle`
+### Install and Play:  
+  Start by downloading the github repository. Once you open it, you will have two options to play.
   
-### To Play:  
-  Download the zip of our repo, extract it, and go to the folder "DungeonCrawler-master" within the folder you extracted it to.
-  Then, call
-  `$ python driver.py`  
-  from the main directory. You will be prompted for a 'y' or an 'n' depending on whether you want to load a save or start over. Respond, and the game window should appear.
+  For best results, you will need pygame, pickle, and Python 2.7 to play this game. If you do not have pygame or pickle, use  
+  `$ sudo apt-get install pygame pickle`  
+  If you don't have Python 2.7, go to [python.org](https://www.python.org/downloads/) and download it.  
+  Once everything is installed, simply direct yourself to the directory of the repository and run `driver.py` using Python or BASH.  
+  Ex:  
+    `$ cd ~/Downloads/DungeonCrawler-master`  
+    `$ python driver.py`
   
-  Ex: 
-    '$ cd ~/Downloads/DungeonCrawler-master'
-    '$ python driver.py'
+  Alternatively, you can open the `DungeonCrawlerCompiled.zip` archive and run the `\_ADungeonCrawler\_` executable. It will be slightly more taxing on your CPU, but you won't need to install anything.
   
 ### Controls:   
-  Move with WASD or the arrow keys.
-  Interact with 'E' (talk to NPCs, open doors, loot chests)
-  Attack with 'Q'.
+  When you start the game it will prompt you to continue from where you left off or start over. Respond by simply pressing 'y' or 'n'. If it is your first time playing, press 'n'.
+  
+  Once you enter the game, controls are as follows:  
+  W - Move up
+  A - Move left
+  S - Move down
+  D - Move right
+  E - Interact
+  R - Attack
+  TAB - Equip next song
+  LSHIFT - Equip previous song
+  ESC - Pause
+  G - Fire gun (you only have one bullet; use it wisely)
 
 ### Usage Rights:  
 MIT License
