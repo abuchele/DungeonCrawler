@@ -92,3 +92,29 @@ id=0011
 Mr.E: Yeah, that's the end. Go explore the other dungeons. They're fun, even if they don't have story in them.$$
 end_0011
 
+id=0012
+@player@ used @item@!$$
+end_0012
+
+id=0013
+Mr.E:"There's a time and place for everything, but not now!"$$
+Where is his voice coming from, anyway?$$
+end_0013
+
+id=0014
+Nike: Ara~ it seems like you've been travelling a while, @player@.  You haven't met me before, but I am Nike.  Although I'm not your guide like Mr. E, I guess you can say I'm a major character.  Or should be.  Your story...  It may be cliche, and there may be shitty plot twists, but as an NPC--denizen-- I'm bound to be moved by them.  It's not like you're a special case or anything, but big sister Nike will be helping you from the sidelines.  If you're ever hurt, just come by me and I'll heal you.  You can find me wandering around.$$
+end_0014
+
+id=0015
+Nike: Ara~ you're not hurt at all?  Are you trying to flirt with me?  You're 10, no, too many years early for that.  How old am I?  Thats...  a... secret~$$
+end_0015
+
+id=0016
+Nike: Ara~ those monsters did a number on you.  Keep this up and I'll think you're getting hurt on purpose just to see me~$$
+Nike: There!  All good~$$
+end_0016
+
+id=0017
+Kerberoge: MUCH PLAY.  VERY EXCITE.  LET'S PLAY!$$
+end_0017
+
