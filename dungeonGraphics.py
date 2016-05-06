@@ -128,7 +128,7 @@ class DungeonModelView(object):
 
                     if monster.sound >= 0:
                         self.soundEffects[monster.sound].play() # play all the sounds
-                        monster.sounnd = -1
+                        monster.sound = -1
                 if block.sound >= 0:
                     self.soundEffects[block.sound].play()
                     block.sound = -1  

@@ -74,7 +74,6 @@ class Entity(object):
 
     def damaged(self, damage):
         self.health -= damage
-        self.sound = 1
 
     def effected(self,effect_specific):
         self.effect[effect_specific] = True
@@ -241,6 +240,7 @@ class Player(Entity):
         self.healCooldown = 10
         if damage < 0:  # damage for negative damage is not a thing
             return
+        self.sound = 1
         Entity.damaged(self,damage)
 
     def update(self):   # just kind of moves you around
@@ -457,7 +457,7 @@ class Monster(Entity):
         Entity.update(self)             #handles movement, attack cooldowns, burning and lava
 
     def interact(self,player):
-        return "You try to poke the "+self.name+", but it swats your hand away."
+        return "You try to poke "+self.name+", but it swats your hand away."
 
     def newName(self):      # thinks of a new name
         return "missingno"
@@ -583,7 +583,7 @@ class Demon(Monster):
 class Skeleton(Monster):
     def __init__(self,x,y, player, model, monstercoords):
         Monster.__init__(self, x,y, player, model, monstercoords)
-        self.health = 20
+        self.health = 8
         self.accuracy = 5
         self.damageRange = 2
         self.flatDamage = 3
@@ -602,7 +602,7 @@ class Skeleton(Monster):
         if self.timer > 0:
             self.timer -= 1
         if self.health <= 0:
-            self.health = 15
+            self.health = 8
             self.speed += 20
             self.sprite = 8
             self.timer = 20
