@@ -11,7 +11,6 @@ import time
 import math
 
 
-
 class Dungeon(object):
 	def __init__(self, w, h, method="whole"):
 		self.w = w
@@ -22,6 +21,7 @@ class Dungeon(object):
 		thing = dga.generate(w,h,method)
 
 		self.grid = thing[0]
+
 
 		self.nullBlock = Null()
 
@@ -156,6 +156,7 @@ class Dungeon(object):
 					"You think you hear screaming.",
 					"Something moves in the corner of your eye.",
 					"You think you hear footsteps."])
+
 
 
 	def getBlock(self,x,y):

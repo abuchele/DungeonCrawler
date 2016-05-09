@@ -473,10 +473,8 @@ class Zombie(Monster):
         self.flatDamage = 2
         self.armor = 8
         self.speed = 127    # speed goes from 1 to 256
-        if randint(0,1) == 0:
-            self.sprite = 2
-        else:
-            self.sprite = 3
+        self.sprite = [0,0]
+        self.step = 0
 
     def newName(self):
         if randint(1,1000) == 1:
@@ -486,6 +484,52 @@ class Zombie(Monster):
             vowels = ["a","u","oo","e","o","ou","er"]
             endings = ["gh","m","r","p","ng","h",""]
             return choice(consonants)+choice(vowels)+choice(endings)
+
+
+    def attack(self,that):
+        try:
+            if (self.y-that.y) == 1:
+                if (self.x-that.x) == 0:
+                    self.direction = 'U'
+            elif (self.y-that.y) == 0:
+                if (self.x-that.x) == 1:
+                    self.direction = 'L'
+                elif (self.x-that.x)== -1:
+                    self.direction = 'R'
+            elif (self.y-that.y) == -1:
+                if (self.x-that.x) == 0:
+                    self.direction = 'D'
+            else:
+                pass
+
+            if self.attackRoll() >= that.armor:
+                damage = self.damage()
+                that.damaged(damage)
+                self.model.interp_action("{} hits {} for {} damage!".format(str(self),str(that),damage))
+
+            else:
+                self.model.interp_action("{} misses {}!".format(str(self),str(that)))
+            # print "Attacked entity!"
+        except AttributeError:
+            pass
+            # print "Attacked tile!"
+
+    def FindSprite(self):
+        if self.direction == 'U':
+            f = 0
+        elif self.direction == 'D':
+            f = 1
+        elif self.direction == 'L':
+            f = 2
+        else:
+            f = 3
+
+        if self.prex - self.x == 0:
+            if self.prey - self.y == 0:
+                return [f,self.step]
+        self.step = (self.step + 1) % 2
+        return [f,self.step]
+
 
 
 class Ghost(Monster):
@@ -673,7 +717,7 @@ class MrE(NPC):
             name = ""
             if self.model.terminal:
                 while len(name) <= 0:
-                    name = raw_input("What is your name? ")
+                    name = raw_input("What is your name?  ")
             else:
                 name = "Ray"
             pygame.event.clear()

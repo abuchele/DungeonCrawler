@@ -39,13 +39,30 @@ class Floor(Block):
 		self.color = (200,200,200)
 		self.collides = False
 		self.transparent = True
-		self.sprite = 1
+		random= rng.random()
+		if random < 0.05:
+			self.sprite = rng.choice([37,44,45])
+		elif random <0.15:
+			self.sprite = rng.choice([38,39,40,41,42,43])
+		elif random <0.40:
+			self.sprite = rng.choice([51,50])
+		else:
+			self.sprite = 1
 
 	def __str__(self):
 		return "  "
 
 	def interact(self,player):
-		return rng.choice(["An empty space.","Nothing to interact with here.","I wonder why there's tile down here."])
+		if self.sprite == 37:
+			return "I hope those aren't human bones."
+
+		elif self.sprite == 44:
+			return "It looks like... moss?"			
+
+		elif self.sprite == 45:
+			return "It's a puddle of... probably something gross."	
+		else:	
+			return rng.choice(["An empty space.","Nothing to interact with here.","I wonder why there's tile down here.","The tile is a bit cracked."])
 
 
 class Stone(Block):
@@ -69,14 +86,53 @@ class Brick(Block):
 		self.color = (70,70,70)
 		self.collides = True
 		self.transparent = False
-		self.sprite = 3
+		self.blank = True
+		self.density = 0.25
+		if rng.random() < 0.25:
+			self.blank = False
+		self.blankSprites = [29,30,31,32,33,34,35,36]
+		self.objectSprites = [19,20,21,22,23,24,25,26,27,28]
+		if self.blank == True:
+			self.sprite = rng.choice(self.blankSprites)
+		else:
+			self.sprite = rng.choice(self.objectSprites)
 
 	def __str__(self):
 		return "##"
 
 	def interact(self,player):
-		return rng.choice(["These stone bricks are huge!","Clearly man-made; who built this, and why?","The bricks are cold."])
+		if self.sprite == 19:
+			return "You decide not to think about that."
 
+		elif self.sprite == 20:
+			return "Huh, what purpose would that serve?"
+
+		elif self.sprite == 21:
+			return "There is a crack in the wall. It looks very artistic, don't you think?"
+
+		elif self.sprite == 22:
+			return "There is a crack in the wall."
+
+		elif self.sprite == 23:
+			return "Yikes. It looks like something was trying to break out of here."
+
+		elif self.sprite == 24:
+			return "Umm, is that blood?"
+
+		elif self.sprite == 25:
+			return "Gross."
+
+		elif self.sprite == 26:
+			return "There's a spiderweb on the wall. No spider, though."
+
+		elif self.sprite == 27:
+			return "There's a spiderweb on the wall. No spider, though."
+
+		elif self.sprite == 28:
+			return "A lamp. How nice."
+
+		elif self.sprite > 28:
+			return rng.choice(["These stone bricks are huge!","Clearly man-made; who built this, and why?","The bricks are cold."])
 
 class Door(Block):
 	def __init__(self, biome=-1):
@@ -198,7 +254,7 @@ class Furniture(Block):
 		self.color = (200,150,120)
 		self.collides = True
 		self.transparent = True
-		self.sprite = rng.randint(14,17)
+		self.sprite = rng.choice([14,15,16,17,18,46,47,48,49])
 
 	def __str__(self):
 		return "TT"
@@ -212,7 +268,6 @@ class Furniture(Block):
 			return "You examine a random book: "+rng.choice(["Death of Pi","To Murder a Mockingbird","The Afterlife for Dummies","Basics of Pomegrante Gardening","Twilight","Bury Potter and the Dead Hallows","Dealing with Grief","Pictures of Puppies","It's Okay to be Dead"])
 		else:
 			return rng.choice(["What a comfy-looking couch.","You would sit, but it's filled with holes.","You reach under the cusions and find a penny."])
-
 
 
 class Loot(Block):

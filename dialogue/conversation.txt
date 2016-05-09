@@ -17,6 +17,7 @@ Player: !!$$
 Mr.E: I see, the word "Tutorial" is enough to send shivers down your spine.  Well, if you haven't noticed yet, I'm Mr.E.$$
 Player: ...$$
 Mr.E: That's a pun you say?  Well, I'm sure it's not intentional.  So kid, you got a name?$$
+Mr.E: You'll have to click onto the terminal to enter your name.$$
 end_0001
 
 id=0002
@@ -26,16 +27,17 @@ Mr.E: Son of a gun!  You CAN talk!$$
 @player@: Do you know where my friend could be?$$
 Mr.E: Sounds like you need a guide.  If only there was a guide character to help you.  What a shame...$$
 Mr.E: I know!  For the low price of $19.99 (plus tax), I would be willing to offer my services as your guide!$$
-**a margarita voucher falls out as you open your wallet**$$
-Mr.E: You're flat broke, aren't you?$$
-Mr.E: Tell you what, if you call me the "Great, Magnificent, Better than than his crazy deathbeam building contemporary Mr. E" and ask again, I might lower my rates.$$
+@player@: ... I have one half-off margarita voucher.$$
+Mr.E: I don't like margaritas. $$
+Mr.E: Tell you what, if you call me the "Great, Magnificent, Top Dog Mr. E" and ask again, I might lower my rates.$$
 @player@: ...$$
 Mr.E: Oh?  The silent treatment?  Well, I'll show you!$$
-The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E:  Who's laughing now?$$
-The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E: My contemporary?  How cliche!  Unlike that buffoon, I would never let slip such a cliche story like how 
-your friend is in the Fields of Encounter, and that you as a player must journey through different worlds for a reunion.$$
+The Great, Magnificent, Top Dog Mr.E:
+	  Who's laughing now?$$
+The Great, Magnificent, Top Dog Mr.E: I'm not really the top dog. I should be though. Unlike the buffoon in charge, I would never let slip such a cliche story like how... $$
+Mr.E: ...your friend is in the Fields of Encounter, and that you as a player must journey through different worlds for a reunion.$$
 @player@: What?$$
-The Great, Magnificent, Better than his crazy deathbeam-building contemporary Mr.E: *cough cough* I said, I would never let slip such a *cough* cliche.$$
+Mr.E: *cough cough* I said, I would never let slip such a *cough* cliche.$$
 @player@: My friend is in the Fields of Encounter?$$
 Mr.E: What on earth did that river water do to your listening skills?$$
 Mr.E: Anyway, let's see how much of the following you'll understand.$$
@@ -49,10 +51,10 @@ end_0003
 id=0004
 Mr.E: Good.  Good.  Well, see?  Isn't interaction nice?$$
 @player@: So how do I beat up monsters?$$
-Mr.E: What?  You think this is a fantasy RPG game?  I'm sure these monsters have families to go home to every night.  Just kidding.  I think they spawn from the dank floors.$$
+Mr.E: What?  You think this is a fantasy RPG game?  I'm sure these monsters have families to go home to every night.  Just kidding.  I think they spawn from the floorboards.$$
 Mr.E: On second thought, it would weigh on the shred of my conscience if you died to a weak enemy. It looks like you have a guitar on you.  Hand that over for a sec.$$
-**Mr.E fiddles with your instrument for 2 seconds.**$$
-Mr.E: There.  If you MUST attack something, have your voodoo magic controller person press the R key-- hey! Don't do that near me!$$
+**Mr.E fiddles with your instrument for a few seconds.**$$
+Mr.E: ...There.  If you MUST attack something, have your voodoo magic controller person press the R key-- Hey! Don't do that near me!$$
 end_0004
 
 id=0005
@@ -60,8 +62,8 @@ Mr.E: Surprised?  Imagine what heavy metal would do.  Speaking of which, you do 
 @player@: How do I check my inventory?  Like the stuff I will undoubtedly pick up?$$
 Mr.E: You're asking me this?  You don't even have a bag on you.  Where do you even keep all your things?$$
 @player@: In my pockets.$$
-Mr.E: ...  Well, NORMAL people don't have infinite pocket space.  But for you...  it seems like you would access your INVENTORY by having your interface person press the "return" key.$$
-Mr.E: Use the arrow keys to navigate - q is confirm/select, and e is cancel/back.$$
+Mr.E: ...  Well, NORMAL people don't have infinite pocket space.  But for you...  it seems like you would access your INVENTORY by having your interface person press the "i" key.$$
+Mr.E: You'll need to type in the terminal, so just enter whatever item you're looking for there. And, you'll need to type 'exit' to quit the inventory.$$
 end_0005
 
 id=0006
