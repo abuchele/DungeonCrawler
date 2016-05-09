@@ -27,15 +27,13 @@ Mr.E: Son of a gun!  You CAN talk!$$
 @player@: Do you know where my friend could be?$$
 Mr.E: Sounds like you need a guide.  If only there was a guide character to help you.  What a shame...$$
 Mr.E: I know!  For the low price of $19.99 (plus tax), I would be willing to offer my services as your guide!$$
-<<<<<<< HEAD
 **a pina colada voucher falls out as you open your wallet**$$
 Mr.E: You're flat broke, aren't you?$$
 Mr.E: Tell you what, if you call me the "Great, Magnificent, Better than than his crazy deathbeam building contemporary Mr. E" and ask again, I might lower my rates.$$
-=======
+
 @player@: ... I have one half-off margarita voucher.$$
 Mr.E: I don't like margaritas. $$
 Mr.E: Tell you what, if you call me the "Great, Magnificent, Top Dog Mr. E" and ask again, I might lower my rates.$$
->>>>>>> e14802f07f2045c246474212dc74048646b13d86
 @player@: ...$$
 Mr.E: Oh?  The silent treatment?  Well, I'll show you!$$
 The Great, Magnificent, Top Dog Mr.E:
@@ -115,7 +113,7 @@ Nike: Ara~ it seems like you've been travelling a while, @player@.  You haven't 
 end_0014
 
 id=0015
-Nike: Ara~ you're not hurt at all?  Are you trying to flirt with me?  You're 10, no, too many years early for that.  How old am I?  Thats...  a... secret~$$
+Nike: Ara~ you're not hurt at all?  Are you trying to flirt with me?  You're 10, no, too many years early for that.  How old am I?  Thats...  a... secret<3$$
 end_0015
 
 id=0016
