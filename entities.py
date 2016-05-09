@@ -49,6 +49,7 @@ class Entity(object):
         self.attackCooldown = 0
         self.monstercoords = monstercoords
         self.jumpable = False
+        self.sound = -1
         
     def attackRoll(self): #1d20+accuracy, if it exceeds armor class it's a hit
         return randint(1,20)+self.accuracy #roll a 20-sided dice and add accuracy to the roll - average is 10.5 + accuracy
@@ -141,6 +142,7 @@ class Player(Entity):
         self.attackSpeed = 2
         self.attackCooldown = 0
         self.healCooldown = 0
+        self.easterEggProgress = 6
         self.listening = False
         self.earshot = [] # the area currently being attacked
         self.song = 0   # the selected attack song
@@ -148,6 +150,7 @@ class Player(Entity):
         self.nextSong = 0
         self.availableSong = []  # which songs you can play
         self.hasBullet = True
+
         
     def __str__(self):
         return self.name
@@ -196,6 +199,10 @@ class Player(Entity):
             return "Learned the {} song!".format(["Basic","Loud","Focused","Stunning","Grenade","Flaming","Octothorpe","Silent"][songNum])
 
     def playSong(self):
+        if self.song == self.easterEggProgress:
+            self.easterEggProgress -= 1
+        else:
+            self.easterEggProgress = 6
         if self.song == 0:      # basic attack
             self.playSong0()
         elif self.song == 1:    # spread attack
@@ -233,6 +240,7 @@ class Player(Entity):
         self.healCooldown = 10
         if damage < 0:  # damage for negative damage is not a thing
             return
+        self.sound = 1
         Entity.damaged(self,damage)
 
     def update(self):   # just kind of moves you around
@@ -393,6 +401,7 @@ class Monster(Entity):
         self.distance = 0   # it moves when this reaches 256
         self.name = self.newName()
 
+
     def __str__(self):
         return self.name
 
@@ -448,7 +457,7 @@ class Monster(Entity):
         Entity.update(self)             #handles movement, attack cooldowns, burning and lava
 
     def interact(self,player):
-        return "You try to poke the "+self.name+", but it swats your hand away."
+        return "You try to poke "+self.name+", but it swats your hand away."
 
     def newName(self):      # thinks of a new name
         return "missingno"
@@ -464,10 +473,8 @@ class Zombie(Monster):
         self.flatDamage = 2
         self.armor = 8
         self.speed = 127    # speed goes from 1 to 256
-        if randint(0,1) == 0:
-            self.sprite = 2
-        else:
-            self.sprite = 3
+        self.sprite = [0,0]
+        self.step = 0
 
     def newName(self):
         if randint(1,1000) == 1:
@@ -477,6 +484,52 @@ class Zombie(Monster):
             vowels = ["a","u","oo","e","o","ou","er"]
             endings = ["gh","m","r","p","ng","h",""]
             return choice(consonants)+choice(vowels)+choice(endings)
+
+
+    def attack(self,that):
+        try:
+            if (self.y-that.y) == 1:
+                if (self.x-that.x) == 0:
+                    self.direction = 'U'
+            elif (self.y-that.y) == 0:
+                if (self.x-that.x) == 1:
+                    self.direction = 'L'
+                elif (self.x-that.x)== -1:
+                    self.direction = 'R'
+            elif (self.y-that.y) == -1:
+                if (self.x-that.x) == 0:
+                    self.direction = 'D'
+            else:
+                pass
+
+            if self.attackRoll() >= that.armor:
+                damage = self.damage()
+                that.damaged(damage)
+                self.model.interp_action("{} hits {} for {} damage!".format(str(self),str(that),damage))
+
+            else:
+                self.model.interp_action("{} misses {}!".format(str(self),str(that)))
+            # print "Attacked entity!"
+        except AttributeError:
+            pass
+            # print "Attacked tile!"
+
+    def FindSprite(self):
+        if self.direction == 'U':
+            f = 0
+        elif self.direction == 'D':
+            f = 1
+        elif self.direction == 'L':
+            f = 2
+        else:
+            f = 3
+
+        if self.prex - self.x == 0:
+            if self.prey - self.y == 0:
+                return [f,self.step]
+        self.step = (self.step + 1) % 2
+        return [f,self.step]
+
 
 
 class Ghost(Monster):
@@ -574,7 +627,7 @@ class Demon(Monster):
 class Skeleton(Monster):
     def __init__(self,x,y, player, model, monstercoords):
         Monster.__init__(self, x,y, player, model, monstercoords)
-        self.health = 20
+        self.health = 8
         self.accuracy = 5
         self.damageRange = 2
         self.flatDamage = 3
@@ -593,7 +646,7 @@ class Skeleton(Monster):
         if self.timer > 0:
             self.timer -= 1
         if self.health <= 0:
-            self.health = 15
+            self.health = 8
             self.speed += 20
             self.sprite = 8
             self.timer = 20
@@ -664,7 +717,7 @@ class MrE(NPC):
             name = ""
             if self.model.terminal:
                 while len(name) <= 0:
-                    name = raw_input("What is your name? ")
+                    name = raw_input("What is your name?  ")
             else:
                 name = "Ray"
             pygame.event.clear()

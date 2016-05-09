@@ -35,9 +35,16 @@ class DungeonModelView(object):
         self.HUD = pygame.image.load("HUD_sprites/Hud.png")
 
         spriteNames = ["Null","Floor","Stone","Brick","DoorOpen","DoorClosed","Lava","Bedrock","Obsidian","Glass","Metal","Metal",
-                        "Loot","LootOpen","Furniture0","Furniture1","Furniture2","Furniture3"]
+                        "Loot","LootOpen","Furniture4","Furniture1","Furniture2","Furniture3","Furniture5",
+                        "Brick_chains","Brick_chains2","Brick_crack1","Brick_crack2","Brick_scratch","Brick_splat1","Brick_splat2","Brick_web1","Brick_web2","Brick_lamp",
+                        "Brick_dirt1","Brick_dirt2","Brick_dirt3","Brick_dirt4","Brick_dirt5","Brick_dirt6","Brick_dirt7","Brick_splat3",
+                        "Floor_bones","Floor_crack","Floor_crack2","Floor_crack3","Floor_crack4","Floor_crack5","Floor_dirt1", "Floor_moss","Floor_puddle","Furniture6","Furniture7","Furniture8","Furniture9","Floor_dirt","Floor_dirt2"]
         shadowNames = [name+"_Shadow" for name in spriteNames]
         monsterSpriteNames = ["Demon","Ghost","ZombieF","ZombieM","NPC","DemonAttack","Creeper","Skeleton","Bones","Kerberoge_Front_Base", "NikeStandFront"]
+        zombieSpriteNames = ["ZombieFW1","ZombieFW2","ZombieFA1","ZombieFA2","ZombieWL1","ZombieWL2","ZombieWR1","ZombieWR2","ZombieBW1","ZombieBW2"]
+        zombieDirections = ["U","D","L","R"]
+        # self.zombieSprites = [[pygame.image.load("sprites/Ray_{}_Walk{}.png".format(direc,movem)) for movem in range(0,6)] for direc in spriteNames]
+        self.zombieSprites = [[pygame.image.load("sprites/Zombie{}W{}.png".format(direc,movem)) for movem in range(0,2)] for direc in zombieDirections]
         effectNames = ["Stunned","OnFire"]
         attackSpriteNames = ["attack"+str(i) for i in range(0,8)]
         songSpriteNames = ["song"+str(i) for i in range(0,8)]
@@ -48,6 +55,9 @@ class DungeonModelView(object):
         self.attackSprites = loadSprites(attackSpriteNames)
         self.sheetSprites = loadSprites(songSpriteNames, directory="HUD_sprites")
 
+        soundNames = ["jump","hit","rumble","easterEgg"]
+        self.soundEffects = loadSounds(soundNames)
+
         self.t = 0
 
         self.compose_LOS_list()  # do some preliminary calculations for Line of Sight
@@ -55,7 +65,7 @@ class DungeonModelView(object):
         self.visible = dict()
         for x in [-1,0,1]:
             for y in [-1,0,1]:
-                self.visible[(x,y)] = True  # keeps track fo which blocks are visible
+                self.visible[(x,y)] = True  # keeps track of which blocks are visible
 
 
     def update(self):
@@ -104,28 +114,46 @@ class DungeonModelView(object):
                 else:                                                           # if we don't know what it looks like
                     self.screen.blit(self.sprites[0], blockCoords)              # put in a placeholder block
 
+
                 monster = apparentmonstercoords.get((pxr+dx,pyr+dy),0) #this is a Monster
                 if monster != 0 and monster.sprite >= 0:    # if there is a monster and it is not invisible...
                     mxr, myr = (monster.x, monster.y)
                     mxc, myc = monster.getCoords(t)
                     monstCoords = ((mxc-pxc)*self.blockSize[0]+self.dispSize[0]/2, (myc-pyc)*self.blockSize[1]+self.dispSize[1]/2)
-                    if self.visible[(mxr-pxr,myr-pyr)]:                                       # if it is visible,
-                        self.screen.blit(self.monsterSprites[monster.sprite],monstCoords)   # just draw it and the monster on it
-                        if monster.effect.get("ignited",0):
-                            self.screen.blit(self.effectSprites[1], monstCoords)
-                        if monster.effect.get("stunned",0):
-                            self.screen.blit(self.effectSprites[0], monstCoords)
-                    elif self.model.player.listening: #draws "listen sprites" on all monsters within range
-                        self.screen.blit(self.soundSprite,monstCoords)
-                    if type(monster).__name__ == "Demon":
-                        if monster.attackWarmup > 0:
-                            self.targetLocations.append(monster.attackCoords)
-                        elif monster.attackWarmup == 0:
-                            self.explosionLocations.append(monster.attackCoords)    
+                    if type(monster).__name__ == "Zombie":
+                        if self.visible[(mxr-pxr,myr-pyr)]:
+                            zombienumber = monster.FindSprite()
+                            monsterSprite = self.zombieSprites[zombienumber[0]][zombienumber[1]]                                   # if it is visible,
+                            self.screen.blit(monsterSprite,monstCoords)
+                    else:
+                
+                        if self.visible[(mxr-pxr,myr-pyr)]:                                       # if it is visible,
+                            self.screen.blit(self.monsterSprites[monster.sprite],monstCoords)   # just draw it and the monster on it
+                            if monster.effect.get("ignited",0):
+                                self.screen.blit(self.effectSprites[1], monstCoords)
+                            if monster.effect.get("stunned",0):
+                                self.screen.blit(self.effectSprites[0], monstCoords)
+                        elif self.model.player.listening: #draws "listen sprites" on all monsters within range
+                            self.screen.blit(self.soundSprite,monstCoords)
+                        if type(monster).__name__ == "Demon":
+                            if monster.attackWarmup > 0:
+                                self.targetLocations.append(monster.attackCoords)
+                            elif monster.attackWarmup == 0:
+                                self.explosionLocations.append(monster.attackCoords)  
+
+                    if monster.sound >= 0:
+                        self.soundEffects[monster.sound].play() # play all the sounds
+                        monster.sound = -1
+                if block.sound >= 0:
+                    self.soundEffects[block.sound].play()
+                    block.sound = -1  
 
                 playerSprite = self.playerSprites[self.model.player.sprite[0]][self.model.player.sprite[1]] # draw the player at the appropriate time
                 if dx == max(self.model.player.prex-self.model.player.x,0) and dy == max(self.model.player.prey-self.model.player.y,0):
-                    self.screen.blit(playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))
+                    self.screen.blit(playerSprite, (self.dispSize[0]/2, self.dispSize[1]/2))    # draw the player
+                if self.model.player.sound >= 0:
+                    self.soundEffects[self.model.player.sound].play()   # play the player sound
+                    self.model.player.sound = -1
 
 
     def drawAttacks(self, t, pxr, pyr, pxc, pyc):
@@ -206,6 +234,9 @@ def loadMinimap(grid):  # creates a minimap for the given block list-list
 
 def loadSprites(filenames, directory="sprites"):
     return [pygame.image.load("{}/{}.png".format(directory,name)) for name in filenames]
+
+def loadSounds(filenames, directory="sounds"):
+    return [pygame.mixer.Sound("{}/{}.wav".format(directory,name)) for name in filenames]
 
 
 def drawLOS(x,y):   # gets the point that is 1 closer to the origin (if that block is visible and transparent, this block is visible)
