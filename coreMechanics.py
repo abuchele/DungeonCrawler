@@ -11,7 +11,6 @@ import time
 import math
 
 
-
 class Dungeon(object):
 	def __init__(self, w, h, method="whole"):
 		self.w = w
@@ -22,6 +21,7 @@ class Dungeon(object):
 		thing = dga.generate(w,h,method)
 
 		self.grid = thing[0]
+
 
 		self.nullBlock = Null()
 
@@ -116,14 +116,22 @@ class Dungeon(object):
 					self.player.effected("submerged in lava")
 				else:
 					self.player.x,self.player.y = self.player.facingCoordinates()		# also please try not to jump into more lava
+					self.player.sound = 0
 					if type(self.getBlock(self.player.x, self.player.y)).__name__ == "Lava":
 						self.player.effected("submerged in lava")
 			elif self.monstercoords.has_key((self.player.x,self.player.y)):				# you can jump over one jumpable monster
 				if self.player.canMoveTo(*self.player.facingCoordinates()):				# if there is no block in front of you
 					self.player.x,self.player.y = self.player.facingCoordinates()
+					self.player.sound = 0
 
 			if self.player.health <= 0:
 				self.state = "K"
+
+			if self.player.easterEggProgress < 0:
+				self.player.easterEggProgress -= 1
+				if self.player.easterEggProgress < -5:
+					self.player.sound = 3
+					self.player.easterEggProgress = 6
 
 			old_monstercoords = copy.copy(self.monstercoords) 
 			for dy in range(-8,9):			# move all the monsters
@@ -148,6 +156,7 @@ class Dungeon(object):
 					"You think you hear screaming.",
 					"Something moves in the corner of your eye.",
 					"You think you hear footsteps."])
+
 
 
 	def getBlock(self,x,y):

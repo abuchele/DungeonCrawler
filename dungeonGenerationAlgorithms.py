@@ -582,6 +582,8 @@ def makeRoom(x0,y0,d,w,h,grid,biome=0):
 	for x in range(min(x1,x2), max(x1,x2)+1):
 		for y in range(min(y1,y2), max(y1,y2)+1):
 			grid[y][x] = Floor(biome=biome)
+
+
 	return True
 
 
@@ -783,3 +785,4 @@ def placeFurniture(dens, grid):	# scatters treasure blocks across the map
 
 			if wallsHit < 2 and rng.random() < dens*(wallCount):
 				grid[y][x] = Furniture()
+
