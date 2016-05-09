@@ -26,7 +26,7 @@ Mr.E: Son of a gun!  You CAN talk!$$
 @player@: Do you know where my friend could be?$$
 Mr.E: Sounds like you need a guide.  If only there was a guide character to help you.  What a shame...$$
 Mr.E: I know!  For the low price of $19.99 (plus tax), I would be willing to offer my services as your guide!$$
-**a margarita voucher falls out as you open your wallet**$$
+**a pina colada voucher falls out as you open your wallet**$$
 Mr.E: You're flat broke, aren't you?$$
 Mr.E: Tell you what, if you call me the "Great, Magnificent, Better than than his crazy deathbeam building contemporary Mr. E" and ask again, I might lower my rates.$$
 @player@: ...$$
